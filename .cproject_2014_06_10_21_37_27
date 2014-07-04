@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="intel.linux.x86_64.so.rel.377573276_14.0.0">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="intel.linux.x86_64.so.rel.377573276_14.0.0" moduleId="org.eclipse.cdt.core.settings" name="Release">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/swigEos"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/swigEos/Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="swigEos" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="intel.linux.x86_64.so.rel.377573276_14.0.0" name="Release" parent="intel.linux.x86_64.so.rel_14.0.0" preannouncebuildStep="Generate SWIG wrapped c++ file" prebuildStep="swig -c++ -python -o eos_wrap.cpp ./eos_wrap.i">
+					<folderInfo id="intel.linux.x86_64.so.rel.377573276._14.0.0" name="/" resourcePath="">
+						<toolChain id="intel.toolchain.linux.x86_64.so.rel.1423936779_14.0.0" name="Intel Toolchain for Shared Library on Intel(R) 64" superClass="intel.toolchain.linux.x86_64.so.rel_14.0.0">
+							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.linux.x86_64.so.rel_14.0.0.1800984490" name="Platform.So.Release" osList="linux" superClass="intel.platform.linux.x86_64.so.rel_14.0.0"/>
+							<builder buildPath="${workspace_loc:/swigEos}/Release" id="intel.builder.linux.x86_64.so.rel.1335294755_14.0.0" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Intel Builder" superClass="intel.builder.linux.x86_64.so.rel_14.0.0"/>
+							<tool id="intel.cpp.compilestep.linux.x86_64.so.rel.538382960_14.0.0" name="Intel Intel(R) 64 C++ Compiler " superClass="intel.cpp.compilestep.linux.x86_64.so.rel_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.598051674" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.cpp.compilestep.input.1134551965" superClass="intel.cpp.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.compilestep.linux.x86_64.so.rel.1156533378_14.0.0" name="Intel Intel(R) 64 C Compiler" superClass="intel.c.compilestep.linux.x86_64.so.rel_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.714386119" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.c.compilestep.input.4085822" superClass="intel.c.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.linkstep.so.linux.x86_64.rel.96549330_14.0.0" name="Intel Intel(R) 64 C Linker" superClass="intel.c.linkstep.so.linux.x86_64.rel_14.0.0"/>
+							<tool id="intel.cpp.linkstep.so.linux.x86_64.rel.1750675494_14.0.0" name="Intel Intel(R) 64 C++ Linker" superClass="intel.cpp.linkstep.so.linux.x86_64.rel_14.0.0">
+								<option id="intel.linkstep.libname.1959222853" name="Additional Libraries (-l)" superClass="intel.linkstep.libname" valueType="libs">
+									<listOptionValue builtIn="false" value="levmar"/>
+									<listOptionValue builtIn="false" value="blas"/>
+									<listOptionValue builtIn="false" value="f2c"/>
+									<listOptionValue builtIn="false" value="lapack"/>
+								</option>
+								<option id="intel.linkstep.libpath.2127951917" name="Search Directory for Libraries (-L)" superClass="intel.linkstep.libpath" valueType="stringList">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.linkstep.input.725162294" superClass="intel.linkstep.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="intel.linux.x86_64.so.dbg.1776816277_14.0.0">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="intel.linux.x86_64.so.dbg.1776816277_14.0.0" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/swigEos"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/swigEos/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="swigEos" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="intel.linux.x86_64.so.dbg.1776816277_14.0.0" name="Debug" parent="intel.linux.x86_64.so.dbg_14.0.0">
+					<folderInfo id="intel.linux.x86_64.so.dbg.1776816277._14.0.0" name="/" resourcePath="">
+						<toolChain id="intel.toolchain.linux.x86_64.so.dbg.2092313541_14.0.0" name="Intel Toolchain for Shared Library on Intel(R) 64" superClass="intel.toolchain.linux.x86_64.so.dbg_14.0.0">
+							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.linux.x86_64.so.dbg_14.0.0.948052681" name="Platform.So.Debug" osList="linux" superClass="intel.platform.linux.x86_64.so.dbg_14.0.0"/>
+							<builder buildPath="${workspace_loc:/swigEos}/Debug" id="intel.builder.linux.x86_64.so.dbg.372567646_14.0.0" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Intel Builder" superClass="intel.builder.linux.x86_64.so.dbg_14.0.0"/>
+							<tool id="intel.cpp.compilestep.linux.x86_64.so.dbg.486956468_14.0.0" name="Intel Intel(R) 64 C++ Compiler " superClass="intel.cpp.compilestep.linux.x86_64.so.dbg_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.486415698" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.cpp.compilestep.input.942048119" superClass="intel.cpp.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.compilestep.linux.x86_64.so.dbg.507507469_14.0.0" name="Intel Intel(R) 64 C Compiler" superClass="intel.c.compilestep.linux.x86_64.so.dbg_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.2136436049" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.c.compilestep.input.633467516" superClass="intel.c.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.linkstep.so.linux.x86_64.dbg.2138588126_14.0.0" name="Intel Intel(R) 64 C Linker" superClass="intel.c.linkstep.so.linux.x86_64.dbg_14.0.0"/>
+							<tool id="intel.cpp.linkstep.so.linux.x86_64.dbg.1450484206_14.0.0" name="Intel Intel(R) 64 C++ Linker" superClass="intel.cpp.linkstep.so.linux.x86_64.dbg_14.0.0">
+								<inputType id="intel.linkstep.input.825553189" superClass="intel.linkstep.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="swigEos.intel.linux.so.2.1576155205" name="Shared Library" projectType="intel.linux.so.2"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/swigEos"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/swigEos"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.rel.377573276_14.0.0;intel.linux.x86_64.so.rel.377573276._14.0.0;intel.c.compilestep.linux.x86_64.so.rel.1156533378_14.0.0;intel.c.compilestep.input.4085822">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.dbg.1776816277_14.0.0;intel.linux.x86_64.so.dbg.1776816277._14.0.0;intel.c.compilestep.linux.x86_64.so.dbg.507507469_14.0.0;intel.c.compilestep.input.633467516">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.rel.377573276_14.0.0;intel.linux.x86_64.so.rel.377573276._14.0.0;intel.cpp.compilestep.linux.x86_64.so.rel.538382960_14.0.0;intel.cpp.compilestep.input.1134551965">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.dbg.1776816277_14.0.0;intel.linux.x86_64.so.dbg.1776816277._14.0.0;intel.cpp.compilestep.linux.x86_64.so.dbg.486956468_14.0.0;intel.cpp.compilestep.input.942048119">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+</cproject>

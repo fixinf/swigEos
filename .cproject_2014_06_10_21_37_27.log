@@ -1,0 +1,32 @@
+Project Name: swigEos
+
+Updating an Intel configuration to Use GCC: Release (id = intel.linux.x86_64.so.rel.377573276_14.0.0)
+  Processing project-level settings:
+    mapping tool info: Intel Intel(R) 64 C++ Compiler  (v14.0.0) -> GCC C++ Compiler
+      copied -I /home/const/levmar-2.6 
+      copied -g
+    mapping tool info: Intel Intel(R) 64 C Compiler (v14.0.0) -> GCC C Compiler
+      copied -I /home/const/levmar-2.6 
+      copied -g
+    mapping tool info: Intel Intel(R) 64 C Linker (v14.0.0) -> GCC C Linker
+    mapping tool info: Intel Intel(R) 64 C++ Linker (v14.0.0) -> GCC C++ Linker
+      copied -l levmar -l blas -l f2c -l lapack 
+      copied /home/const/levmar-2.6 (Search Directory for Libraries (-L))
+
+  => New Configuration Name: Release_g (id = cdt.managedbuild.config.gnu.so.release.1820107176)
+
+Updating an Intel configuration to Use GCC: Debug (id = intel.linux.x86_64.so.dbg.1776816277_14.0.0)
+  Processing project-level settings:
+    mapping tool info: Intel Intel(R) 64 C++ Compiler  (v14.0.0) -> GCC C++ Compiler
+      copied -I /home/const/levmar-2.6 
+      copied -g
+    mapping tool info: Intel Intel(R) 64 C Compiler (v14.0.0) -> GCC C Compiler
+      copied -I /home/const/levmar-2.6 
+      copied -g
+    mapping tool info: Intel Intel(R) 64 C Linker (v14.0.0) -> GCC C Linker
+    mapping tool info: Intel Intel(R) 64 C++ Linker (v14.0.0) -> GCC C++ Linker
+
+  => New Configuration Name: Debug_g (id = cdt.managedbuild.config.gnu.so.debug.518701530)
+
+
+.cproject file was backed up to .cproject_2014_06_10_21_37_27

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="intel.linux.x86_64.so.rel.377573276_14.0.0">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="intel.linux.x86_64.so.rel.377573276_14.0.0" moduleId="org.eclipse.cdt.core.settings" name="Release">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/swigEos"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/swigEos/Release"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="swigEos" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="intel.linux.x86_64.so.rel.377573276_14.0.0" name="Release" parent="intel.linux.x86_64.so.rel_14.0.0" preannouncebuildStep="Generate SWIG wrapped c++ file" prebuildStep="swig -c++ -python -o eos_wrap.cpp ./eos_wrap.i">
+					<folderInfo id="intel.linux.x86_64.so.rel.377573276._14.0.0" name="/" resourcePath="">
+						<toolChain id="intel.toolchain.linux.x86_64.so.rel.1423936779_14.0.0" name="Intel Toolchain for Shared Library on Intel(R) 64" superClass="intel.toolchain.linux.x86_64.so.rel_14.0.0">
+							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.linux.x86_64.so.rel_14.0.0.1800984490" name="Platform.So.Release" osList="linux" superClass="intel.platform.linux.x86_64.so.rel_14.0.0"/>
+							<builder buildPath="${workspace_loc:/swigEos}/Release" id="intel.builder.linux.x86_64.so.rel.1335294755_14.0.0" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Intel Builder" superClass="intel.builder.linux.x86_64.so.rel_14.0.0"/>
+							<tool id="intel.cpp.compilestep.linux.x86_64.so.rel.538382960_14.0.0" name="Intel Intel(R) 64 C++ Compiler " superClass="intel.cpp.compilestep.linux.x86_64.so.rel_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.598051674" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.cpp.compilestep.input.1134551965" superClass="intel.cpp.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.compilestep.linux.x86_64.so.rel.1156533378_14.0.0" name="Intel Intel(R) 64 C Compiler" superClass="intel.c.compilestep.linux.x86_64.so.rel_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.714386119" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.c.compilestep.input.4085822" superClass="intel.c.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.linkstep.so.linux.x86_64.rel.96549330_14.0.0" name="Intel Intel(R) 64 C Linker" superClass="intel.c.linkstep.so.linux.x86_64.rel_14.0.0"/>
+							<tool id="intel.cpp.linkstep.so.linux.x86_64.rel.1750675494_14.0.0" name="Intel Intel(R) 64 C++ Linker" superClass="intel.cpp.linkstep.so.linux.x86_64.rel_14.0.0">
+								<option id="intel.linkstep.libname.1959222853" name="Additional Libraries (-l)" superClass="intel.linkstep.libname" valueType="libs">
+									<listOptionValue builtIn="false" value="levmar"/>
+									<listOptionValue builtIn="false" value="blas"/>
+									<listOptionValue builtIn="false" value="f2c"/>
+									<listOptionValue builtIn="false" value="lapack"/>
+								</option>
+								<option id="intel.linkstep.libpath.2127951917" name="Search Directory for Libraries (-L)" superClass="intel.linkstep.libpath" valueType="stringList">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.linkstep.input.725162294" superClass="intel.linkstep.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="intel.linux.x86_64.so.dbg.1776816277_14.0.0">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="intel.linux.x86_64.so.dbg.1776816277_14.0.0" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/swigEos"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/swigEos/Debug"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="swigEos" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="intel.linux.x86_64.so.dbg.1776816277_14.0.0" name="Debug" parent="intel.linux.x86_64.so.dbg_14.0.0">
+					<folderInfo id="intel.linux.x86_64.so.dbg.1776816277._14.0.0" name="/" resourcePath="">
+						<toolChain id="intel.toolchain.linux.x86_64.so.dbg.2092313541_14.0.0" name="Intel Toolchain for Shared Library on Intel(R) 64" superClass="intel.toolchain.linux.x86_64.so.dbg_14.0.0">
+							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.linux.x86_64.so.dbg_14.0.0.948052681" name="Platform.So.Debug" osList="linux" superClass="intel.platform.linux.x86_64.so.dbg_14.0.0"/>
+							<builder buildPath="${workspace_loc:/swigEos}/Debug" id="intel.builder.linux.x86_64.so.dbg.372567646_14.0.0" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Intel Builder" superClass="intel.builder.linux.x86_64.so.dbg_14.0.0"/>
+							<tool id="intel.cpp.compilestep.linux.x86_64.so.dbg.486956468_14.0.0" name="Intel Intel(R) 64 C++ Compiler " superClass="intel.cpp.compilestep.linux.x86_64.so.dbg_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.486415698" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.cpp.compilestep.input.942048119" superClass="intel.cpp.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.compilestep.linux.x86_64.so.dbg.507507469_14.0.0" name="Intel Intel(R) 64 C Compiler" superClass="intel.c.compilestep.linux.x86_64.so.dbg_14.0.0">
+								<option id="intel.compilestep.preprocessor.includedirectories.2136436049" name="Additional Include Directories (-I)" superClass="intel.compilestep.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="intel.c.compilestep.input.633467516" superClass="intel.c.compilestep.input"/>
+							</tool>
+							<tool id="intel.c.linkstep.so.linux.x86_64.dbg.2138588126_14.0.0" name="Intel Intel(R) 64 C Linker" superClass="intel.c.linkstep.so.linux.x86_64.dbg_14.0.0"/>
+							<tool id="intel.cpp.linkstep.so.linux.x86_64.dbg.1450484206_14.0.0" name="Intel Intel(R) 64 C++ Linker" superClass="intel.cpp.linkstep.so.linux.x86_64.dbg_14.0.0">
+								<inputType id="intel.linkstep.input.825553189" superClass="intel.linkstep.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.so.release.1820107176">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.release.1820107176" moduleId="org.eclipse.cdt.core.settings" name="Release_g">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description=" 2014_06_10_21_37_27" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.config.gnu.so.release.1820107176" name="Release_g" parent="cdt.managedbuild.config.gnu.so.release" preannouncebuildStep="Generate SWIG wrapped c++ file" prebuildStep="swig -c++ -python -o eos_wrap.cpp ./eos_wrap.i">
+					<folderInfo id="cdt.managedbuild.config.gnu.so.release.1820107176." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.so.release.722597341" name="Linux GCC" resourceTypeBasedDiscovery="true" superClass="cdt.managedbuild.toolchain.gnu.so.release">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.release.1369543307" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.release"/>
+							<builder buildPath="${workspace_loc:/swigEos}/Release" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.so.release.1125492988" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="false" superClass="cdt.managedbuild.target.gnu.builder.so.release"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1281766734" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.release.1739543523" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.release">
+								<option id="gnu.cpp.compiler.so.release.option.optimization.level.1304118086" name="Optimization Level" superClass="gnu.cpp.compiler.so.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.so.release.option.debugging.level.1673138289" name="Debug Level" superClass="gnu.cpp.compiler.so.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.include.paths.1973486878" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.996871033" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.1145983277" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.so.release.option.optimization.level.108205809" name="Optimization Level" superClass="gnu.c.compiler.so.release.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.so.release.option.debugging.level.291030913" name="Debug Level" superClass="gnu.c.compiler.so.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.821093840" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.107727622" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.c.linker.so.release.2008832846" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.release">
+								<option defaultValue="true" id="gnu.c.link.so.release.option.shared.544794738" name="Shared (-shared)" superClass="gnu.c.link.so.release.option.shared" valueType="boolean"/>
+							</tool>
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.263621225" name="GCC C++ Linker" outputPrefix="lib" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
+								<option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.1977136819" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
+								<option id="gnu.cpp.link.option.libs.1011100508" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="levmar"/>
+									<listOptionValue builtIn="false" value="blas"/>
+									<listOptionValue builtIn="false" value="f2c"/>
+									<listOptionValue builtIn="false" value="lapack"/>
+								</option>
+								<option id="gnu.cpp.link.option.paths.799594157" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.624973717" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.so.release.1184364990" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.release">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.252765926" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.so.debug.518701530">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.so.debug.518701530" moduleId="org.eclipse.cdt.core.settings" name="Debug_g">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description=" 2014_06_10_21_37_27" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.ICCErrorParser;org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.config.gnu.so.debug.518701530" name="Debug_g" parent="cdt.managedbuild.config.gnu.so.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.so.debug.518701530." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.940993247" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.1321397597" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
+							<builder buildPath="${workspace_loc:/swigEos}/Debug" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.so.debug.1014064534" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder.Debug_g" parallelBuildOn="false" superClass="cdt.managedbuild.target.gnu.builder.so.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.897034765" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1686540650" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug">
+								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.822956642" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.182139753" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" value="gnu.c.debugging.level.minimal" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.include.paths.1462712882" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1322795362" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.243629139" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.so.debug.option.optimization.level.361780079" superClass="gnu.c.compiler.so.debug.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.so.debug.option.debugging.level.1419945283" superClass="gnu.c.compiler.so.debug.option.debugging.level" value="gnu.c.debugging.level.minimal" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.435903500" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/const/levmar-2.6"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1558283411" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.c.linker.so.debug.1116380737" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug">
+								<option defaultValue="true" id="gnu.c.link.so.debug.option.shared.436875198" superClass="gnu.c.link.so.debug.option.shared" valueType="boolean"/>
+							</tool>
+							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.1725013417" name="GCC C++ Linker" outputPrefix="lib" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug">
+								<option defaultValue="true" id="gnu.cpp.link.so.debug.option.shared.1789502423" superClass="gnu.cpp.link.so.debug.option.shared" valueType="boolean"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.861368329" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.1808568629" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1267033439" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="swigEos.intel.linux.so.2.1576155205" name="Shared Library" projectType="intel.linux.so.2"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/swigEos"/>
+		</configuration>
+		<configuration configurationName="Release_g">
+			<resource resourceType="PROJECT" workspacePath="/swigEos"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/swigEos"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.518701530;cdt.managedbuild.config.gnu.so.debug.518701530.;cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1686540650;cdt.managedbuild.tool.gnu.cpp.compiler.input.1322795362">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.rel.377573276_14.0.0;intel.linux.x86_64.so.rel.377573276._14.0.0;intel.c.compilestep.linux.x86_64.so.rel.1156533378_14.0.0;intel.c.compilestep.input.4085822">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.dbg.1776816277_14.0.0;intel.linux.x86_64.so.dbg.1776816277._14.0.0;intel.c.compilestep.linux.x86_64.so.dbg.507507469_14.0.0;intel.c.compilestep.input.633467516">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.rel.377573276_14.0.0;intel.linux.x86_64.so.rel.377573276._14.0.0;intel.cpp.compilestep.linux.x86_64.so.rel.538382960_14.0.0;intel.cpp.compilestep.input.1134551965">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.release.1820107176;cdt.managedbuild.config.gnu.so.release.1820107176.;cdt.managedbuild.tool.gnu.cpp.compiler.so.release.1739543523;cdt.managedbuild.tool.gnu.cpp.compiler.input.996871033">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.518701530;cdt.managedbuild.config.gnu.so.debug.518701530.;cdt.managedbuild.tool.gnu.c.compiler.so.debug.243629139;cdt.managedbuild.tool.gnu.c.compiler.input.1558283411">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="intel.linux.x86_64.so.dbg.1776816277_14.0.0;intel.linux.x86_64.so.dbg.1776816277._14.0.0;intel.cpp.compilestep.linux.x86_64.so.dbg.486956468_14.0.0;intel.cpp.compilestep.input.942048119">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.intel.compiler.cdt.managedbuilder.ui.ICCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.release.1820107176;cdt.managedbuild.config.gnu.so.release.1820107176.;cdt.managedbuild.tool.gnu.c.compiler.so.release.1145983277;cdt.managedbuild.tool.gnu.c.compiler.input.107727622">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+</cproject>
