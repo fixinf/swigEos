@@ -30,7 +30,7 @@ double KVOR_mod::eta_o(double f){
 		return pow(KVOR::eta_o(f), alpha);
 	}
 	else{
-		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+//		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 		return pow(KVOR::eta_o(f), alpha) + omega_a*pow(f - omega_f, 3);
 	}
 }
@@ -41,7 +41,7 @@ double KVOR_mod::eta_r(double f){
 		return res;
 	}
 	else{
-		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+//		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 		return res + rho_a*pow(f - rho_f, 3);
 	}
 }
@@ -61,7 +61,7 @@ double KVOR_mod::phi_n(double f){
 		return res;
 	}
 	else{
-		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+//		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 		return res + phi_a*pow(f - phi_f, 3);
 	}
 }

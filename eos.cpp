@@ -7,7 +7,7 @@
 
 
 #include "eos.h"
-
+#include "aux.h"
 //#include <gsl/gsl_vector_double.h>
 #include <levmar.h>
 #include <algorithm>
@@ -23,6 +23,7 @@ namespace calc{
 	struct fun_n_eq_params{
 		set_const * C;
 		double n;
+		double f_init;
 	};
 
 
@@ -42,38 +43,38 @@ namespace calc{
 	}
 
 	void fun_n_eq(double * p, double * hx, int m, int n, void * adata){
-		double f_eq = p[0];
-//		printf("i'm in\n");
+
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
-//		printf("i'm in\n");
-//		vec _n;
-		double sum=0, sum_ch=0, sum_o = 0.0, sum_rho = 0.0;
-//		printf("n = ");
-//		printf("p = ");
-		for (int i = 1; i < m; i++){
-//			printf("%f ", p[i]);
-			//_n.push_back(p[i]);
-			sum += p[i];
-			sum_ch += p[i]*C->Q[i-1];
-			sum_o += p[i]*C->X_o[i-1];
-			sum_rho += p[i]*C->X_r[i-1]*C->T[i-1];
+
+		double n_sum = 0.0;
+		double n_n = par->n;
+		double * n_in = new double [m+2]; //input set for _E and mu
+		double * n_f = new double [m+1]; //input set for f_eq; actually is {n_n,n_p,...,n_X0}
+		for (int i = 0; i < m; i++){
+			n_n -= p[i];
+			n_in[i+2] = p[i];
+			n_f[i+1] = p[i];
 		}
-//		printf("\n");
-//		printf("i'm in\n");
-		double df = 1e-4;
-//		var v;
-//		v.n = _n;
-//		v.f = f_eq + df;
-		p[0] += df;
-		double dE = _E(p, m, C);
-		p[0] -= 2*df;
-		dE -= _E(p, m ,C);
-		dE /= 2*df;
-		p[0] += df; //returns to the given value
-		hx[0] = dE;
-		double mu_n = mu(p, m, 1, C);
-		double mu_p = mu(p, m, 2, C);
+
+		n_f[0] = n_n;
+
+		double f = f_eq(p, m, C, par->f_init);
+		par->f_init = f;
+
+		n_in[0] = f;
+		n_in[1] = n_n;
+
+		double sum=0, sum_ch=0, sum_o = 0.0, sum_rho = 0.0;
+		for (int i = 0; i < m; i++){
+			sum += n_f[i];
+			sum_ch += n_f[i]*C->Q[i];
+			sum_o += n_f[i]*C->X_o[i];
+			sum_rho += n_f[i]*C->X_r[i]*C->T[i];
+		}
+
+		double mu_n = mu(n_in, m, 1, C);
+		double mu_p = mu(n_in, m, 2, C);
 		double mu_e = mu_n - mu_p;
 		double n_e = 0, n_mu = 0;
 		if (mu_e > m_e){
@@ -82,56 +83,30 @@ namespace calc{
 		if (mu_e > m_mu){
 			n_mu += pow(mu_e*mu_e - m_mu*m_mu,1.5)/(3*M_PI*M_PI);
 		}
-		hx[1] = par->n - sum;
-		hx[2] = sum_ch - n_e - n_mu;
-		//var() for testing the existence of hyperons
-		double * p_temp = new double[m];
-		p_temp[0] = f_eq;
-		for (int i = 1; i < m; i++){
-			p_temp[i] = p[i];
-		}
-		for (int i = 3; i < m; i++){
-//			if (v.n[i] < 1e-6){
-//				hx[i] = 0.0;
-//			}
-//			else{
-//			printf("i = %i, %i\n",i,v_temp.n.size());
 
-//			printf("mu = %f, m = %f \n", mu(v, 0, C), C->M[i-1]);
+		hx[0] = sum_ch - n_e - n_mu;
+
+		for (int i = 1; i < m; i++){
 			hx[i] = calc::p_f(p[i]);
-			double m_eff = C->M[i-1]*C->phi_n(C->X_s[i-1] * (C->M[0]/C->M[i-1]) * p[0]);
+
+			double m_eff = C->M[i+1]*C->phi_n(C->X_s[i+1] * (C->M[0]/C->M[i+1]) * f);
+
 			double res = pow(
-					mu_n - C->Q[i-1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i-1] * sum_o
-					- C->Cr/pow(C->M[0],2) * C->X_r[i-1]*C->T[i-1] * sum_rho,
+					mu_n - C->Q[i+1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i+1] * sum_o
+					- C->Cr/pow(C->M[0],2) * C->X_r[i+1]*C->T[i+1] * sum_rho,
 					2.0);
+
 			res -= m_eff*m_eff;
+
 			if (res > 0){
 				hx[i] -= sqrt(res);
 			}
-//			if (mu(p_temp, m, 1, C) - C->Q[i-1]*mu_e >=mu(p_temp, m, i, C)){//C->M[i-1]*C->phi_n(C->X_s[i] * (C->M[0]/C->M[i]) * v.f)){
-//				hx[i] = mu(p, m, 1, C) - C->Q[i-1]*mu_e - mu(p, m, i, C);
-////				printf("! %i eq = %f \n control = %f \n",i, hx[i], mu(p_temp, m, 1, C) -
-////						C->Q[i-1]*mu_e - mu(p_temp, m, i, C));
-//			}
-//			else{
-//				hx[i] = p[i];
-////				sum -= p[i];
-////				hx[1] = par->n - sum;
-////				sum_ch -= p[i]*C->Q[i-1];
-////				hx[2] = sum_ch - n_e - n_mu;
-////				p[i] = 0;
-//			}
-////			}
-//			p_temp[i] = p[i];
 		}
-//		printf("f = ");
-		for (int i = 0; i < m; i++){
-//			printf("%f ", hx[i]);
-		}
-//		printf("\n");
-		delete[] p_temp;
+		delete[] n_in;
+		delete[] n_f;
 	}
-}
+
+}//namespace calc
 
 /**\brief Energy density functional itself.
  * Provides the energy density functional evaluated at some point v = {n, f}
@@ -174,7 +149,7 @@ double stepF(var v, set_const *C){
 void stepE(double n, double * init, int initN, double * out, int dim_Out, int iter, set_const* C) {
 	double opts[5];
 	bool debug = 1;
-	calc::fun_n_eq_params p = {C, n};
+	calc::fun_n_eq_params p = {C, n, 0.1};
 	int m = initN;
 	double * x = new double[m];
 	double * lb = new double[m];
@@ -189,8 +164,8 @@ void stepE(double n, double * init, int initN, double * out, int dim_Out, int it
 //		if (i > 2) lb[i] = -100500.0;
 	}
 
-	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-15; opts[3]=1E-12;
-		opts[4]= -1e-3;
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
+		opts[4]= -1e-5;
 	dlevmar_bc_dif(calc::fun_n_eq, x, NULL, m, m, lb, NULL, NULL, iter, opts, info, NULL, NULL, &p);
 //	dlevmar_dif(calc::fun_n_eq, x, NULL, m, m, 2000, opts, NULL, NULL, NULL, &p);
 
@@ -216,9 +191,9 @@ void stepE(double n, double * init, int initN, double * out, int dim_Out, int it
 	for (int i = 0; i < m; i++){
 		out[i] = x[i];
 	}
-//	delete[] x;
-//	delete[] fun;
-//	delete[] lb;
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
 }
 
 //TEST FUNCTION
@@ -282,6 +257,5 @@ float sumTest2(double * in, int n, double * in2, int n2){
 	}
 	return res;
 }
-
 
 

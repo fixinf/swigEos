@@ -42,15 +42,15 @@ double f_eq(double * n, int dimN, set_const * C, double init){
 	x[0] = init;
 	lb[0] = 0.0;
 	ub[0] = 1.0;
-	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-15; opts[3]=1E-12;
-		opts[4]= -1e-3;
-	int iter = 100;
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-22; opts[3]=1E-24;
+		opts[4]= -1e-5;
+	int iter = 300;
 	dlevmar_bc_dif(func_f_eq, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
 	double res = x[0];
-//	delete[] x;
-//	delete[] fun;
-//	delete[] lb;
-//	delete[] ub;
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
+	delete[] ub;
 	return res;
 }
 
