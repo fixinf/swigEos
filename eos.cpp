@@ -25,6 +25,11 @@ namespace calc{
 		double n;
 	};
 
+
+	double p_f(double n) {
+		return pow(3.0 * M_PI * M_PI * D * n, 1.0 / 3.0);
+	}
+
 	double mu(double * n, int dimN, int i, set_const * C){
 		double dn = 1e-4;
 		n[i] += dn;
@@ -43,7 +48,7 @@ namespace calc{
 		set_const * C = par->C;
 //		printf("i'm in\n");
 //		vec _n;
-		double sum=0, sum_ch=0;
+		double sum=0, sum_ch=0, sum_o = 0.0, sum_rho = 0.0;
 //		printf("n = ");
 //		printf("p = ");
 		for (int i = 1; i < m; i++){
@@ -51,6 +56,8 @@ namespace calc{
 			//_n.push_back(p[i]);
 			sum += p[i];
 			sum_ch += p[i]*C->Q[i-1];
+			sum_o += p[i]*C->X_o[i-1];
+			sum_rho += p[i]*C->X_r[i-1]*C->T[i-1];
 		}
 //		printf("\n");
 //		printf("i'm in\n");
@@ -65,7 +72,9 @@ namespace calc{
 		dE /= 2*df;
 		p[0] += df; //returns to the given value
 		hx[0] = dE;
-		double mu_e = mu(p, m, 1, C) - mu(p, m, 2, C);
+		double mu_n = mu(p, m, 1, C);
+		double mu_p = mu(p, m, 2, C);
+		double mu_e = mu_n - mu_p;
 		double n_e = 0, n_mu = 0;
 		if (mu_e > m_e){
 			n_e += pow(mu_e*mu_e - m_e*m_e,1.5)/(3*M_PI*M_PI);
@@ -89,22 +98,31 @@ namespace calc{
 //			printf("i = %i, %i\n",i,v_temp.n.size());
 
 //			printf("mu = %f, m = %f \n", mu(v, 0, C), C->M[i-1]);
-			p_temp[i] = 0;
-			if (mu(p_temp, m, 1, C) - C->Q[i-1]*mu_e >=mu(p_temp, m, i, C)){//C->M[i-1]*C->phi_n(C->X_s[i] * (C->M[0]/C->M[i]) * v.f)){
-				hx[i] = mu(p, m, 1, C) - C->Q[i-1]*mu_e - mu(p, m, i, C);
-//				printf("! %i eq = %f \n control = %f \n",i, hx[i], mu(p_temp, m, 1, C) -
-//						C->Q[i-1]*mu_e - mu(p_temp, m, i, C));
+			hx[i] = calc::p_f(p[i]);
+			double m_eff = C->M[i-1]*C->phi_n(C->X_s[i-1] * (C->M[0]/C->M[i-1]) * p[0]);
+			double res = pow(
+					mu_n - C->Q[i-1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i-1] * sum_o
+					- C->Cr/pow(C->M[0],2) * C->X_r[i-1]*C->T[i-1] * sum_rho,
+					2.0);
+			res -= m_eff*m_eff;
+			if (res > 0){
+				hx[i] -= sqrt(res);
 			}
-			else{
-				hx[i] = p[i];
-//				sum -= p[i];
-//				hx[1] = par->n - sum;
-//				sum_ch -= p[i]*C->Q[i-1];
-//				hx[2] = sum_ch - n_e - n_mu;
-//				p[i] = 0;
-			}
+//			if (mu(p_temp, m, 1, C) - C->Q[i-1]*mu_e >=mu(p_temp, m, i, C)){//C->M[i-1]*C->phi_n(C->X_s[i] * (C->M[0]/C->M[i]) * v.f)){
+//				hx[i] = mu(p, m, 1, C) - C->Q[i-1]*mu_e - mu(p, m, i, C);
+////				printf("! %i eq = %f \n control = %f \n",i, hx[i], mu(p_temp, m, 1, C) -
+////						C->Q[i-1]*mu_e - mu(p_temp, m, i, C));
 //			}
-			p_temp[i] = p[i];
+//			else{
+//				hx[i] = p[i];
+////				sum -= p[i];
+////				hx[1] = par->n - sum;
+////				sum_ch -= p[i]*C->Q[i-1];
+////				hx[2] = sum_ch - n_e - n_mu;
+////				p[i] = 0;
+//			}
+////			}
+//			p_temp[i] = p[i];
 		}
 //		printf("f = ");
 		for (int i = 0; i < m; i++){
@@ -112,10 +130,6 @@ namespace calc{
 		}
 //		printf("\n");
 		delete[] p_temp;
-	}
-
-	double p_f(double n) {
-		return pow(3.0 * M_PI * M_PI * D * n, 1.0 / 3.0);
 	}
 }
 
