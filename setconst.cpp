@@ -32,11 +32,15 @@
  *  Created on: 16.05.2013
  *      Author: fixinf
  */
+
 #include "setconst.h"
+
 #include <math.h>
+#include <cstdio>
+//#include <iostream>
+//#include <string>
+
 #include "constants.h"
-#include <iostream>
-#include <string>
 
 //double set_const::phi_n(double f){
 //	return 1.0 - f;
@@ -169,35 +173,14 @@ int set_const::SetHyperConstants(){
 	return 0;
 }
 
-
-//set_const::set_const(double C_s, double C_o, double C_r, double b, double c,
-//					 double z,std::function<double(double)> f_eta_o) {
-//	// TODO Auto-generated constructor stub
-//	set_const::C_o = C_o;
-//	set_const::C_r = C_r;
-//	set_const::C_s = C_s;
-//	set_const::b = b;
-//	set_const::c = c;
-//	set_const::z = z;
-//	this->eta_o = f_eta_o;
-//}
-
-//set_const::set_const(std::string name, double C_s, double C_o, double C_r,
-//					 double b, double c, double z,
-//					 scaling phi_n = NULL,scaling eta_s = NULL, scaling eta_o = NULL, scaling eta_r= NULL) {
-//	// TODO Auto-generated constructor stub
-//	set_const::C_o = C_o;
-//	set_const::C_r = C_r;
-//	set_const::C_s = C_s;
-//	set_const::b = b;
-//	set_const::c = c;
-//	set_const::z = z;
-//	set_const::name = name;
-//	this->phi_n = phi_n;
-//	this->eta_s = eta_s;
-//	this->eta_o = eta_o;
-//	this->eta_r = eta_r;
-//
-//	//std::cout << "BBBBBB" << this->b <<"CCCC" << this->c << std::endl;
-//	// TODO использование переданной функции как метода или же нафиг
-//}
+void set_const::set(double* p, int dimP) {
+	if(dimP < 5){
+		printf("Array elements must be >= 5!");
+		return;
+	}
+	this->Cs = p[0];
+	this->Co = p[1];
+	this->Cr = p[2];
+	this->b = p[3];
+	this->c = p[4];
+}

@@ -9,6 +9,9 @@
 #include "DriverBase.h"
 #include "KVDriver.h"
 #include "TOV.h"
+#include "aux.h"
+#include "solve.h"
+#include "KVORmod.h"
 %}
 
 %include "std_vector.i"
@@ -36,9 +39,13 @@ namespace std{
 %include "eos.h" 
 %include "setconst.h"
 %include "KVOR.h"
+%include "KVORmod.h"
 %include "Walecka.h"
 %include "DriverBase.h"
 %apply (double * INPLACE_ARRAY1, int DIM1) {(double * E, int dimE), (double * P, int dimP), (double * n, int dimN)};
 %include "KVDriver.h"
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* result, int dimResult)};
 %include "TOV.h"
+%apply (double * INPLACE_ARRAY1, int DIM1) {(double * n, int dimN)};
+%include "aux.h"
+%include "solve.h"

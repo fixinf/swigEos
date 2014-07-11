@@ -59,7 +59,7 @@ void star(double rho_init, double * result, int dimResult, DriverBase* D) {
 	double f[3];
 	int status = eq_volkov(r_init, y, f, NULL);
 	for (i = 1; i <= 10000; i++) {
-		printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
+//		printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
 		double ti = i * t1 / 1000.0;
 		if (y[0] > delta * P_init) {
 			status = gsl_odeiv2_driver_apply(d, &t, ti, y);
@@ -69,7 +69,7 @@ void star(double rho_init, double * result, int dimResult, DriverBase* D) {
 				break;
 			}
 		} else {
-			std::cout << "RES2 " << y[1] << "      " << t << std::endl;
+//			std::cout << "RES2 " << y[1] << "      " << t << std::endl;
 			result[0] = y[1];
 			result[1] = t;
 			gsl_odeiv2_driver_free(d);

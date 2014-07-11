@@ -19,6 +19,7 @@
 
 extern void stepE(double n, double * init, int dimInit, double * out, int dimOut, int iter, set_const *);
 //extern double stepF(var, set_const *);
+extern double _E(double * n, int dimN, set_const *);
 extern double E(double * n, int dimN, set_const *);
 extern double sum(std::vector<double> x);
 namespace calc{

@@ -74,6 +74,7 @@ public:
 	set_const(std::string name, double Cs, double Co , double Cr, double b, double c, double z);
 	void init(double, double, double, double, double, double);
 	double diff_phi_n(double);
+	void set(double * p, int dimP);
 	virtual double U(double) = 0;
 	double dU(double);
 	void set_name(std::string name);
