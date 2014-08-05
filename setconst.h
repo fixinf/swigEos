@@ -67,6 +67,7 @@ public:
 	//			Cs		Co		Cr		b		c		z
 	set_const(){
 		init(179.56,87.6,100.64,7.7346e-3,3.4462e-4, 0.65);
+		this->phi_meson = 0;
 	}
 	set_const(double, double, double, double, double, double);
 	//			Cs		Co		Cr		b		c		z
@@ -82,6 +83,7 @@ public:
 	virtual double eta_s(double) = 0;
 	virtual double eta_o(double) = 0;
 	virtual double eta_r(double) = 0;
+	virtual double eta_p(double) = 0;
 	double Cs;
 	double Co;
 	double Cr;
@@ -92,13 +94,19 @@ public:
 	double f0;
 	std::vector<double> X_s;
 	std::vector<double> X_o;
+	std::vector<double> X_p;
 	vec X_r;
 	std::vector<double> Q;
 	std::vector<double> T;
 	vec M;
 	bool Hyper;
-	int SetHyperConstants();
+	int SetHyperConstants(int);
 	std::string repr();
+	bool phi_meson;
+	void set_xo(double * x, int dimX);
+	void set_xr(double * x, int dimX);
+	void set_xp(double * x, int dimX);
+	void set_xs(double * x, int dimX);
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;

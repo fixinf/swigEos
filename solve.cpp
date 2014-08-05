@@ -20,15 +20,25 @@ struct solve_params{
 };
 
 void func_solve(double * x, double * hx, int m, int _n, void * adata){
+	bool debug = 0;
 	solve_params * p = (solve_params *) adata;
 	p->C->set(x, 5);
 	p->C->f0 = p->f0;
 	double n[3];
 	double n_f[2] = {p->n0/2, p->n0/2};
-	n[0] = f_eq(n_f, 2, p->C);
+	n[0] = f_eq(n_f, 2, p->C, p->f0);
+	if (debug){
+		printf("f = %f \n", n[0]);
+	}
 	n[1] = n_f[0];
 	n[2] = n_f[1];
+	if (debug){
+		printf("n = %f %f %f\n", n[0], n[1], n[2]);
+	}
 	hx[0] = EBind(n, 3, p->C) - p->E0; //E(n0) = e0
+	if (debug){
+		printf("EBind = %f \n", EBind(n, 3, p->C));
+	}
 	hx[1] = n[0] - p->f0;//m_eff(n0) = M0
 	double dn = 1e-3;
 	n_f[0] += dn/2;
@@ -76,8 +86,9 @@ void solve(double n0, double E0, double f0, double K0, double J0, set_const* C) 
 	}
 	printf("\n");
 
-	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-15; opts[3]=1E-20;
-		opts[4]= -1e-3;
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-30; opts[3]=1E-20;
+		opts[4]= -1e-5;
+
 	int iter = 1000;
 	dlevmar_dif(func_solve, x, NULL, m, m, iter, opts, info, NULL, NULL, &p);
 
@@ -97,9 +108,9 @@ void solve(double n0, double E0, double f0, double K0, double J0, set_const* C) 
 		printf("f%i = %f  ", i, fun[i]);
 	}
 	printf("\n");
-//	delete[] x;
-//	delete[] fun;
-//	delete[] lb;
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
 }
 
 

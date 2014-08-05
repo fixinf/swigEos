@@ -99,7 +99,7 @@ void set_const::set_name(std::string name){
 
 void set_const::init(double C_s, double C_o, double C_r, double b, double c, double z){
 	this->Hyper = true;
-	this->SetHyperConstants();
+	this->SetHyperConstants(0);
 	this->Co = C_o;
 	this->Cr = C_r;
 	this->Cs = C_s;
@@ -108,21 +108,67 @@ void set_const::init(double C_s, double C_o, double C_r, double b, double c, dou
 	this->z = z;
 }
 
-int set_const::SetHyperConstants(){
+int set_const::SetHyperConstants(int type){
 	//Порядок следования барионов:
 	// n p L0 S- S0 S+ X- X0
 
 	this->X_o.clear();
 	this->X_s.clear();
 	this->X_r.clear();
+	this->X_p.clear();
 	this->T.clear();
 	this->Q.clear();
 	this->M.clear();
+	double xo[8];
+	double xr[8];
+	double ebind[8];
+	double xp[8];
+	double sq2 = sqrt(2.0);
 	if (true){
-		double xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
-		double xr[8] = { 1.0, 1.0, 0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0 };
-//		double xr[8] = { 1, 1, 0, 1.0, 1.0, 1.0, 1.0, 1.0};
-		double ebind[8] = {0, 0, -30, 30, 30, 30, -18, -18};
+		switch (type) {
+			case 0://Quark counting
+				double _xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
+				double _xr[8] = { 1.0, 1.0, 0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0 };
+				double _ebind[8] = {0, 0, -30, 30, 30, 30, -18, -18};
+				double _xp[8] = {0,0,0,0,0,0,0,0};
+				for (int i =0; i<8; i++){
+					xo[i] = _xo[i];
+					xr[i] = _xr[i];
+					xp[i] = _xp[i];
+					ebind[i] = _ebind[i];
+				}
+				break;
+			case 1://SU(3)
+				double _2xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
+				double _2xr[8] = { 1.0, 1.0, 0, 1.0, 1.0, 1.0, 1.0, 1.0};
+				double _2ebind[8]= {0, 0, -30, 30, 30, 30, -18, -18};
+				double _2xp[8] = {0,0,0,0,0,0,0,0};
+				for (int i =0; i<8; i++){
+					xo[i] = _2xo[i];
+					xr[i] = _2xr[i];
+					xp[i] = _2xp[i];
+					ebind[i] = _2ebind[i];
+				}
+				break;
+
+			case 2: //SU(6)
+				double _3xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
+				double _3xr[8] = { 1.0, 1.0, 0, 2.0, 2.0, 2.0, 1.0, 1.0};
+				double _3ebind[8] = {0, 0, -30, 30, 30, 30, -18, -18};
+				double _3xp[8] = {0.0, 0.0, -sq2/3,-sq2/3,-sq2/3,-sq2/3,-2*sq2/3,-2*sq2/3};
+				for (int i =0; i<8; i++){
+					xo[i] = _3xo[i];
+					xr[i] = _3xr[i];
+					xp[i] = _3xp[i];
+					ebind[i] = _3ebind[i];
+				}
+				break;
+
+			default:
+				printf("Something Wrong with hyper constants label!!!\n");
+				return -2;
+				break;
+		}
 //		double ebind[8] = {0, 0, -30, 50, 50, 50, -18, -18};
 		double m[8] = { 939/135.0, 939/135.0, 1116/135.0, 1195/135.0,
 				1195/135.0, 1195/135.0 , 1317/135.0, 1317/135.0};
@@ -141,32 +187,10 @@ int set_const::SetHyperConstants(){
 				this->X_s.push_back(xs[i]);
 				this->X_o.push_back(xo[i]);
 				this->X_r.push_back(xr[i]);
+				this->X_p.push_back(xp[i]);
 				this->T.push_back(t[i]);
 				this->Q.push_back(q[i]);
 				this->M.push_back(m[i]);
-		}
-	}
-	else{
-		double xo[8] = { 1, 1, 0,0,0,0,0,0 };
-		double xr[8] = { 1, 1, 0,0,0,0,0,0 };
-		double ebind[8] = { 0, 0, 0,0,0,0,0,0 };
-		double m[8] = {939/135.0, 939/135.0, 1116/135.0, 1195/135.0,
-				1195/135.0, 1195/135.0 , 1317/135.0, 1317/135.0};
-		//	double xs[8] = { 1, 1, 0, 0, 0, 0, 0, 0 };
-		//	double xo[8] = { 1, 1, 0, 0, 0, 0, 0, 0 };
-		//	double xr[8] = { 1, 1, 0, 0, 0, 0, 0, 0 };
-		double xs[8] = { 1, 1, 0, 0, 0, 0, 0, 0 };
-		double t[8] = { 0.5, -0.5, -1.0, 0.0, 1.0, -0.5, 0.5 };
-		double q[8] = { 0, 1, 0, -1, 0, 1, -1, 0 };
-		for (int i = 0; i < 8; i++){
-			if (this->Hyper){
-				this->X_s.push_back(xs[i]);
-				this->X_o.push_back(xo[i]);
-				this->X_r.push_back(xr[i]);
-				this->T.push_back(t[i]);
-				this->Q.push_back(q[i]);
-				this->M.push_back(m[i]);
-			}
 		}
 	}
 
@@ -183,4 +207,35 @@ void set_const::set(double* p, int dimP) {
 	this->Cr = p[2];
 	this->b = p[3];
 	this->c = p[4];
+}
+
+void set_const::set_xo(double* x, int dimX) {
+	this->X_o.clear();
+	for (int i = 0; i < dimX; i++){
+		X_o.push_back(x[i]);
+	}
+}
+
+void set_const::set_xr(double* x, int dimX) {
+	this->X_r.clear();
+	for (int i = 0; i < dimX; i++){
+		X_r.push_back(x[i]);
+	}
+}
+
+void set_const::set_xp(double* x, int dimX) {
+	this->X_p.clear();
+	for (int i = 0; i < dimX; i++){
+		X_p.push_back(x[i]);
+	}
+}
+
+void set_const::set_xs(double* x, int dimX) {
+	this->X_s.clear();
+	X_s.push_back(1.0);
+	X_s.push_back(1.0);
+	for (int i = 2; i <dimX; i++){
+		printf("x[i] = %f \n", x[i]);
+		X_s.push_back((80.73*X_o[i] - x[i]) / 140.70);
+	}
 }

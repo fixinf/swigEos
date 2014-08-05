@@ -40,6 +40,10 @@ double KVOR::phi_n(double f){
 	return 1.0 -f;
 }
 
+double KVOR::eta_p(double f) {
+	return 1.0;
+}
+
 double KVOR::U(double f){
 	return pow(m_n,4)*(b * pow(f, 3)/3 + c * pow(f,4)/4 );
 }

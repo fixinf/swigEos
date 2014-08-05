@@ -19,6 +19,7 @@ public:
 	virtual double eta_s(double);
 	virtual double phi_n(double);
 	virtual double U(double);
+	virtual double eta_p(double);
 };
 
 #endif /* WALECKA_H_ */

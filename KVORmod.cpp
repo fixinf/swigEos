@@ -23,6 +23,7 @@ KVOR_mod::KVOR_mod() : KVOR() {
 	this->omega_f = 1.0;
 	this->rho_f = 1.0;
 	this->phi_f = 1.0;
+	this->phi_gamma = 0.0;
 }
 
 double KVOR_mod::eta_o(double f){
@@ -62,8 +63,13 @@ double KVOR_mod::phi_n(double f){
 	}
 	else{
 //		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+//		return res + phi_a*pow(f - phi_f, 3)/cosh(f - phi_f);
 		return res + phi_a*pow(f - phi_f, 3);
 	}
+}
+
+double KVOR_mod::eta_p(double f){
+	return pow(this->eta_o(f), this->phi_gamma);
 }
 
 KVOR_mod::~KVOR_mod() {

@@ -37,6 +37,7 @@ namespace std{
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* init, int dimInit)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* out, int dimOut)};
 %include "eos.h" 
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* x, int dimX)};
 %include "setconst.h"
 %include "KVOR.h"
 %include "KVORmod.h"

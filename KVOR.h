@@ -19,6 +19,7 @@ public:
 	virtual double eta_r(double);
 	virtual double eta_s(double);
 	virtual double phi_n(double);
+	virtual double eta_p(double);
 	virtual double U(double);
 };
 
