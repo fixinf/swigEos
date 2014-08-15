@@ -16,37 +16,40 @@ struct func_f_eq_params{
 };
 
 void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
-	bool debug = false;
+	bool debug = 1;
 	func_f_eq_params * params = (func_f_eq_params *) adata;
 	bool sprime = (params->C->sprime and (m > 1));
-	double * n = new double[params->dimN + 1 + sprime];
+	double * n = new double[params->dimN + m];
 	if (debug){
 		printf("sprime = %i \n", sprime);
 	}
-	n[0] = p[0];
-	for (int i = 1 + sprime; i <= params->dimN; i++){
-		n[i] = params->n[i-1 - sprime];
+	for (int i = 0; i < m; i++){
+		n[i] = p[i];
+	}
+	for (int i = m; i <= params->dimN; i++){
+		n[i] = params->n[i-m];
 	}
 	if (debug) {
 		printf("f_eq: n = ");
-		for (int i = 0; i < params->dimN + 1; i++){
-			printf("%e ", n[i]);
+		for (int i = 0; i < params->dimN + m; i++){
+			printf("%f ", n[i]);
 		}
 		printf("\n");
 	}
-	double dE = _E(n, params->dimN + 1 + sprime, params->C);
-	n[0] -= params->df;
-	dE -= _E(n, params->dimN + 1 + sprime, params->C);
-	dE /= params->df;
-	hx[0] = dE;
-	n[0] += params->df;
-	if (sprime){
-		dE = _E(n, params->dimN + 1 + sprime, params->C);
-		n[1] -= params->df;
-		dE -= _E(n, params->dimN + 1 + sprime, params->C);
+	double dE;
+	for (int i = 0; i < m; i++){
+		n[i] += params->df;
+		dE = _E(n, params->dimN + m, params->C);
+		n[i] -= params->df;
+		dE -= _E(n, params->dimN + m, params->C);
 		dE /= params->df;
-		hx[1] = dE;
-		n[1] += params->df;
+		hx[i] = dE;
+		if (debug){
+			printf("dE[%i] = %f  ", i, dE);
+		}
+	}
+	if (debug){
+		printf("\n");
 	}
 	delete [] n;
 }
