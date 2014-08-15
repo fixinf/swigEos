@@ -26,7 +26,7 @@ void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 	for (int i = 0; i < m; i++){
 		n[i] = p[i];
 	}
-	for (int i = m; i <= params->dimN; i++){
+	for (int i = m; i < m + params->dimN; i++){
 		n[i] = params->n[i-m];
 	}
 	if (debug) {

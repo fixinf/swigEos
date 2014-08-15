@@ -90,6 +90,7 @@ public:
 	double Cs;
 	double Co;
 	double Cr;
+	double Csp;
 	std::string name;
 	double b;
 	double c;

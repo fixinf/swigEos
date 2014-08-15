@@ -25,8 +25,11 @@ void func_solve(double * x, double * hx, int m, int _n, void * adata){
 	p->C->set(x, 5);
 	p->C->f0 = p->f0;
 	double n[3];
+	double init[1] = {p->C->f0};
+	double out[1];
 	double n_f[2] = {p->n0/2, p->n0/2};
-	n[0] = f_eq(n_f, 2, p->C, p->f0);
+	f_eq(n_f, 2, init, 1, out, 1, p->C);
+	n[0] = out[0];
 	if (debug){
 		printf("f = %f \n", n[0]);
 	}
@@ -43,7 +46,8 @@ void func_solve(double * x, double * hx, int m, int _n, void * adata){
 	double dn = 1e-3;
 	n_f[0] += dn/2;
 	n_f[1] += dn/2;
-	n[0] = f_eq(n_f, 2, p->C);
+	f_eq(n_f, 2, init, 1, out, 1, p->C);
+	n[0] = out[0];
 	n[1] = n_f[0];
 	n[2] = n_f[1];
 //	printf("n1 = %f, n2 = %f \n", n[1], n[2]);
@@ -51,7 +55,8 @@ void func_solve(double * x, double * hx, int m, int _n, void * adata){
 //	printf("f0 = %f dEbind = %f \n",n[0], dEBind);
 	n_f[0] -= dn/2;
 	n_f[1] -= dn/2;
-	n[0] = f_eq(n_f, 2, p->C);
+	f_eq(n_f, 2, init, 1, out, 1, p->C);
+	n[0] = out[0];
 	n[1] = n_f[0];
 	n[2] = n_f[1];
 //	printf("n1 = %f, n2 = %f \n", n[1], n[2]);

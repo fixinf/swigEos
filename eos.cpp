@@ -54,14 +54,14 @@ namespace calc{
 		bool debug = false;
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
-
+		int sc = 1 + C->sprime;
 		double n_sum = 0.0;
 		double n_n = par->n;
 		double * n_in = new double [m+2]; //input set for _E and mu
 		double * n_f = new double [m+1]; //input set for f_eq; actually is {n_n,n_p,...,n_X0}
 		for (int i = 0; i < m; i++){
 			n_n -= p[i];
-			n_in[i+2] = p[i];
+			n_in[i + 1 + sc] = p[i]; //scalar + neutron(1) offset
 			n_f[i+1] = p[i];
 		}
 
@@ -73,15 +73,15 @@ namespace calc{
 			}
 			printf("\n");
 		}
-		double f = f_eq(n_f, m+1, C, par->f_init);//m -> m+1 fixed 14.07.2014
-		par->f_init = f;
-		if (debug) {
-			printf("f = %f \n", f);
+		double * init = new double[sc];
+		double * out = new double[sc];
+		f_eq(n_f, m+1, init, sc, out, sc, C);//m -> m+1 fixed 14.07.2014
+
+
+		for (int i = 0; i < sc; i++){
+			n_in[i] = out[i];
 		}
-
-		n_in[0] = f;
-		n_in[1] = n_n;
-
+		n_in[sc] = n_n;
 		double sum=0, sum_ch=0, sum_o = 0.0, sum_rho = 0.0, sum_p = 0;
 		for (int i = 0; i < m + 1; i++){
 			sum += n_f[i];
@@ -108,6 +108,12 @@ namespace calc{
 		}
 
 		hx[0] = sum_ch - n_e - n_mu;
+
+		double fp = 0;
+		double f = out[0];
+		if (C->sprime){
+			fp = out[1];
+		}
 
 		for (int i = 1; i < m; i++){
 			hx[i] = calc::p_f(p[i]);
@@ -155,23 +161,33 @@ double _E(double * n, int dimN, set_const * C){
 		printf("\n");
 	}
 	double f = n[0];
+	int sc = 1 + C->sprime;
+	double fp = 0;
+	if (C->sprime){
+		fp = n[1];
+	}
 	double res = pow(m_n, 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
+
+	res += pow(m_n, 4.0)*fp*fp/(2*C->Csp);
+
 	double sum = 0;
 	double sum_t3 = 0;
 	double sum_p = 0;
+	double meff_arg = 0;
 	if (debug){
 		printf("res_f : %f \n", res);
 	}
-	for (int i = 1; i < dimN; ++i){
-		res += kineticInt(n[i], (C->M)[i-1] * C->phi_n(C->X_s[i-1] * (C->M[0]/C->M[i-1]) * f), f);
+	for (int i = sc; i < dimN; ++i){
+		meff_arg = C->X_s[i-sc] * (C->M[0]/C->M[i-sc]) * f + C->X_sp[i-sc] * (C->M[0]/C->M[i-sc])*fp;
+		res += kineticInt(n[i], (C->M)[i-sc] * C->phi_n(meff_arg), f);
 //		printf("i = %i, n[i] = %f, pf(n[i]) = %f \n", i, v.n[i], calc::p_f(v.n[i]));
 //		printf("K = %f \n", kineticInt(v.n[i], (C->M)[i] * C->phi_n(v.f), v.f));
 //		printf("M_PI = %f \n", M_PI);
 //		printf("asinh(1) = %f\n", asinh(1.0));
-		sum += n[i] * C->X_o[i-1];
-		sum_t3 += n[i]*(C->T)[i-1] * C->X_r[i-1];
+		sum += n[i] * C->X_o[i-sc];
+		sum_t3 += n[i]*(C->T)[i-sc] * C->X_r[i-sc];
 		if (C->phi_meson){
-			sum_p += n[i]*C->X_p[i-1];
+			sum_p += n[i]*C->X_p[i-sc];
 		}
 	}
 	//omega
