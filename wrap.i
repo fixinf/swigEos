@@ -47,8 +47,10 @@ namespace std{
 %include "KVDriver.h"
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* result, int dimResult)};
 %include "TOV.h"
+
 %apply (double * INPLACE_ARRAY1, int DIM1) {(double * n, int dimN)};
-%apply (double * INPLACE_ARRAY1, int DIM1) {(double * n, int dimN), (double * init, int dimInit)};
-%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* out, int dimOut)};
+%apply (double * INPLACE_ARRAY1, int DIM1) {(double * init, int dimInit)};
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* res, int dimRes)};
 %include "aux.h"
+
 %include "solve.h"

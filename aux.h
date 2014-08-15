@@ -10,8 +10,9 @@
 #include "setconst.h"
 #include "eos.h"
 
-extern double f_eq(double * n, int dimN, set_const * C, double init = 1e-1);
-extern void f_eq(double * n, int dimN, double * init, int dimInit, double * out, int dimOut, set_const * C);
+extern void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int dimRes, set_const * C);
+//extern double f_eq(double * n, int dimN, set_const * C, double init = 1e-1);
+
 extern double K(double n, set_const *C);
 extern double EBind(double * n, int dimN, set_const *C);
 extern double J(double n, set_const * C);
