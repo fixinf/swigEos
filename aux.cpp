@@ -55,8 +55,30 @@ void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 }
 
 double f_eq(double * n, int dimN, set_const * C, double init){
+//	double opts[5];
+//	printf("I'm in \n");
+//	func_f_eq_params p = {n, dimN, 1e-4, C};
+//	int m = 1;
+//	double * x = new double[m];
+//	double * lb = new double[m];
+//	double * ub = new double[m];
+//	double * fun = new double[m];
+//	double info[LM_INFO_SZ];
+//	//double x[3] = {v.n[0], v.n[1], v.f};
+//	x[0] = init;
+//	lb[0] = 0.0;
+//	ub[0] = 1.0;
+//	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
+//	opts[4]= -1e-5;
+//	int iter = 300;
+//	dlevmar_bc_dif(func_f_eq, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+//	double res = x[0];
+//	delete[] x;
+//	delete[] fun;
+//	delete[] lb;
+//	delete[] ub;
+//	return res;
 	double opts[5];
-	printf("I'm in \n");
 	func_f_eq_params p = {n, dimN, 1e-4, C};
 	int m = 1;
 	double * x = new double[m];
@@ -69,7 +91,7 @@ double f_eq(double * n, int dimN, set_const * C, double init){
 	lb[0] = 0.0;
 	ub[0] = 1.0;
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
-	opts[4]= -1e-5;
+		opts[4]= -1e-5;
 	int iter = 300;
 	dlevmar_bc_dif(func_f_eq, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
 	double res = x[0];

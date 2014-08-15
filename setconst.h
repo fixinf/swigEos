@@ -87,9 +87,6 @@ public:
 	virtual double eta_o(double) = 0;
 	virtual double eta_r(double) = 0;
 	virtual double eta_p(double) = 0;
-	virtual double eta_sp(double){
-		return 1;
-	}
 	double Cs;
 	double Co;
 	double Cr;
@@ -112,7 +109,6 @@ public:
 	bool phi_meson;
 	double n0;
 	bool sprime;
-	int fields_solve;
 	void set_xo(double * x, int dimX);
 	void set_xr(double * x, int dimX);
 	void set_xp(double * x, int dimX);
