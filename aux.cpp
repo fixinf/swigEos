@@ -18,10 +18,14 @@ struct func_f_eq_params{
 void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 	bool debug = false;
 	func_f_eq_params * params = (func_f_eq_params *) adata;
-	double * n = new double[params->dimN + 1];
+	double * n = new double[params->dimN + 1, params->C->sprime];
+	bool sprime = (params->C->sprime and (m > 1));
+	if (debug){
+		printf("sprime = %i \n", sprime);
+	}
 	n[0] = p[0];
-	for (int i = 1; i <= params->dimN; i++){
-		n[i] = params->n[i-1];
+	for (int i = 1 + sprime; i <= params->dimN; i++){
+		n[i] = params->n[i-1 - sprime];
 	}
 	if (debug) {
 		printf("f_eq: n = ");
@@ -30,16 +34,26 @@ void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 		}
 		printf("\n");
 	}
-	double dE = _E(n, params->dimN + 1, params->C);
+	double dE = _E(n, params->dimN + 1 + sprime, params->C);
 	n[0] -= params->df;
-	dE -= _E(n, params->dimN + 1, params->C);
+	dE -= _E(n, params->dimN + 1 + sprime, params->C);
 	dE /= params->df;
 	hx[0] = dE;
+	n[0] += params->df;
+	if (sprime){
+		dE = _E(n, params->dimN + 1 + sprime, params->C);
+		n[1] -= params->df;
+		dE -= _E(n, params->dimN + 1 + sprime, params->C);
+		dE /= params->df;
+		hx[1] = dE;
+		n[1] += params->df;
+	}
 	delete [] n;
 }
 
 double f_eq(double * n, int dimN, set_const * C, double init){
 	double opts[5];
+	printf("I'm in \n");
 	func_f_eq_params p = {n, dimN, 1e-4, C};
 	int m = 1;
 	double * x = new double[m];
@@ -52,7 +66,7 @@ double f_eq(double * n, int dimN, set_const * C, double init){
 	lb[0] = 0.0;
 	ub[0] = 1.0;
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
-		opts[4]= -1e-5;
+	opts[4]= -1e-5;
 	int iter = 300;
 	dlevmar_bc_dif(func_f_eq, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
 	double res = x[0];
@@ -61,6 +75,37 @@ double f_eq(double * n, int dimN, set_const * C, double init){
 	delete[] lb;
 	delete[] ub;
 	return res;
+}
+
+void f_eq(double * n, int dimN, double * init, int dimInit, double * out, int dimOut, set_const * C){
+	double opts[5];
+	func_f_eq_params p = {n, dimN, 1e-4, C};
+	int m = 1 + C->sprime;
+	double * x = new double[m];
+	double * lb = new double[m];
+	double * ub = new double[m];
+	double * fun = new double[m];
+	double info[LM_INFO_SZ];
+	//double x[3] = {v.n[0], v.n[1], v.f};
+	x[0] = init[0];
+	if (C->sprime){
+		x[1] = init[1];
+	}
+	lb[0] = 0.0;
+	ub[0] = 1.0;
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
+		opts[4]= -1e-5;
+	int iter = 300;
+	dlevmar_bc_dif(func_f_eq, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+	double res = x[0];
+	out[0] = x[0];
+	if (C->sprime){
+		out[1] = x[1];
+	}
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
+	delete[] ub;
 }
 
 double EBind(double * n, int dimN, set_const *C){

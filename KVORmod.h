@@ -26,6 +26,7 @@ public:
 	double phi_f;
 	double phi_a;
 	double phi_gamma;
+	double phi_z;
 	virtual double eta_o(double);
 	virtual double eta_r(double);
 	virtual double eta_s(double);

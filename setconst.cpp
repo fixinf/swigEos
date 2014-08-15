@@ -116,6 +116,7 @@ int set_const::SetHyperConstants(int type){
 	this->X_s.clear();
 	this->X_r.clear();
 	this->X_p.clear();
+	this->X_sp.clear();
 	this->T.clear();
 	this->Q.clear();
 	this->M.clear();
@@ -123,6 +124,7 @@ int set_const::SetHyperConstants(int type){
 	double xr[8];
 	double ebind[8];
 	double xp[8];
+	double xsp[8];
 	double sq2 = sqrt(2.0);
 	if (true){
 		switch (type) {
@@ -179,8 +181,21 @@ int set_const::SetHyperConstants(int type){
 		xs[0] = 1.0;
 		xs[1] = 1.0;
 		for (int i = 2; i < 8; i++){
-			xs[i] = (80.73*xo[i] - ebind[i]) / 140.70;
+//			xs[i] = (80.73*xo[i] - ebind[i]) / 140.70;
+			xs[i] = ((Co*n0*135/(m[0]*m[0]))*xo[i] - ebind[i]) / (135.0*m[0]*f0);
 		}
+
+		double ebindLambda = -5.0;
+		xsp[0] = 0.0;
+		xsp[1] = 0.0;
+		double xsp_l = ((Co*xo[2]*n0*135/(m[0]*m[0]))*xo[2] - ebindLambda) / (135.0*m[0]*f0);
+		xsp[2] = xsp_l;
+		xsp[3] = xsp_l;
+		xsp[4] = xsp_l;
+		xsp[5] = xsp_l;
+		xsp[6] = 2*xsp_l;
+		xsp[7] = 2*xsp_l;
+
 		double t[8] = { -0.5, 0.5, 0.0, -1.0, 0.0, 1.0, -0.5, 0.5 };
 		double q[8] = { 0, 1, 0, -1, 0, 1, -1, 0 };
 		for (int i = 0; i < 8; i++){
@@ -188,6 +203,7 @@ int set_const::SetHyperConstants(int type){
 				this->X_o.push_back(xo[i]);
 				this->X_r.push_back(xr[i]);
 				this->X_p.push_back(xp[i]);
+				this->X_sp.push_back(xsp[i]);
 				this->T.push_back(t[i]);
 				this->Q.push_back(q[i]);
 				this->M.push_back(m[i]);

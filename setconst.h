@@ -43,6 +43,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <math.h>
 /*
  * set_const.h
  *
@@ -67,7 +68,9 @@ public:
 	//			Cs		Co		Cr		b		c		z
 	set_const(){
 		init(179.56,87.6,100.64,7.7346e-3,3.4462e-4, 0.65);
+		this->n0 = pow(197.33/135.0, 3) * 0.16;
 		this->phi_meson = 0;
+		this->sprime = 0;
 	}
 	set_const(double, double, double, double, double, double);
 	//			Cs		Co		Cr		b		c		z
@@ -84,6 +87,9 @@ public:
 	virtual double eta_o(double) = 0;
 	virtual double eta_r(double) = 0;
 	virtual double eta_p(double) = 0;
+	virtual double eta_sp(double){
+		return 1;
+	}
 	double Cs;
 	double Co;
 	double Cr;
@@ -96,6 +102,7 @@ public:
 	std::vector<double> X_o;
 	std::vector<double> X_p;
 	vec X_r;
+	vec X_sp;
 	std::vector<double> Q;
 	std::vector<double> T;
 	vec M;
@@ -103,6 +110,9 @@ public:
 	int SetHyperConstants(int);
 	std::string repr();
 	bool phi_meson;
+	double n0;
+	bool sprime;
+	int fields_solve;
 	void set_xo(double * x, int dimX);
 	void set_xr(double * x, int dimX);
 	void set_xp(double * x, int dimX);

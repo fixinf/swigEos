@@ -84,7 +84,7 @@ void KVDriver::set(double * E, int dimE, double * P, int dimP, double * n, int d
 	this->P = new double[dimP];
 	this->n = new double[dimN];
 	for (int i = 0; i < dimE; i++){
-		printf("%f %f %f \n", E[i], P[i], n[i]);
+//		printf("%f %f %f \n", E[i], P[i], n[i]);
 		this->E[i] = E[i];
 		this->P[i] = P[i];
 		this->n[i] = n[i];
