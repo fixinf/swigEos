@@ -237,7 +237,7 @@ double stepF(var v, set_const *C){
 //Stepper function for E
 void stepE(double n, double * init, int initN, double f_init, double * out, int dim_Out, int iter, set_const* C) {
 	double opts[5];
-	bool debug = 0;
+	bool debug = 1;
 	calc::fun_n_eq_params p = {C, n, f_init};
 	int m = initN;
 	double * x = new double[m];

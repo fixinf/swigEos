@@ -18,8 +18,8 @@ struct func_f_eq_params{
 void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 	bool debug = false;
 	func_f_eq_params * params = (func_f_eq_params *) adata;
-	double * n = new double[params->dimN + 1, params->C->sprime];
 	bool sprime = (params->C->sprime and (m > 1));
+	double * n = new double[params->dimN + 1 + sprime];
 	if (debug){
 		printf("sprime = %i \n", sprime);
 	}
