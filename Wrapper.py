@@ -38,7 +38,8 @@ class Wrapper():
 #         
 #         for i in rs:
 #             self.rho.append(i)
-        f = 0.0
+        sp = 1 + self.C.sprime
+        f = np.array([0.0 for i in range(sp)])
         for _i, i in enumerate(self.n):
             if abs(i - 3.53) < 1e-2:
                 pass
@@ -47,8 +48,9 @@ class Wrapper():
             rho = eos.stepE(i, last, f, len(last), iter, self.C)
             self.rho.append(rho.copy())
             self.rho[_i]=np.insert(self.rho[_i],0, i - np.sum(rho))
-            f = eos.f_eq(self.rho[_i], self.C, f)
-            self.rho[_i]=np.insert(self.rho[_i],0, f)
+            f = eos.f_eq(self.rho[_i], f, sp, self.C)
+            for j in range(sp):
+                self.rho[_i]=np.insert(self.rho[_i], j, [j])
             last = np.array(rho)
 #             temp = self.rho[_i]
 #             temp[3] = 0.0
