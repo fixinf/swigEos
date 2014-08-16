@@ -16,7 +16,7 @@ struct func_f_eq_params{
 };
 
 void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
-	bool debug = 1;
+	bool debug = 0;
 	func_f_eq_params * params = (func_f_eq_params *) adata;
 	bool sprime = (params->C->sprime and (m > 1));
 	double * n = new double[params->dimN + m];

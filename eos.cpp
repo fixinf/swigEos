@@ -51,14 +51,14 @@ namespace calc{
 	}
 
 	void fun_n_eq(double * p, double * hx, int m, int n, void * adata){
-		bool debug = false;
+		bool debug = 1;
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;
 		double n_sum = 0.0;
 		double n_n = par->n;
-		double * n_in = new double [m+2]; //input set for _E and mu
-		double * n_f = new double [m+1]; //input set for f_eq; actually is {n_n,n_p,...,n_X0}
+		double * n_in = new double [m+sc+1]; //input set for _E and mu
+		double * n_f = new double [m+sc]; //input set for f_eq; actually is {n_n,n_p,...,n_X0}
 		for (int i = 0; i < m; i++){
 			n_n -= p[i];
 			n_in[i + 1 + sc] = p[i]; //scalar + neutron(1) offset
@@ -94,8 +94,8 @@ namespace calc{
 //			printf("sum %f sum_ch %f sum_o %f sum_rho %f \n", sum, sum_ch, sum_o, sum_rho);
 		}
 
-		double mu_n = mu(n_in, m+2, 1, C);
-		double mu_p = mu(n_in, m+2, 2, C);
+		double mu_n = mu(n_in, m + sc + 1, sc + 0, C);
+		double mu_p = mu(n_in, m + sc + 1, sc + 1, C);
 		double mu_e = mu_n - mu_p;
 //		printf("n = %f %f %f \n", n_in[0], n_in[1], n_in[2]);
 //		printf("%f %f %f\n" ,mu_n, mu_p, sum_ch);
