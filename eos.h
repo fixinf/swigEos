@@ -17,7 +17,7 @@
 #include "constants.h"
 
 
-extern void stepE(double n, double * init, int dimInit, double f_init, double * out, int dimOut, int iter, set_const *);
+extern void stepE(double n, double * init, int dimInit, double * f_init, int dimF_init, double * out, int dimOut, int iter, set_const *);
 //extern double stepF(var, set_const *);
 extern double _E(double * n, int dimN, set_const *);
 extern double E(double * n, int dimN, set_const *);

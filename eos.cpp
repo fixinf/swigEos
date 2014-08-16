@@ -23,7 +23,8 @@ namespace calc{
 	struct fun_n_eq_params{
 		set_const * C;
 		double n;
-		double f_init;
+		double * f_init;
+		int dimF_init;
 	};
 
 	double p_f(double n) {
@@ -73,9 +74,8 @@ namespace calc{
 			}
 			printf("\n");
 		}
-		double * init = new double[sc];
 		double * out = new double[sc];
-		f_eq(n_f, m+1, init, sc, out, sc, C);//m -> m+1 fixed 14.07.2014
+		f_eq(n_f, m+1, par->f_init, sc, out, sc, C);//m -> m+1 fixed 14.07.2014
 
 
 		for (int i = 0; i < sc; i++){
@@ -251,7 +251,7 @@ double stepF(var v, set_const *C){
 	return 0.0;
 }
 //Stepper function for E
-void stepE(double n, double * init, int initN, double f_init, double * out, int dim_Out, int iter, set_const* C) {
+void stepE(double n, double * init, int initN, double * f_init, int dimF_init, double * out, int dim_Out, int iter, set_const* C) {
 	double opts[5];
 	bool debug = 1;
 	calc::fun_n_eq_params p = {C, n, f_init};
