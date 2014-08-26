@@ -181,8 +181,8 @@ int set_const::SetHyperConstants(int type){
 		xs[0] = 1.0;
 		xs[1] = 1.0;
 		for (int i = 2; i < 8; i++){
-			xs[i] = (80.73*xo[i] - ebind[i]) / 140.70;
-//			xs[i] = ((Co*n0*135/(m[0]*m[0]))*xo[i] - ebind[i]) / (135.0*m[0]*f0);
+//			xs[i] = (80.73*xo[i] - ebind[i]) / 140.70;
+			xs[i] = ((Co*n0*135/(m[0]*m[0]))*xo[i] - ebind[i]) / (135.0*m[0]*f0);
 		}
 
 		double ebindLambda = -5.0;

@@ -18,6 +18,44 @@
 
 //#include "constants.h"
 //#include "setconst.h"
+double p_f(double n) {
+	return pow(3.0 * M_PI * M_PI * D * n, 1.0 / 3.0);
+}
+
+double kineticInt(double n, double m, double f){
+	double pf = p_f(n);
+	double result2 = pf*sqrt(m*m + pf*pf)*(m*m + 2*pf*pf);
+	if (m > 0.0){
+		result2 -= pow(m,4)*asinh(pf/m);
+	}
+	result2 = result2/(8*M_PI*M_PI);
+	return result2;
+}
+
+
+void potentials(double * n, int dimN, double * result, int dimResult, set_const * C){
+	double sum_o = 0;
+	double sum_r = 0;
+	double sum_phi = 0;
+	int sc = 1 + C->sprime;
+	for (int i = sc; i < dimN; i++){
+		sum_o += n[i] * C->X_o[i-sc];
+		sum_r += n[i]*(C->T)[i-sc] * C->X_r[i-sc];
+		if (C->phi_meson){
+			sum_phi += n[i]*C->X_p[i-sc];
+		}
+	}
+	double f = n[0];
+	double fp = 0;
+	if (C->sprime){
+		fp = n[1];
+	}
+	result[0] = -f*C->M[0]; ///(sqrt(C->Cs/C->eta_s(f)));
+	result[1] = -fp*C->M[0]/(sqrt(C->Csp));
+	result[2] = (C->Co/(C->eta_o(f)))*sum_o/pow(C->M[0],2);
+	result[3] = (C->Cr/(C->eta_r(f)))*sum_r/pow(C->M[0],2);
+	result[4] = (C->Co/C->eta_p(f)) * pow(m_o/m_p, 2) * sum_phi / pow(C->M[0], 2);
+}
 
 namespace calc{
 	struct fun_n_eq_params{
@@ -27,32 +65,65 @@ namespace calc{
 		int dimF_init;
 	};
 
-	double p_f(double n) {
-		return pow(3.0 * M_PI * M_PI * D * n, 1.0 / 3.0);
-	}
+
 
 	double mu(double * n, int dimN, int i, set_const * C){
 		bool debug = false;
 		double dn = 1e-3;
-		n[i] += dn;
-		double dE = _E(n, dimN, C);
-		n[i] -= 2.0*dn;
-		dE -= _E(n, dimN, C);
-		n[i] += dn;
-//		printf("mu: i = %i, res = %f \n", i, dE/dn);
-		if (debug) {
-			printf("mu: n[0] = %f, n[1] = %f, n[2] = %f", n[0], n[1], n[2]);
-			for (int j = 3; j < dimN; j++){
-				printf("n[%i] = %e",j, n[j]);
-			}
-			printf(" res=%f", dE/(2*dn));
-			printf("\n");
+
+//		n[i] += dn;
+//		double dE = _E(n, dimN, C);
+//		n[i] -= 2.0*dn;
+//		dE -= _E(n, dimN, C);
+//		n[i] += dn;
+//
+////		Increased precision: f'(x) = (1/3h)(2(f(1) - f(-1)) - 0.25 (f(2) - f(-2)) )
+////
+////		n[i] += 2*dn;
+////		double dE = -0.25*_E(n, dimN, C);
+////		n[i] -= dn;
+////		dE += 2*_E(n, dimN, C);
+////		n[i] -= 2*dn;
+////		dE += -2*_E(n, dimN, C);
+////		n[i] -= dn;
+////		dE += 0.25*_E(n, dimN, C);
+////		n[i] += 2*dn;
+//
+//		if (debug) {
+//			printf("mu: n[0] = %f, n[1] = %f, n[2] = %f", n[0], n[1], n[2]);
+//			for (int j = 3; j < dimN; j++){
+//				printf("n[%i] = %e",j, n[j]);
+//			}
+//			printf(" res=%f", dE/(2*dn));
+//			printf("\n");
+//		}
+//		return dE/(2.0*dn);
+////		return dE/(3.0*dn);
+
+		int sp = 1 + C->sprime;
+		i = i - sp;
+		double out[5];
+		potentials(n, dimN, out, 5, C);
+		double f = n[0];
+		double fp = 0.0;
+		if (C->sprime){
+			fp = n[1];
 		}
-		return dE/(2.0*dn);
+		double m_eff_arg = C->X_s[i]*(C->M[0]/C->M[i])*f + C->X_sp[i]*(C->M[0]/C->M[i])*fp;
+//		printf("f = %f, m_eff_arg = %f \n", f, m_eff_arg);
+		double m_eff = C->M[i] * C->phi_n(m_eff_arg);
+		double res = sqrt(pow(p_f(n[i+sp]), 2.0) + pow(m_eff, 2.0));
+//		double res = 0.0;
+		res += C->X_o[i]*out[2];
+		res += C->X_r[i]*C->T[i]*out[3];
+		res += C->X_sp[i]*out[4];
+//		printf("mu[%i] res = %f \n", i, res);
+		return res;
 	}
 
+
 	void fun_n_eq(double * p, double * hx, int m, int n, void * adata){
-		bool debug = 1;
+		bool debug = 0;
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;
@@ -75,7 +146,7 @@ namespace calc{
 			printf("\n");
 		}
 		double * out = new double[sc];
-		f_eq(n_f, m+1, par->f_init, sc, out, sc, C);//m -> m+1 fixed 14.07.2014
+		f_eq(n_f, m+1, par->f_init, sc, out, sc, C);//m -> m+1 fixed
 
 
 		for (int i = 0; i < sc; i++){
@@ -116,9 +187,9 @@ namespace calc{
 		}
 
 		for (int i = 1; i < m; i++){
-			hx[i] = calc::p_f(p[i]);
+			hx[i] = p_f(p[i]);
 
-			double m_eff = C->M[i+1]*C->phi_n(C->X_s[i+1] * (C->M[0]/C->M[i+1]) * f);
+			double m_eff = C->M[i+1]*C->phi_n(C->X_s[i+1] * (C->M[0]/C->M[i+1]) * f  + C->X_sp[i+1] * (C->M[0]/C->M[i+1]) * fp);
 
 			double res = pow(
 					mu_n - C->Q[i+1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i+1] * sum_o / C->eta_o(f)
@@ -141,15 +212,7 @@ namespace calc{
 /**\brief Energy density functional itself.
  * Provides the energy density functional evaluated at some point v = {n, f}
  */
-double kineticInt(double n, double m, double f){
-	double p_f = calc::p_f(n);
-	double result2 = p_f*sqrt(m*m + p_f*p_f)*(m*m + 2*p_f*p_f);
-	if (m > 0.0){
-		result2 -= pow(m,4)*asinh(p_f/m);
-	}
-	result2 = result2/(8*M_PI*M_PI);
-	return result2;
-}
+
 
 double _E(double * n, int dimN, set_const * C){
 	bool debug = 0;
