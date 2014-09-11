@@ -46,11 +46,11 @@ class Wrapper():
             
             pb.update(100 * _i / len(self.n))
             rho = eos.stepE(i, last, f, len(last), iter, self.C)
-            self.rho.append(rho.copy())
+            self.rho.append(rho.copy()) 
             self.rho[_i]=np.insert(self.rho[_i],0, i - np.sum(rho))
             f = eos.f_eq(self.rho[_i], f, sp, self.C)
             for j in range(sp):
-                self.rho[_i]=np.insert(self.rho[_i], j, [j])
+                self.rho[_i]=np.insert(self.rho[_i], j, f[j])
             last = np.array(rho)
 #             temp = self.rho[_i]
 #             temp[3] = 0.0
@@ -98,8 +98,10 @@ class Wrapper():
     
     def Esymm(self, n, f=0.0):
         res = []
+        f = 0.0
         for z in n:
-            f = eos.f_eq(np.array([z/2,z/2]), self.C, f)
+            f, = eos.f_eq(np.array([z/2,z/2]), np.array([f]), 1, self.C)
+#             res.append((eos.E(np.array([f, z/2, z/2]), self.C))/z - self.C.M[0])
             res.append((eos.E(np.array([f, z/2, z/2]), self.C)))
         return np.array(res)
         

@@ -20,45 +20,58 @@ C.phi_f = 0.35
 C.phi_a = -3.5
 C.omega_f = 0.55
 C.d = -10.0
-C.phi_gamma = 10.0
-
+C.phi_gamma = 2.0
+C.phi_z = 3.5
+ 
 f0 = 0.26
 
+C.Csp = 300.0
+
 wr = Wrapper(C)
-for f in linspace(C.f0, f0, 200):
+for f in linspace(C.f0, f0, 20):
     C.f0 = f
     wr.solve(f0=C.f0)
-    
-
- 
-
+# pause(10)
 C.SetHyperConstants(2)
+C.sprime = 1
+sp = 1 + C.sprime
+init = np.array([0.0 for i in range(sp)])
+
 print C.X_s[0], C.X_s[2], C.X_s[3]
-pause(2)
+# pause(2)
 C.phi_meson = 1
 print C.f0
-print eos.f_eq(array([wr.n0/2, wr.n0/2]), C)
-# pause(1)
+
+print eos.f_eq(np.array([wr.n0/2.0, wr.n0/2.0]), init, sp, C)
+print eos.f_eq(np.array([0.25, 0.25]),np.array([0.0]), 1, C)
+# pause(10)
 dx = 1e-4
 n_l = np.linspace(0.00001, 5.0, 500)
 res = []
 rho = [0.0]
 feq = []
-f = 0
 
 def U_lambda(x, Y, gamma=None):
-    f = 0.0
+    f = init
     res = []
     for n in n_l:
         f_eq_arg = array([(1- x)*n*(1-Y), x*n*(1-Y), Y*n])
 #         print 'f_eq_arg=',
-        f = eos.f_eq(f_eq_arg, C, f)
-        mu_arg = np.array([f,(1- x)*n*(1-Y), x*n*(1-Y), Y*n])
+        f = eos.f_eq(f_eq_arg, f, sp, C)
+        print f
+        mu_arg = np.array([(1- x)*n*(1-Y), x*n*(1-Y), Y*n])
+        mu_arg = np.insert(mu_arg, 0, f)
         feq.append(f)
+        print mu_arg
         qqq = eos._E(mu_arg, C)/n - C.M[2]
 #         qqq = eos.mu(mu_arg, 3, C) - C.M[2]
         res.append(qqq)
-    return n_l, np.array(res)*135.0
+    return np.array(res)*135.0
+
+arrr=  U_lambda(0.0, 1.0)
+print arrr
+plot(n_l, arrr)
+show()
 
 def U_sigma_m():
     f = 0.0
@@ -125,7 +138,7 @@ for line in stoks_S:
 x_S_stoks = np.array(x_S_stoks, dtype=float64)*wr.n0/0.16
 
 print x_balb.dtype
-n_l, res = U_lambda(0.0, 0.0)
+res = U_lambda(0.0, 0.0)
 
 
 fig, axx = plt.subplots(1, 2)
