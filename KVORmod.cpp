@@ -11,7 +11,7 @@
 #include <cstdio>
 
 KVOR_mod::KVOR_mod() : KVOR() {
-	// TODO Auto-generated constructor stub
+
 	this->phi_a = 0.0;
 	this->omega_a = 0.0;
 	this->rho_a = 0.0;
@@ -25,6 +25,7 @@ KVOR_mod::KVOR_mod() : KVOR() {
 	this->phi_f = 1.0;
 	this->phi_gamma = 0.0;
 	this->phi_z = 0.65;
+	this->omega_c = 0.0;
 }
 
 double KVOR_mod::eta_o(double f){
@@ -33,12 +34,15 @@ double KVOR_mod::eta_o(double f){
 	}
 	else{
 //		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-		return pow(KVOR::eta_o(f), alpha) + omega_a*pow(f - omega_f, 3);
+		return pow(KVOR::eta_o(f), alpha) + omega_a*pow(f - omega_f, 3) + omega_c*pow(f - omega_f, 11);
 	}
 }
 
 double KVOR_mod::eta_r(double f){
-	double res = pow(1 + beta * f/(1 + beta*f0), gamma);
+	double res = pow((1 + beta * f)/(1 + beta*f0), gamma);
+//	double res = pow((1 + beta * f)/(1 + beta*f0), gamma) - 1;
+//	res *= (atanh(100*pow(f - f0, 3)) + 1)/2 ;
+//	res += 1;
 	if (f < this->rho_f){
 		return res;
 	}
@@ -57,8 +61,11 @@ double KVOR_mod::U(double f){
 	return 0.0;
 }
 
-double KVOR_mod::phi_n(double f){
+double KVOR_mod::phi_n(int i, double f){
 	double res = 1-f;
+	if (i > 1){
+		return 1 - f;
+	}
 	if (f < this->phi_f){
 		return res;
 	}
@@ -74,6 +81,6 @@ double KVOR_mod::eta_p(double f){
 }
 
 KVOR_mod::~KVOR_mod() {
-	// TODO Auto-generated destructor stub
+
 }
 

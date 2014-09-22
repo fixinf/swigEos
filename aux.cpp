@@ -122,7 +122,7 @@ double f_eq(double * n, int dimN, set_const * C, double init){
 
 void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int dimRes, set_const * C){
 	double opts[5];
-	func_f_eq_params p = {n, dimN, 1e-5, C};
+	func_f_eq_params p = {n, dimN, 1e-7, C};
 	int m = 1 + C->sprime;
 	double * x = new double[m];
 	double * lb = new double[m];
@@ -130,16 +130,39 @@ void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int di
 	double * fun = new double[m];
 	double info[LM_INFO_SZ];
 	//double x[3] = {v.n[0], v.n[1], v.f};
+
 	for (int i = 0; i < m; i++){
 		x[i] = init[i];
 		lb[i] = 0.0;
 		ub[i] = 1.0;
 	}
 
+	//debug only
+	double sum = 0;
+	bool debug = 0;
+	for (int i = 0; i < dimN; i++){
+		sum += n[i];
+	}
+
+	if (sum > 2.93){
+		debug = 0;
+	}
+
+	ub[0] = 1.0;
+	ub[1] = 1.0;
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
 		opts[4]= -1e-5;
 	int iter = 300;
 	dlevmar_bc_dif(func_f_eq, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+
+	if (debug){
+		printf("info: ");
+		for (int i = 0; i < LM_INFO_SZ; i++){
+			printf("[%i] = %f ", i, info[i]);
+		}
+		printf("\n");
+	}
+
 	for (int i = 0; i < m; i++){
 		res[i] = x[i];
 	}
@@ -227,4 +250,37 @@ double J(double n, set_const * C){
 	return 135.0*n*d2E/8;
 }
 
+double J(double n, set_const * C, double f){
+	double dn = 1e-3;
+	int old_sprime = C->sprime;
+	C->sprime = 0;
+	double _n[2] = {(n-dn)/2, (n+dn)/2};
+	double out[1];
+	double init[1] = {f};
+	f_eq(_n, 2, init, 1, out, 1, C);
+	double n_E[3] = {out[0], (n - dn)/2, (n + dn)/2};
+	double d2E = _E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E -= 2*_E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += _E(n_E, 3, C);
+	d2E /= (dn/2)*(dn/2);
+	C->sprime = old_sprime;
+	return 135.0*n*d2E/8;
+}
 

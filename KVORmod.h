@@ -27,11 +27,12 @@ public:
 	double phi_a;
 	double phi_gamma;
 	double phi_z;
+	double omega_c;
 	virtual double eta_o(double);
 	virtual double eta_r(double);
 	virtual double eta_s(double);
 	virtual double eta_p(double);
-	virtual double phi_n(double);
+	virtual double phi_n(int,double);
 	virtual double U(double);
 };
 

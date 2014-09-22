@@ -10,7 +10,7 @@
 
 #include "setconst.h"
 
-extern void solve(double n0, double E0, double f0, double K0, double J0, set_const * C);
+extern int solve(double n0, double E0, double f0, double K0, double J0, set_const * C, int iter, int mu_scale);
 
 
 

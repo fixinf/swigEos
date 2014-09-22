@@ -8,7 +8,6 @@
 #include "DriverBase.h"
 
 DriverBase::DriverBase() {
-	// TODO Auto-generated constructor stub
 	this->fname = "";
 }
 
@@ -18,7 +17,7 @@ DriverBase::DriverBase(string fname) {
 }
 
 DriverBase::~DriverBase() {
-	// TODO Auto-generated destructor stub
+
 }
 
 void DriverBase::readEos(){

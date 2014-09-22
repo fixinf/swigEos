@@ -71,6 +71,7 @@ public:
 		this->n0 = pow(197.33/135.0, 3) * 0.16;
 		this->phi_meson = 0;
 		this->sprime = 0;
+		this->Csp = 1.0;
 	}
 	set_const(double, double, double, double, double, double);
 	//			Cs		Co		Cr		b		c		z
@@ -82,7 +83,7 @@ public:
 	virtual double U(double) = 0;
 	double dU(double);
 	void set_name(std::string name);
-	virtual double phi_n(double) = 0;
+	virtual double phi_n(int, double) = 0;
 	virtual double eta_s(double) = 0;
 	virtual double eta_o(double) = 0;
 	virtual double eta_r(double) = 0;
@@ -114,6 +115,7 @@ public:
 	void set_xr(double * x, int dimX);
 	void set_xp(double * x, int dimX);
 	void set_xs(double * x, int dimX);
+	double func(double x);
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;

@@ -9,7 +9,7 @@
 //#include "constants.h"
 //
 //set_const::set_const() {
-//	// TODO Auto-generated constructor stub
+
 //	this->M = new vec();
 //	M->push_back(m_n);
 //	M->push_back(m_n);
@@ -22,7 +22,7 @@
 //}
 //
 //set_const::~set_const() {
-//	// TODO Auto-generated destructor stub
+
 //}
 
 
@@ -49,7 +49,7 @@
 
 double set_const::diff_phi_n(double f){
 	double df = 0.0001;
-	return (this->phi_n(f+df) - this->phi_n(f))/(df);
+	return (this->phi_n(0,f+df) - this->phi_n(0,f))/(df);
 }
 
 //double set_const::eta_r(double f){
@@ -59,7 +59,7 @@ double set_const::diff_phi_n(double f){
 //}
 
 double set_const::dU(double f){
-	return pow(m_n,4.0)*(b*pow(f,2.0) + c*pow(f,3.0));
+	return pow(M[0],4.0)*(b*pow(f,2.0) + c*pow(f,3.0));
 }
 
 
@@ -172,7 +172,7 @@ int set_const::SetHyperConstants(int type){
 				break;
 		}
 //		double ebind[8] = {0, 0, -30, 50, 50, 50, -18, -18};
-		double m[8] = { 939/135.0, 939/135.0, 1116/135.0, 1195/135.0,
+		double m[8] = { 938/135.0, 938/135.0, 1116/135.0, 1195/135.0,
 				1195/135.0, 1195/135.0 , 1317/135.0, 1317/135.0};
 		//	double xs[8] = { 1, 1, 0, 0, 0, 0, 0, 0 };
 		//	double xo[8] = { 1, 1, 0, 0, 0, 0, 0, 0 };
@@ -252,6 +252,16 @@ void set_const::set_xs(double* x, int dimX) {
 	X_s.push_back(1.0);
 	for (int i = 2; i <dimX; i++){
 		printf("x[i] = %f \n", x[i]);
-		X_s.push_back((80.73*X_o[i] - x[i]) / 140.70);
+		X_s.push_back(((Co*n0*135/(M[0]*M[0]))*X_o[i] - x[i])
+				/ (135.0*M[0]*f0));
+	}
+}
+
+double set_const::func(double x){
+	if (x <= 0){
+		return 0.0;
+	}
+	else{
+		return exp(-2./x);
 	}
 }

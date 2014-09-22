@@ -51,10 +51,11 @@ void func_solve(double * x, double * hx, int m, int _n, void * adata){
 	n[1] = n_f[0];
 	n[2] = n_f[1];
 //	printf("n1 = %f, n2 = %f \n", n[1], n[2]);
+
 	double dEBind = EBind(n, 3, p->C);
 //	printf("f0 = %f dEbind = %f \n",n[0], dEBind);
-	n_f[0] -= dn/2;
-	n_f[1] -= dn/2;
+	n_f[0] -= dn;
+	n_f[1] -= dn;
 	f_eq(n_f, 2, init, 1, out, 1, p->C);
 	n[0] = out[0];
 	n[1] = n_f[0];
@@ -62,7 +63,7 @@ void func_solve(double * x, double * hx, int m, int _n, void * adata){
 //	printf("n1 = %f, n2 = %f \n", n[1], n[2]);
 	dEBind -= EBind(n, 3, p->C);
 //	printf("f0 = %f dEbind = %f \n",n[0], dEBind);
-	dEBind /= dn;
+	dEBind /= 2*dn;
 //	printf("f0 = %f dEbind = %f \n",n[0], dEBind);
 
 	hx[2] = dEBind; //dEBind/dn (n0) = 0;
@@ -70,7 +71,7 @@ void func_solve(double * x, double * hx, int m, int _n, void * adata){
 	hx[4] = p->J0 - J(p->n0, p->C);
 }
 
-void solve(double n0, double E0, double f0, double K0, double J0, set_const* C) {
+int solve(double n0, double E0, double f0, double K0, double J0, set_const* C, int iter, int mu_scale) {
 	double opts[5];
 	solve_params p = {n0, E0, K0, J0, f0, C};
 	int m = 5;
@@ -91,10 +92,9 @@ void solve(double n0, double E0, double f0, double K0, double J0, set_const* C) 
 	}
 	printf("\n");
 
-	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-30; opts[3]=1E-20;
-		opts[4]= -1e-5;
+	opts[0]= mu_scale*LM_INIT_MU; opts[1]=1E-15; opts[2]=0.0; opts[3]=1E-12;
+		opts[4]= -1e-4;
 
-	int iter = 1000;
 	dlevmar_dif(func_solve, x, NULL, m, m, iter, opts, info, NULL, NULL, &p);
 
 	printf("info: ");
@@ -116,6 +116,7 @@ void solve(double n0, double E0, double f0, double K0, double J0, set_const* C) 
 	delete[] x;
 	delete[] fun;
 	delete[] lb;
+	return info[6];
 }
 
 

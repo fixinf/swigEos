@@ -91,6 +91,12 @@
 							</tool>
 							<tool id="intel.c.linkstep.so.linux.x86_64.dbg.2138588126_14.0.0" name="Intel Intel(R) 64 C Linker" superClass="intel.c.linkstep.so.linux.x86_64.dbg_14.0.0"/>
 							<tool id="intel.cpp.linkstep.so.linux.x86_64.dbg.1450484206_14.0.0" name="Intel Intel(R) 64 C++ Linker" superClass="intel.cpp.linkstep.so.linux.x86_64.dbg_14.0.0">
+								<option id="intel.linkstep.libname.389585409" superClass="intel.linkstep.libname" valueType="libs">
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="levmar"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="blas"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="f2c"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="lapack"/>
+								</option>
 								<inputType id="intel.linkstep.input.825553189" superClass="intel.linkstep.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

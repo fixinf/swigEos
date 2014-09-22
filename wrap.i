@@ -12,6 +12,7 @@
 #include "aux.h"
 #include "solve.h"
 #include "KVORmod.h"
+#include "KVORmod2.h"
 %}
 
 %include "std_vector.i"
@@ -42,6 +43,7 @@ namespace std{
 %include "setconst.h"
 %include "KVOR.h"
 %include "KVORmod.h"
+%include "KVORmod2.h"
 %include "Walecka.h"
 %include "DriverBase.h"
 %apply (double * INPLACE_ARRAY1, int DIM1) {(double * E, int dimE), (double * P, int dimP), (double * n, int dimN)};

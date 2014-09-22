@@ -68,9 +68,9 @@ namespace calc{
 
 
 	double mu(double * n, int dimN, int i, set_const * C){
-		bool debug = false;
-		double dn = 1e-3;
-
+//		bool debug = false;
+//		double dn = 1e-3;
+//
 //		n[i] += dn;
 //		double dE = _E(n, dimN, C);
 //		n[i] -= 2.0*dn;
@@ -98,7 +98,7 @@ namespace calc{
 //			printf("\n");
 //		}
 //		return dE/(2.0*dn);
-////		return dE/(3.0*dn);
+//		return dE/(3.0*dn);
 
 		int sp = 1 + C->sprime;
 		i = i - sp;
@@ -111,7 +111,7 @@ namespace calc{
 		}
 		double m_eff_arg = C->X_s[i]*(C->M[0]/C->M[i])*f + C->X_sp[i]*(C->M[0]/C->M[i])*fp;
 //		printf("f = %f, m_eff_arg = %f \n", f, m_eff_arg);
-		double m_eff = C->M[i] * C->phi_n(m_eff_arg);
+		double m_eff = C->M[i] * C->phi_n(i,m_eff_arg);
 		double res = sqrt(pow(p_f(n[i+sp]), 2.0) + pow(m_eff, 2.0));
 //		double res = 0.0;
 		res += C->X_o[i]*out[2];
@@ -189,7 +189,7 @@ namespace calc{
 		for (int i = 1; i < m; i++){
 			hx[i] = p_f(p[i]);
 
-			double m_eff = C->M[i+1]*C->phi_n(C->X_s[i+1] * (C->M[0]/C->M[i+1]) * f  + C->X_sp[i+1] * (C->M[0]/C->M[i+1]) * fp);
+			double m_eff = C->M[i+1]*C->phi_n(i+1,C->X_s[i+1] * (C->M[0]/C->M[i+1]) * f  + C->X_sp[i+1] * (C->M[0]/C->M[i+1]) * fp);
 
 			double res = pow(
 					mu_n - C->Q[i+1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i+1] * sum_o / C->eta_o(f)
@@ -229,20 +229,25 @@ double _E(double * n, int dimN, set_const * C){
 	if (C->sprime){
 		fp = n[1];
 	}
-	double res = pow(m_n, 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
+	double res = pow(C->M[0], 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
+	if (debug){
+		printf("res_f : %f\n", res);
+	}
 
-	res += pow(m_n, 4.0)*fp*fp/(2*C->Csp);
+	res += C->U(f);
+
+	res += pow(C->M[0], 4.0)*fp*fp/(2*C->Csp);
 
 	double sum = 0;
 	double sum_t3 = 0;
 	double sum_p = 0;
 	double meff_arg = 0;
 	if (debug){
-		printf("res_f : %f \n", res);
+		printf("res_Uf : %f \n", res);
 	}
 	for (int i = sc; i < dimN; ++i){
 		meff_arg = C->X_s[i-sc] * (C->M[0]/C->M[i-sc]) * f + C->X_sp[i-sc] * (C->M[0]/C->M[i-sc])*fp;
-		res += kineticInt(n[i], (C->M)[i-sc] * C->phi_n(meff_arg), f);
+		res += kineticInt(n[i], (C->M)[i-sc] * C->phi_n(i-sc,meff_arg), f);
 //		printf("i = %i, n[i] = %f, pf(n[i]) = %f \n", i, v.n[i], calc::p_f(v.n[i]));
 //		printf("K = %f \n", kineticInt(v.n[i], (C->M)[i] * C->phi_n(v.f), v.f));
 //		printf("M_PI = %f \n", M_PI);
@@ -254,12 +259,12 @@ double _E(double * n, int dimN, set_const * C){
 		}
 	}
 	//omega
-	res += C->Co * sum*sum/(2.0*m_n*m_n*C->eta_o(f));
+	res += C->Co * sum*sum/(2.0*C->M[0]*C->M[0]*C->eta_o(f));
 	if (debug){
 		printf("res_om : %f \n", res);
 	}
 	//phi
-	res += pow(m_o/m_p ,2.0)*C->Co * sum_p*sum_p/(2.0*m_n*m_n*C->eta_p(f));
+	res += pow(m_o/m_p ,2.0)*C->Co * sum_p*sum_p/(2.0*C->M[0]*C->M[0]*C->eta_p(f));
 	if (debug){
 		printf("res_phi : %f \n", res);
 	}
@@ -267,9 +272,9 @@ double _E(double * n, int dimN, set_const * C){
 	if (debug){
 		printf("res_rho : %f \n", res);
 	}
-	res += C->Cr * pow(sum_t3/m_n, 2.0) / (2 * C->eta_r(f));
+	res += C->Cr * pow(sum_t3/C->M[0], 2.0) / (2 * C->eta_r(f));
 
-	res += C->U(f);
+
 	return res;
 }
 
@@ -278,7 +283,7 @@ double E(double* n, int dimN, set_const* C) {
 	double res = _E(n, dimN, C);
 
 //	double f = n[0];
-//	double res = pow(m_n, 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
+//	double res = pow(C->M[0], 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
 //	double sum = 0;
 //	double sum_t3 = 0;
 //	for (int i = 1; i < dimN; ++i){
@@ -290,13 +295,13 @@ double E(double* n, int dimN, set_const* C) {
 //		sum += n[i] * C->X_o[i-1];
 //		sum_t3 += n[i]*(C->T)[i-1] * C->X_r[i-1];
 //	}
-//	res += C->Co * sum*sum/(2.0*m_n*m_n*C->eta_o(f));
+//	res += C->Co * sum*sum/(2.0*C->M[0]*C->M[0]*C->eta_o(f));
 ////	printf("sum_t3 = %f  \n", sum_t3);
-//	res += C->Cr * pow(sum_t3/m_n, 2.0) / (2 * C->eta_r(f));
+//	res += C->Cr * pow(sum_t3/C->M[0], 2.0) / (2 * C->eta_r(f));
 //	res += C->U(f);
-
-	double mu_n = calc::mu(n, dimN, 1, C);
-	double mu_p = calc::mu(n, dimN, 2, C);
+	int sp = 1 + C->sprime;
+	double mu_n = calc::mu(n, dimN, sp, C);
+	double mu_p = calc::mu(n, dimN, sp+1, C);
 	double mu_e = mu_n - mu_p;
 	double n_e = 0, n_mu = 0;
 	if (mu_e > m_e){
@@ -316,7 +321,7 @@ double stepF(var v, set_const *C){
 //Stepper function for E
 void stepE(double n, double * init, int initN, double * f_init, int dimF_init, double * out, int dim_Out, int iter, set_const* C) {
 	double opts[5];
-	bool debug = 1;
+	bool debug = 0;
 	calc::fun_n_eq_params p = {C, n, f_init};
 	int m = initN;
 	double * x = new double[m];
@@ -324,12 +329,8 @@ void stepE(double n, double * init, int initN, double * f_init, int dimF_init, d
 	double * fun = new double[m];
 	double info[LM_INFO_SZ];
 	//double x[3] = {v.n[0], v.n[1], v.f};
-	x[0] = init[0];
-	if (C->sprime){
-		x[1] = init[1];
-	}
-	lb[0] = 0.0;
-	for (int i = 1+C->sprime; i < m; i++){
+
+	for (int i = 0; i < m; i++){
 		x[i] = init[i];
 		lb[i] = 0.0;
 //		if (i > 2) lb[i] = -100500.0;

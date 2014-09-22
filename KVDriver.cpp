@@ -14,7 +14,7 @@
 
 using namespace std;
 KVDriver::KVDriver() {
-	// TODO Auto-generated constructor stub
+
 }
 
 KVDriver::KVDriver(double * E, int dimE, double * P, int dimP, double * n, int dimN){
@@ -93,6 +93,6 @@ void KVDriver::set(double * E, int dimE, double * P, int dimP, double * n, int d
 }
 
 KVDriver::~KVDriver() {
-	// TODO Auto-generated destructor stub
+
 }
 

@@ -14,5 +14,6 @@
 
 void star(double rho_init, double * result, int dimResult, DriverBase* D);
 
+void star_crust(double rho_init, double * result, int dimResult, DriverBase* D);
 
 #endif /* TOV_H_ */

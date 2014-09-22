@@ -9,7 +9,6 @@
 #include <cmath>
 #include "constants.h"
 Walecka::Walecka() : set_const() {
-	// TODO Auto-generated constructor stub
 	Co = 54.6041;
 	Cs = 164.462;
 	Cr = 121.69;
@@ -18,7 +17,6 @@ Walecka::Walecka() : set_const() {
 }
 
 Walecka::~Walecka() {
-	// TODO Auto-generated destructor stub
 }
 
 double Walecka::eta_o(double f){
@@ -33,7 +31,7 @@ double Walecka::eta_r(double f){
 	return 1.0;
 }
 
-double Walecka::phi_n(double f){
+double Walecka::phi_n(int i, double f){
 	return 1.0 - f;
 }
 
@@ -42,5 +40,5 @@ double Walecka::eta_p(double f){
 }
 
 double Walecka::U(double f){
-	return pow(m_n,4)*(b * pow(f, 3)/3 + c * pow(f,4)/4 );
+	return pow(M[0],4)*(b * pow(f, 3)/3 + c * pow(f,4)/4 );
 }
