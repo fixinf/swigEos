@@ -9,20 +9,20 @@ from matplotlib.widgets import Slider, CheckButtons, RadioButtons
 # print colors
 # show()
 
-C = eos.KVOR_mod()
-C.SetHyperConstants(2)
-C.alpha = 0.85
-C.omega_a = 12.0
-C.rho_a = 0.0
-C.phi_f = 0.35
-C.phi_a = -3.5
-C.omega_f = 0.55
-C.d = -10.0
-C.phi_gamma = -0.8
-C.z = 0.65
-C.phi_z = 3.1
-
-f0 = 0.26
+C = eos.KVOR()
+# C.SetHyperConstants(2)
+# C.alpha = 0.85
+# C.omega_a = 12.0
+# C.rho_a = 0.0
+# C.phi_f = 0.35
+# C.phi_a = -3.5
+# C.omega_f = 0.55
+# C.d = -10.0
+# C.phi_gamma = -0.8
+# C.z = 0.65
+# C.phi_z = 3.1
+# 
+# f0 = 0.26
 
 # 
 # C.alpha = 1.1
@@ -36,7 +36,7 @@ f0 = 0.26
 # C.gamma = 3.0
 # C.beta = 20.8
 # f0 = 0.24
-
+f0 = 0.195
 print C.X_s[7]
 
 print C.X_s[7]

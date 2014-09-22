@@ -151,7 +151,7 @@ def E_frac(_n, x, Y):
     res = []
     for n in _n:
         arg_f = np.array([n*(1-Y)*(1-x), n*(1-Y)*x, Y*n])
-        f = eos.f_eq(arg_f, wr.C, f)
+        f = eos.f_eq(arg_f, wr.C)
         arg_e =np.array([f, n*(1-Y)*(1-x), n*(1-Y)*x, Y*n])
         E = eos.E(arg_e, wr.C)/n - C.M[0] 
         res.append(E)

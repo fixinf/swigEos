@@ -15,41 +15,39 @@ C.SetHyperConstants(2)
 
 C.alpha = 0.85
 C.z = 0.65
-
-C.omega_a = 1.67
-C.omega_f = 0.44
-
+    
+C.omega_a = 0*6.45
+C.omega_f = 0.53
+    
 C.rho_a = 0.0
+    
+C.phi_a = 0*-0.85
+C.phi_f = 0.28
+    
+C.d = 0*-5.5
+C.omega_c = -10000.
 
-C.phi_a = -1.01
-C.phi_f = 0.33
-
-C.d = -4.21
-
-C.phi_gamma = 3.0
+C.phi_gamma = 2.0
 C.phi_z = 3.5
-
+ 
 C.sprime = 0
 C.Csp = 380.0
+    
+C.beta = 0.5
+C.gamma = 8.0
+ 
+C.f0 = 0.26
 
-C.beta = 4.54
-C.gamma = 3.78
-
-
-
-f0 = 0.26
-
-nmax = 3.3
+nmax = 5.0
 C.sprime = 0
 wr = Wrapper(C)
-for f in linspace(C.f0, f0, 20):
-    C.f0 = f
-    wr.solve(f0=C.f0)
-C.sprime = 1
+wr.solve(f0=C.f0, iter=3000)
+# exit()
+C.sprime = 0
 C.SetHyperConstants(2)
 
 sp = 1 + C.sprime
-C.phi_meson = 1
+C.phi_meson = 0
 
 wr.reset(hyper=1, nmax=nmax, npoints=400)
 rho = []

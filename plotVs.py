@@ -3,6 +3,7 @@ from Wrapper import Wrapper
 from pylab import *
 from numpy import array, linspace
 from matplotlib.widgets import Slider, CheckButtons, RadioButtons
+from scipy.misc.common import derivative
 # x = linspace(0.0, 3.0, 100)
 # l = plot(x, sin(x),x, sin(2*x),x, sin(3*x))
 # colors = [c.properties()['color'] for c in l]
@@ -53,12 +54,16 @@ n_p = linspace(0.0, 4.0, 1000)
 wrlist = [wr, wr2]
 
 for wr in wrlist:
-    for f in linspace(0.195, f0, 100):
+    for f in linspace(0.195, f0, 200):
         wr.C.f0 = f
         wr.solve(f0=f) 
         
     print 'Done!'
     pause(1)
+
+print eos.J(wr.n0, C2)
+print 3*derivative(lambda z: eos.J(z, C2), wr.n0, dx=1e-3)
+pause(5)
 
 fig, ax = plt.subplots(1,2)
 

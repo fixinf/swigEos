@@ -67,7 +67,7 @@ class Wrapper():
     
     def EPN(self):
         if self.set:
-            return self.E, self.P, self.n
+            return self.E*self.m_pi**4, self.P*self.m_pi**4, self.n
         else:
             print 'Wrapper is not set!'
         
@@ -80,8 +80,14 @@ class Wrapper():
         self.dr.set(self.E*self.m_pi**4, self.P*self.m_pi**4, self.n)
         self.driverSet = True
     
-    def solve(self, f0=0.195, E0=-16.0, K0=275.0, J0=32.0):
-        eos.solve(self.n0, E0, f0, K0, J0, self.C)
+    def solve(self, f0=0.195, E0=-16.0, K0=275.0, J0=32.0, iter=1000, mu_scale = 1):
+        sprime_old = self.C.sprime
+        self.C.sprime = 0
+        res = eos.solve(self.n0, E0, f0, K0, J0, self.C, iter, mu_scale)
+        print res
+        if mu_scale < 50000 and res == 5:
+            self.solve(f0, E0, K0, J0, iter, 5*mu_scale)
+        self.C.sprime = sprime_old 
     
     def stars(self, nmin = 0.5, nmax = 4.0, npoints=20):
         if not self.set:
