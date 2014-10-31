@@ -45,8 +45,11 @@ namespace std{
 %include "KVORmod.h"
 %include "KVORmod2.h"
 %include "Walecka.h"
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double * N, int dimN)};
 %include "DriverBase.h"
 %apply (double * INPLACE_ARRAY1, int DIM1) {(double * E, int dimE), (double * P, int dimP), (double * n, int dimN)};
+%apply (double * INPLACE_ARRAY1, int DIM1) {(double * src, int dim_src)};
+
 %include "KVDriver.h"
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* result, int dimResult)};
 %include "TOV.h"

@@ -26,6 +26,15 @@ public:
 	virtual double PofN(double n);
 	virtual double EofN(double n);
 	virtual double EofP(double P);
+	virtual double NofP(double N);
+	virtual double NofE(double N);
+	double * lastNstar;
+	double * lastRstar;
+	double * lastMstar;
+	int nSize;
+	void getLastN(double * N, int dimN);
+	void getLastR(double * N, int dimN);
+	void getLastM(double * N, int dimN);
 };
 
 #endif /* TOVDRIVER_H_ */

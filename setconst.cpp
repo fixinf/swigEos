@@ -106,6 +106,7 @@ void set_const::init(double C_s, double C_o, double C_r, double b, double c, dou
 	this->b = b;
 	this->c = c;
 	this->z = z;
+	this->exp_alpha = 1.0;
 }
 
 int set_const::SetHyperConstants(int type){
@@ -262,6 +263,6 @@ double set_const::func(double x){
 		return 0.0;
 	}
 	else{
-		return exp(-2./x);
+		return exp(-exp_alpha/x);
 	}
 }

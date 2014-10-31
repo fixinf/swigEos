@@ -23,6 +23,8 @@ void potentials(double * n, int dimN, double * out, int dimOut, set_const * C);
 extern double _E(double * n, int dimN, set_const *);
 extern double E(double * n, int dimN, set_const *);
 extern double sum(std::vector<double> x);
+extern double kineticInt(double n, double m, double f);
+extern double p_f(double n);
 namespace calc{
 extern double mu(double * n, int dimN, int i, set_const * C);
 }

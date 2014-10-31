@@ -10,7 +10,25 @@
 #include <gsl/gsl_odeiv2.h>
 #include <cstdio>
 KVOR_mod2::KVOR_mod2() : KVOR_mod() {
-
+	rho_kind = 0;
+	omega_kind = 0;
+	e = 0.;
+	d = 0.;
+	phi_a = 0.;
+	phi_gamma = 0.0;
+	phi_z = 0.0;
+	beta = 1.0;
+	gamma = 2.0;
+	alpha = 1.0;
+	omega_c = 0.;
+	omega_a = 0.;
+	omega_f = 1.;
+	rho_a = 0.;
+	rho_f = 1.;
+	phi_f = 1.;
+	this->exp_alpha = 0;
+	this->Csp = 1.;
+	this->rho_power = 2.;
 }
 
 KVOR_mod2::~KVOR_mod2() {
@@ -18,6 +36,7 @@ KVOR_mod2::~KVOR_mod2() {
 }
 
 double KVOR_mod2::eta_o(double f){
+//	f = (1.0-f0)*this->func(f - f0)/this->func(1-f0) + f0;
 	double res = pow(KVOR::eta_o(f), alpha);
 //	double res = pow(KVOR::eta_o(f), alpha) - 1;
 //	res *= (tanh(1e5*pow(f - f0,3)) + 1)/2 ;
@@ -27,24 +46,32 @@ double KVOR_mod2::eta_o(double f){
 	}
 	else{
 //		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-		return res + omega_a*pow(f - omega_f, 3) + omega_c*pow(f - omega_f, 11);
+		switch (omega_kind){
+		case 0 :
+			return res + omega_a*pow(f - omega_f, 3) + omega_c*pow(f - omega_f, 11);
+			break;
+		case 1:
+			return res / cosh(omega_a * pow(f - omega_f, 2));
+			break;
+		}
 	}
 }
 
 double KVOR_mod2::eta_r(double f){
-//	printf("f = %f ", f);
-	f = (1.0-f0)*this->func(f - f0)/this->func(1-f0) + f0;
-//	printf(" new f = %f \n", f);
-	double res = pow((1 + beta * f)/(1 + beta*f0), gamma);
-//	double res = pow((1 + beta * f)/(1 + beta*f0), gamma) - 1;
-//	res *= (tanh(1e5*pow(f - f0,3)) + 1)/2 ;
-//	res += 1;
+	double res = pow((1 + beta * pow(f, rho_power))/(1 + beta*pow(f0, rho_power)), gamma);
+//	printf("%i \n", rho_kind);
 	if (f < this->rho_f){
 		return res;
 	}
 	else{
-//		printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-		return res + rho_a*pow(f - rho_f, 3);
+		switch (rho_kind){
+		case 0 :
+			return res + rho_a*pow(f - rho_f, 3);
+			break;
+		case 1 :
+			return res / cosh(rho_a * pow(f - rho_f,2));
+			break;
+		}
 	}
 }
 

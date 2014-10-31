@@ -79,6 +79,52 @@ double KVDriver::EofP(double _P) {
 	return E[iMin];
 }
 
+double KVDriver::NofP(double _P){
+	double min = 1e45;
+	int iMin;
+	for (int i = 0; i < count; i++){
+		if (abs(P[i] - _P) < min){
+			min = abs(P[i] - _P);
+			iMin = i;
+		}
+	}
+	return n[iMin];
+}
+
+double KVDriver::NofE(double _E){
+	double min = 1e45;
+	int iMin;
+	for (int i = 0; i < count; i++){
+		if (abs(E[i] - _E) < min){
+			min = abs(E[i] - _E);
+			iMin = i;
+		}
+	}
+	return n[iMin];
+}
+
+int KVDriver::lookFor(double* src, int dim_src, double what) {
+	double max_diff = 10e42;
+	bool got = 0;
+	int a = 0;
+	int b = dim_src - 1;
+	while (a != b){
+		if (src[a] < what){
+			if (src[b] > what){
+				b = floor((b - a)/2);
+			}
+			else{
+				b = a + b/2;
+				if (a == ceil(b - a/2)){
+					return a;
+				}
+				a = ceil((b - a)/2);
+			}
+		}
+	}
+	return a;
+}
+
 void KVDriver::set(double * E, int dimE, double * P, int dimP, double * n, int dimN){
 	this->E = new double[dimE];
 	this->P = new double[dimP];

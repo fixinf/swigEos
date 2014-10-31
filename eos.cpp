@@ -269,11 +269,11 @@ double _E(double * n, int dimN, set_const * C){
 		printf("res_phi : %f \n", res);
 	}
 	//rho
+
+	res += C->Cr * pow(sum_t3/C->M[0], 2.0) / (2 * C->eta_r(f));
 	if (debug){
 		printf("res_rho : %f \n", res);
 	}
-	res += C->Cr * pow(sum_t3/C->M[0], 2.0) / (2 * C->eta_r(f));
-
 
 	return res;
 }

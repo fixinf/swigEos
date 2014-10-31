@@ -97,6 +97,7 @@ public:
 	double c;
 	double z;
 	double f0;
+	double exp_alpha;
 	std::vector<double> X_s;
 	std::vector<double> X_o;
 	std::vector<double> X_p;

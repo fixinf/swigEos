@@ -37,7 +37,7 @@ double KVOR::eta_r(double f){
 }
 
 double KVOR::phi_n(int i, double f){
-	return 1.0 -f;
+	return 1.0 - f;
 }
 
 double KVOR::eta_p(double f) {

@@ -15,6 +15,10 @@ struct func_f_eq_params{
 	set_const * C;
 };
 
+double K_f(double n, double m){
+	return 0.;
+}
+
 void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 	bool debug = 0;
 	func_f_eq_params * params = (func_f_eq_params *) adata;
@@ -36,10 +40,13 @@ void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 		}
 		printf("\n");
 	}
+	double df = params->df;
+	bool anal = 0;
+	if (!anal){
 	double dE;
 	for (int i = 0; i < m; i++){
 //		n[i] += params->df;
-
+//
 //		dE = _E(n, params->dimN + m, params->C);
 //		n[i] -= params->df;
 //		dE -= _E(n, params->dimN + m, params->C);
@@ -48,18 +55,34 @@ void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 //		n[i] += params->df;
 
 //Increased precision:
-		n[i] += 2*params->df;
-		double dE = -0.25*_E(n, params->dimN + m, params->C);
-		n[i] -= params->df;
-		dE += 2*_E(n, params->dimN + m, params->C);
-		n[i] -= 2*params->df;
-		dE += -2*_E(n, params->dimN + m, params->C);
-		n[i] -= params->df;
-		dE += 0.25*_E(n, params->dimN + m, params->C);
-		n[i] += 2*params->df;
-		dE /= 3*params->df;
-		hx[i] = dE;
+//		n[i] += 2*params->df;
+//		double dE = -0.25*_E(n, params->dimN + m, params->C);
+//		n[i] -= params->df;
+//		dE += 2*_E(n, params->dimN + m, params->C);
+//		n[i] -= 2*params->df;
+//		dE += -2*_E(n, params->dimN + m, params->C);
+//		n[i] -= params->df;
+//		dE += 0.25*_E(n, params->dimN + m, params->C);
+//		n[i] += 2*params->df;
+//		dE /= 3*params->df;
+//		hx[i] = dE;
 
+//WE NEED MORE!
+		n[i] += 3*df;
+		double dE = _E(n, params->dimN + m, params->C);
+		n[i] -= df;
+		dE += -9 * _E(n, params->dimN + m, params->C);
+		n[i] -= df;
+		dE += 45 * _E(n, params->dimN + m, params->C);
+		n[i] -= 2*df;
+		dE += -45 * _E(n, params->dimN + m, params->C);
+		n[i] -= df;
+		dE += 9 * _E(n, params->dimN + m, params->C);
+		n[i] -= df;
+		dE += -1 * _E(n, params->dimN + m, params->C);
+		n[i] += 3*df;
+		dE /= 60 * df;
+		hx[i] = dE;
 		if (debug){
 			printf("dE[%i] = %f  ", i, dE);
 		}
@@ -68,6 +91,10 @@ void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 		printf("\n");
 	}
 	delete [] n;
+	}
+	else{
+
+	}
 }
 
 double f_eq(double * n, int dimN, set_const * C, double init){
@@ -122,7 +149,7 @@ double f_eq(double * n, int dimN, set_const * C, double init){
 
 void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int dimRes, set_const * C){
 	double opts[5];
-	func_f_eq_params p = {n, dimN, 1e-7, C};
+	func_f_eq_params p = {n, dimN, 1e-5, C};
 	int m = 1 + C->sprime;
 	double * x = new double[m];
 	double * lb = new double[m];
@@ -150,7 +177,7 @@ void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int di
 
 	ub[0] = 1.0;
 	ub[1] = 1.0;
-	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-24;
 		opts[4]= -1e-5;
 	int iter = 300;
 	dlevmar_bc_dif(func_f_eq, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
@@ -177,20 +204,20 @@ double EBind(double * n, int dimN, set_const *C){
 	for (int i = 1; i < dimN; ++i) {
 		sum += n[i];
 	}
-	return 135.0*( _E(n, dimN, C)/sum - C->M[0]);
+return 135.0*( _E(n, dimN, C)/sum - C->M[0]);
 }
 
 double K(double n, set_const *C){
-	double dn = 1e-3;
-	double _n[2] = {(n+dn)/2, (n+dn)/2};
+	double dn = 1e-2;
+	double _n[2] = {(n+2*dn)/2, (n+2*dn)/2};
 	double init[1] = {C->f0};
 	double out[1];
 	int old_sprime = C->sprime;
 	C->sprime = 0;
 	f_eq(_n, 2, init, 1, out, 1, C);
 	double f = out[0];
-	double n_E[3] = {f, (n+dn)/2, (n + dn)/2};
-	double d2E = EBind(n_E, 3, C);
+	double n_E[3] = {f, (n+2*dn)/2, (n + 2*dn)/2};
+	double d2E = -EBind(n_E, 3, C);
 
 	_n[0] -= dn/2;
 	_n[1] -= dn/2;
@@ -199,7 +226,7 @@ double K(double n, set_const *C){
 	n_E[1] -= dn/2;
 	n_E[2] -= dn/2;
 
-	d2E -= 2*EBind(n_E, 3, C);
+	d2E += 16.*EBind(n_E, 3, C);
 
 	_n[0] -= dn/2;
 	_n[1] -= dn/2;
@@ -208,8 +235,26 @@ double K(double n, set_const *C){
 	n_E[1] -= dn/2;
 	n_E[2] -= dn/2;
 
-	d2E += EBind(n_E, 3, C);
-	d2E /= dn*dn;
+	d2E += -30.*EBind(n_E, 3, C);
+
+	_n[0] -= dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] -= dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += 16.*EBind(n_E, 3, C);
+
+	_n[0] -= dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] -= dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += -1.*EBind(n_E, 3, C);
+	d2E /= 12*dn*dn;
 	C->sprime = old_sprime;
 	return 9*n*n*d2E;
 }
@@ -220,12 +265,12 @@ double J(double n, set_const * C){
 	double dn = 1e-3;
 	int old_sprime = C->sprime;
 	C->sprime = 0;
-	double _n[2] = {(n-dn)/2, (n+dn)/2};
+	double _n[2] = {(n-2*dn)/2, (n+2*dn)/2};
 	double out[1];
 	double init[1] = {C->f0};
 	f_eq(_n, 2, init, 1, out, 1, C);
-	double n_E[3] = {out[0], (n - dn)/2, (n + dn)/2};
-	double d2E = _E(n_E, 3, C);
+	double n_E[3] = {out[0], (n - 2*dn)/2, (n + 2*dn)/2};
+	double d2E = -1.*_E(n_E, 3, C);
 
 	_n[0] += dn/2;
 	_n[1] -= dn/2;
@@ -235,7 +280,7 @@ double J(double n, set_const * C){
 	n_E[1] += dn/2;
 	n_E[2] -= dn/2;
 
-	d2E -= 2*_E(n_E, 3, C);
+	d2E += 16*_E(n_E, 3, C);
 
 	_n[0] += dn/2;
 	_n[1] -= dn/2;
@@ -244,8 +289,27 @@ double J(double n, set_const * C){
 	n_E[1] += dn/2;
 	n_E[2] -= dn/2;
 
-	d2E += _E(n_E, 3, C);
-	d2E /= (dn/2)*(dn/2);
+	d2E += -30.*_E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += 16.*_E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += -1.*_E(n_E, 3, C);
+
+	d2E /= 12*(dn/2)*(dn/2);
 	C->sprime = old_sprime;
 	return 135.0*n*d2E/8;
 }

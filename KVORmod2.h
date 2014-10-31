@@ -28,6 +28,9 @@ public:
 	double phi_gamma;
 	double phi_z;
 	double omega_c;
+	int rho_kind;
+	double rho_power;
+	int omega_kind;
 	virtual double eta_o(double);
 	virtual double eta_r(double);
 	virtual double eta_s(double);

@@ -48,6 +48,9 @@ public:
 	double EofN(double);
 	double PofN(double);
 	double EofP(double);
+	double NofP(double);
+	double NofE(double);
+	int lookFor(double * src, int dim_src, double what);
 	void set(double * E, int dimE, double * P, int dimP, double * n, int dimN);
 private:
 	set_const * C;
