@@ -13,14 +13,13 @@ from pylab import pause
 from scipy import interpolate
 imgfolder = os.path.join('..','img')
 
-C = eos.KVOR_mod()
+C = eos.KVOR_mod2()
 C.SetHyperConstants(2)
 wr = Wrapper(C)
 n = np.linspace(0.0, 4.0, 2000)
 
 uX = []
 uY = []
-
 
 C.Csp = 1
 
@@ -30,39 +29,49 @@ C.Csp = 1
 # C.b = 0.007734608051455927
 # C.c = 0.0003446178665624873
 
-C.Cs = 179.56233875157545
+C.Cs = 227.825989
 C.Co =  134.882595
 C.Cr = 93.199075
 C.b = 0.005592
 C.c = -0.012123
 
-C.alpha = 0.85
-C.z = 0.65
-    
-C.omega_a = 6.45
-C.omega_f = 0.53
-
-C.phi_a = -0.85
-C.phi_f = 0.28
-    
-C.d = -5.5
-    
-C.phi_gamma = 3.0
-C.phi_z = 3.5
- 
-C.sprime = 0
-C.Csp = 380.0
-    
-C.beta = 0.5
-C.gamma = 8.0
-
-C.omega_c = -15000.0
+# C.alpha = 0.85
+# C.z = 0.65
+#     
+# C.omega_a = 6.45
+# C.omega_f = 0.53
+# 
+# C.phi_a = -0.85
+# C.phi_f = 0.28
+#     
+# C.d = -5.5
+#     
+# C.phi_gamma = 3.0
+# C.phi_z = 3.5
+#  
+# C.sprime = 0
+# C.Csp = 380.0
+#     
+# C.beta = 0.8
+# C.gamma = 9.0
+# C.exp_alpha = 0.05
+# C.omega_c = -15000.0
 
 C.rho_f = 0.4
-C.rho_a = -70.466
+C.rho_a = 100
+# print C.rho_a
+C.beta = 1.0
+C.gamma = 5.5
+C.f0 = 0.195
 
-C.f0 = 0.27
+#C.rho_kind = 0
 
+def eval_rho_a(f_max, f_rho, f0, beta, gamma):
+    return ((1 + beta*f_max**2)/(1 + beta*f0**2))**gamma / (f_max-f_rho)**3
+
+# C.rho_a =  -eval_rho_a(1.1, C.rho_f, C.f0, C.beta, C.gamma)
+print C.rho_a 
+pause(1)
 C.SetHyperConstants(2)
 print [i for i in C.X_s]
 C.set_xs(np.array([0.0, 0.0, -30.0, 30.0, 30., 30., -18., -18.]))
@@ -71,7 +80,7 @@ print [i for i in C.X_s]
 wr.solve(f0=C.f0,iter=3000)
 C.SetHyperConstants(2)
 C.phi_meson = 1
-hyper=1
+hyper=0
 npoints=1000
 wr.reset(hyper=hyper, npoints=npoints)
 
@@ -201,43 +210,43 @@ for n in wr.n:
 # plt.show()
 # #-------------- end -------------------#
 
-#-------------- Plot hyper for two a_rho ---------------#
-colors = ['b', 'r', 'g', 'y', 'cyan', 'm', 'k', 'black']
-ar_list = [0.0, -70.466]
-fig= plt.figure(figsize=(6,6))
-lines = []
-lines2 = []
-mlist = []
-lslist = ['--', '-']
-for j, a in enumerate(ar_list):
-    rho = []
-    C.rho_a = a
-    plt.gca().set_color_cycle(colors)
-    wr.reset(hyper=1, npoints=npoints)
-    for r in wr.rho:
-        sum = 0
-        for _n in r[1:]:
-            sum += _n
-        rho.append(r[1:]/sum)
-    lines=plt.plot(wr.n/wr.n0, rho, ls=lslist[j])
-    wr.setDriver()
-    N, M, R = wr.stars(npoints=200)
-    mlist.append(np.max(M))
-#     line2, = plt.plot(wr.n/wr.n0, map(C.eta_r, wr.rho[:, 0]), c='b', ls=lslist[j]) 
-#     lines.append(line)
-#     lines2.append(line2)
-
-plt.ylim([0.0, 1.0])
-# plt.legend(lines,['old', 'new'], loc=0)
-# plt.legend(lines2, ['new symm', 'new NS'], loc=0)
-plt.legend(lines, ['n','p',r'$\Lambda$',r'$\Sigma^-$',r'$\Sigma^0$',
-           r'$\Sigma^+$', r'$\Xi^-$', r'$\Xi^0$'],
-           loc=0)
-plt.xlabel(r'$n/n_0$', fontsize=18)
-plt.ylabel(r'$n_i$', fontsize=18)
-print mlist
-plt.show()
-#-------------- end -------------------#
+# #-------------- Plot hyper for two a_rho ---------------#
+# colors = ['b', 'r', 'g', 'y', 'cyan', 'm', 'k', 'black']
+# ar_list = [0.0, -70.466]
+# fig= plt.figure(figsize=(6,6))
+# lines = []
+# lines2 = []
+# mlist = []
+# lslist = ['--', '-']
+# for j, a in enumerate(ar_list):
+#     rho = []
+#     C.rho_a = a
+#     plt.gca().set_color_cycle(colors)
+#     wr.reset(hyper=1, npoints=npoints)
+#     for r in wr.rho:
+#         sum = 0
+#         for _n in r[1:]:
+#             sum += _n
+#         rho.append(r[1:]/sum)
+#     lines=plt.plot(wr.n/wr.n0, rho, ls=lslist[j])
+#     wr.setDriver()
+#     N, M, R = wr.stars(npoints=200)
+#     mlist.append(np.max(M))
+# #     line2, = plt.plot(wr.n/wr.n0, map(C.eta_r, wr.rho[:, 0]), c='b', ls=lslist[j]) 
+# #     lines.append(line)
+# #     lines2.append(line2)
+# 
+# plt.ylim([0.0, 1.0])
+# # plt.legend(lines,['old', 'new'], loc=0)
+# # plt.legend(lines2, ['new symm', 'new NS'], loc=0)
+# plt.legend(lines, ['n','p',r'$\Lambda$',r'$\Sigma^-$',r'$\Sigma^0$',
+#            r'$\Sigma^+$', r'$\Xi^-$', r'$\Xi^0$'],
+#            loc=0)
+# plt.xlabel(r'$n/n_0$', fontsize=18)
+# plt.ylabel(r'$n_i$', fontsize=18)
+# print mlist
+# plt.show()
+# #-------------- end -------------------#
 
 fig, ax = plt.subplots(2,4)
 ax[0,0].plot(wr.n/wr.n0, rho, wr.n/wr.n0, [0.14 for i in wr.n])

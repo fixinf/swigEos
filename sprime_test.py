@@ -4,41 +4,16 @@ from pylab import *
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+import Models
 # x = linspace(0.0, 3.0, 100)
 # l = plot(x, sin(x),x, sin(2*x),x, sin(3*x))
 # colors = [c.properties()['color'] for c in l]
 # print colors
 # show()
 
-C = eos.KVOR_mod()
+C = Models.myMod()
 C.SetHyperConstants(2)
 
-C.alpha = 0.85
-C.z = 0.65
-    
-C.omega_a = 0*6.45
-C.omega_f = 0.53
-    
-C.rho_a = 0.0
-    
-C.phi_a = 0*-0.85
-C.phi_f = 0.28
-    
-C.d = 0*-5.5
-C.omega_c = -10000.
-
-C.phi_gamma = 2.0
-C.phi_z = 3.5
- 
-C.sprime = 0
-C.Csp = 380.0
-    
-C.beta = 0.5
-C.gamma = 8.0
- 
-C.f0 = 0.26
-
-nmax = 5.0
 C.sprime = 0
 wr = Wrapper(C)
 wr.solve(f0=C.f0, iter=3000)
@@ -48,7 +23,7 @@ C.SetHyperConstants(2)
 
 sp = 1 + C.sprime
 C.phi_meson = 0
-
+nmax = 4.
 wr.reset(hyper=1, nmax=nmax, npoints=400)
 rho = []
 sums = []

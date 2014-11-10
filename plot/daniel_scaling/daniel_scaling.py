@@ -9,9 +9,11 @@ import numpy as np
 import os
 from pylab import pause
 from scipy import interpolate
+import Models
 imgfolder = os.path.join('..','img')
 
-C = eos.KVOR_mod()
+C = Models.myMod()
+
 C.SetHyperConstants(2)
 wr = Wrapper(C)
 n = np.linspace(0.0, 4.0, 2000)
@@ -19,81 +21,14 @@ n = np.linspace(0.0, 4.0, 2000)
 uX = []
 uY = []
 
-def set(params):
-    global C
-    for par, val in params.iteritems():
-        execstring = 'C.'+par+'='+str(val)
-        print execstring
-        exec(execstring)
-
-# params = dict(
-#     alpha=0.85,
-#     d = -4.96,
-#     f0 = 0.27,
-#     a_p = -0.8,
-#     f_p = 0.27,
-#     a_o = 6.37,
-#     f_o = 0.53
-# )
-
-
+f0 = 0.27
 
 C.Csp = 1
 
-C.Cs = 179.56233875157545
-C.Co =  87.59963973682763
-C.Cr = 100.63642242792484
-C.b = 0.007734608051455927
-C.c = 0.0003446178665624873
-  
-C.Cs = 179.56233875157545
-C.Co =  141.14599595
-C.Cr = 92.11
-C.b = 0.004860 
-C.c = -0.008312 
-  
-C.phi_gamma = 3.0
-C.phi_z = 3.5
 
-C.omega_c = -15000.0
-   
-C.sprime = 0
-C.Csp = 380.0  
+suffix = 'Mod/KVOR_rhoa_%.2f'%C.rho_a
 
-# C.alpha = 0.85
-# C.z = 0.65
-#         
-# C.omega_a = 0*4.0
-# C.omega_f = 0.55
-#          
-# C.rho_a = 0*150.0
-# C.rho_f = 0.35
-#      
-# C.beta = 0.5
-# C.gamma = 8.00
-#          
-# C.phi_a = 0*-0.5
-# C.phi_f = 0.29
-#   
-# C.d = -2.6
-
-C.alpha = 0.85
-C.z = 0.65
-C.omega_a = 6.45
-C.omega_f = 0.53
-         
-C.rho_a = 0*150.0
-C.rho_f = 0.35
-     
-C.beta = 0.5
-C.gamma = 8.00
-         
-C.phi_a = -0.85
-C.phi_f = 0.28
-  
-C.d = -5.5
-
-f0 = 0.27
+C.SetHyperConstants(2)
 
 npoints = 1000
 
@@ -157,9 +92,9 @@ for f in flist:
     print 'L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3)
 #     pause()
     C.omega_c = -1000.0
-    l1, = ax.plot(n[1:]/wr.n0, wr.Psymm(n), c='r', ls='--')
+    l1, = ax.plot(n[:]/wr.n0, wr.Psymm(n), c='r', ls='--')
     C.omega_c = -15000.0
-    l2, = ax.plot(n[1:]/wr.n0, wr.Psymm(n), c='r')
+    l2, = ax.plot(n[:]/wr.n0, wr.Psymm(n), c='r')
     plt.xlabel(r'$n/n_0$', fontsize=18)
     plt.ylabel(r'$P_{symm}[MeV]$', fontsize=18)
     plt.ylim([1.0, 1000.0])
@@ -178,7 +113,7 @@ _E = wr.Esymm(n)*wr.m_pi**4*wr.const #conversion to MeV/fm^3
 dE = np.diff(_E)
 dP = np.diff(_P)
 
-wr.reset(npoints=400)
+wr.reset(npoints=1000, nmax=25.)
 _ENS, _PNS, _N = wr.EPN()
 plt.plot(_N/wr.n0, _PNS)
 plt.show()
@@ -190,18 +125,18 @@ plt.plot(_N[1:]/wr.n0, VsNS)
 plt.plot(n[2:]/wr.n0, Vs)
 plt.show()
 
-with open('vs_scaling%.2f.dat'%flist[0], 'w') as f:
+with open(suffix+'vs_scaling%.2f.dat'%flist[0], 'w') as f:
     for i, _n in enumerate(n[2:]):
         f.write('%f    %f \n' %(_n/wr.n0, Vs[i]))
         
-with open ('vsNS_scaling%.2f.dat'%flist[0], 'w') as f:
+with open (suffix+'vsNS_scaling%.2f.dat'%flist[0], 'w') as f:
     for i, _n in enumerate(_N[1:]):
         f.write('%f    %f \n' %(_n/wr.n0, VsNS[i]))
 
 lines = np.array(lines)
 mlist = np.array(mlist)
 
-with open('pressure_scaling%.2f.dat'%flist[0], 'w') as f:
+with open(suffix+'pressure_scaling%.2f.dat'%flist[0], 'w') as f:
     for i, _n in enumerate(n[1:]):
         f.write('%f   '%(_n/wr.n0))
         for _p in lines[:,i]:
@@ -210,7 +145,7 @@ with open('pressure_scaling%.2f.dat'%flist[0], 'w') as f:
 
 
 for j,m in enumerate(mlist):
-    with open('mass_scaling_%.2f.dat'%flist[j],'w') as f:
+    with open(suffix+'mass_scaling_%.2f.dat'%flist[j],'w') as f:
         for i, _n in enumerate(n_star):
             print m[i]
             print max(m)
@@ -225,7 +160,27 @@ rho = []
 sum = []
 for r in wr.rho[:,1:]:
     rho.append(r/np.sum(r))
-plt.plot(rho)
+    
+with open(suffix+'n_scaling_%.2f.dat'%flist[j], 'w') as f:
+    for i, r in enumerate(rho):
+        f.write("%f  " % (wr.n[i]/wr.n0))
+        for k in r:
+            f.write("%f   " % k)
+        f.write("\n")
+        
+with open(suffix+'f_%.2f.dat'%flist[j], 'w') as f:
+    for i, _n in enumerate(wr.n):
+        f.write('%f %f\n'% (_n/wr.n0, wr.rho[i][0]))
+
+with open(suffix+'eta_rho_n_%.2f.dat'%flist[j], 'w') as f:
+    for i, _n in enumerate(wr.n):
+        f.write('%f %f\n'% (_n/wr.n0, C.eta_r(wr.rho[i][0])))
+        
+with open(suffix+'eta_rho_f_%.2f.dat'%flist[j], 'w') as f:
+    for _f in np.linspace(0.0, 1.0, 100):
+        f.write('%f %f \n' % (_f, C.eta_r(_f)))
+
+plt.plot(wr.n/wr.n0, rho, wr.n/wr.n0, [0.14 for i in wr.n])
 plt.show()
 rho = np.array(rho)
 i_DU = np.argmin(np.abs(rho[:,1] - np.array([0.14 for r in rho])))

@@ -47,7 +47,7 @@ wr = Wrapper(C)
 
 for f in linspace(C.f0, f0, 20):
     C.f0 = f
-    wr.solve(f0=C.f0) 
+    wr.solve(f0=C.f0, K0=240.) 
 
 # pause(5)
 

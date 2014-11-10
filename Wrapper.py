@@ -2,23 +2,40 @@ import eosWrap as eos
 import numpy as np
 import multiprocessing as mp
 import multi_progress as prog
-from numpy import dtype
+from numpy import dtype, argmin
+from scipy import interpolate
+import matplotlib.pyplot as plt
+import sys 
+import os
+from tabulate import tabulate
+from scipy.misc.common import derivative
+from zipfile import ZipFile
+from glob import glob
+from os.path import join
+from pylab import sqrt, pi
+from AuxIntegrals import I1num, I2num, I3num, I4num
+
+
 class Wrapper():
     def __init__(self, C):
         self.C = C
         self.m_pi = 135.0
+        self.m_e = 0.5/self.m_pi
+        self.m_mu = 105./self.m_pi
         self.n0 = (197.33/self.m_pi)**3 * 0.16
         self.set = False
         self.driverSet = False
         self.const = 197.33*(0.16/self.n0)**(4.0/3.0)*self.m_pi**(-4.0)
     
-    def reset(self, hyper=False, nmax = 4.0, npoints = 400, iter=30):
+    def reset(self, hyper=False, nmin=0.1, nmax = 4.0, npoints = 400, iter=30):
         if hyper:
             init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         else:
             init = np.array([0.0], dtype=dtype('float'))
             
-        self.n = np.linspace(0.01, nmax, npoints)
+        self.n = np.linspace(nmin, nmax, npoints, retstep=1, endpoint=0)
+        print self.n[1]/self.n0
+        self.n = self.n[0]
         last = init
         self.rho=[]
 
@@ -26,6 +43,7 @@ class Wrapper():
         writer = prog.Writer((0,0))
         pb = prog.ProgressBar(fd=writer)
         pb.start()
+        self.mu_e = []
 #         get_res = lambda z: self.rho = z
 #         rs = p.map_async(lambda z: eos.stepE(z, last, len(last), iter, self.C),
 #                 self.n, callback=get_res)
@@ -46,11 +64,15 @@ class Wrapper():
             
             pb.update(100 * _i / len(self.n))
             rho = eos.stepE(i, last, f, len(last), iter, self.C)
+#             print rho, eos.mu(rho, 1, self.C), eos.mu(rho, 2, self.C)
+            
             self.rho.append(rho.copy()) 
             self.rho[_i]=np.insert(self.rho[_i],0, i - np.sum(rho))
             f = eos.f_eq(self.rho[_i], f, sp, self.C)
             for j in range(sp):
                 self.rho[_i]=np.insert(self.rho[_i], j, f[j])
+                
+            self.mu_e.append(eos.mu(self.rho[_i], 1, self.C) - eos.mu(self.rho[_i], 2, self.C))
             last = np.array(rho)
 #             temp = self.rho[_i]
 #             temp[3] = 0.0
@@ -59,10 +81,17 @@ class Wrapper():
         self.rho=np.array(self.rho)
         _E = map(lambda z: eos.E(z, self.C), self.rho)
         dn = self.n[1] - self.n[0]
-        self.P = self.n[1:]*np.diff(_E)/dn - _E[1:]
-        self.E = np.ascontiguousarray(np.array(_E[1:]))
-        self.n = np.ascontiguousarray(self.n[1:])
-        self.rho = np.ascontiguousarray(self.rho[1:])
+#         self.P = self.n[1:]*np.diff(_E)/dn - _E[1:]
+#         self.P = np.insert(self.P, 0, 0.)
+#         self.P = self.n*self.diffArray(_E, dn) - _E[:]
+#         self.P = np.insert(self.P, 0, 0.)
+        self.E = np.ascontiguousarray(np.array(_E[:]))
+        
+#         self.P = self.n*self.diffArray(self.E, dn) - self.E[:]
+        
+        self.n = np.ascontiguousarray(self.n[:])
+        self.P = np.ascontiguousarray(self.P_chem(self.rho))
+        self.rho = np.ascontiguousarray(self.rho[:])
         self.set = True
     
     def EPN(self):
@@ -80,7 +109,8 @@ class Wrapper():
         self.dr.set(self.E*self.m_pi**4, self.P*self.m_pi**4, self.n)
         self.driverSet = True
     
-    def solve(self, f0=0.195, E0=-16.0, K0=275.0, J0=32.0, iter=1000, mu_scale = 1):
+    def solve(self, f0=0.195, E0=-16.0, K0=275.0, J0=32.0,
+              iter=1000, mu_scale = 1):
         sprime_old = self.C.sprime
         self.C.sprime = 0
         res = eos.solve(self.n0, E0, f0, K0, J0, self.C, iter, mu_scale)
@@ -98,10 +128,20 @@ class Wrapper():
             print 'Driver is not set!'
             return 
         
+        dimRes = 3
+        
+        self.dr = eos.KVDriver()
+        self.dr.set(self.E, self.P, self.n)
+        
         self.n_star = np.linspace(nmin, nmax, npoints)
-        res = np.array(map(lambda z: eos.star(z, 2, self.dr), self.n_star))
-        return self.n_star, res[:,0], res[:,1]
-    
+        res = np.array(map(lambda z: eos.star_crust2(z, dimRes, self.dr,
+                                                      0.8*self.n0),
+                            self.n_star))
+        if dimRes == 3:
+            return (self.n_star, res[:,0], res[:,1],
+                    self.m_pi**4 * self.C.M[0] * res[:,2]) 
+        
+        
     def Esymm(self, n, f=0.0):
         res = []
         f = 0.0
@@ -112,8 +152,833 @@ class Wrapper():
         return np.array(res)
         
     def Psymm(self, n):
-        E = self.Esymm(n)
-        res = n[1:]*np.diff(E)/(n[1]-n[0]) - E[1:]
-        return self.m_pi**4 * self.const*res
+        nlist = []
+        f = 0.
+        for _n in n:
+            f,= eos.f_eq(np.array([_n/2, _n/2]), np.array([f]), 1, self.C)
+            nlist.append(np.array([f, _n/2, _n/2]))
+            
         
+#         res = n[1:]*np.diff(E)/(n[1]-n[0]) - E[1:]
+#         res = np.insert(res, 0, 0.)
+#         res = n[:]*self.diffArray(E,n[1]-n[0]) - E[:]
+        res = self.P_chem(nlist)
+#         res = np.insert(res, 0, 0.)
+        return self.m_pi**4 * self.const * res
     
+    def P_N(self, n):
+        nlist = []
+        f = 0.
+        for _n in n:
+            f,= eos.f_eq(np.array([_n, 0.]), np.array([f]), 1, self.C)
+            nlist.append(np.array([f, _n, 0.]))
+            
+        
+#         res = n[1:]*np.diff(E)/(n[1]-n[0]) - E[1:]
+#         res = np.insert(res, 0, 0.)
+#         res = n[:]*self.diffArray(E,n[1]-n[0]) - E[:]
+        res = self.P_chem(nlist, leptons=False)
+#         res = np.insert(res, 0, 0.)
+        return self.m_pi**4 * self.const * res
+    
+    def star_print(self, z):
+        return eos.star_crust(z, 3, self.dr, 1e-11)
+    
+    def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = 1., nmax = 4.0, npoints=50, crust="crust.dat", show=False):
+        self.reset(nmin = 0., nmax = nmax, npoints = 1000)
+        E, P, N = self.EPN()
+        N = N/self.n0
+        e = []
+        p = []
+        n = []
+        with open("/home/const/workspace/swigEosWrapper/crust.dat", 'r') as f:
+            for line in f:
+                # print line
+                _e, _p, _n = line.split()
+                if float(_n) < ncut_crust:
+                    e.append(float(_e))
+                    p.append(float(_p))
+                    n.append(float(_n))
+        n_eos = 3
+        i_n_eos = np.argmin(abs(N - [ncut_eos for i in N]))
+                
+        plist = np.append(p[:],P[i_n_eos:(i_n_eos+n_eos)])
+        elist = np.append(e[:],E[i_n_eos:(i_n_eos+n_eos)])
+        nlist = np.append(n[:],N[i_n_eos:(i_n_eos+n_eos)])
+        
+        
+        print i_n_eos
+        print P[i_n_eos:(i_n_eos+n_eos)]
+        print N[i_n_eos:(i_n_eos+n_eos)]
+#         exit()
+        iP = interpolate.interp1d(nlist, plist, kind=inter)
+        iE = interpolate.interp1d(nlist, elist, kind=inter)
+        
+        gamma = 1./4.
+        iN = np.linspace(1e-10**gamma, ncut_eos**gamma, 10000)
+        iN = iN**(1./gamma)
+        
+        crust_p = np.array(map(iP, iN))
+        crust_e = np.array(map(iE, iN))
+        
+#         finalE = np.append(crust_e, E[i_n_eos+n_eos:])
+#         finalP = np.append(crust_p, P[i_n_eos + n_eos:])
+#         finalN = np.append(iN, N[i_n_eos+n_eos:])
+        
+        finalE = np.append(crust_e, E[i_n_eos+n_eos:])/self.m_pi**4
+        finalP = np.append(crust_p, P[i_n_eos + n_eos:])/self.m_pi**4
+        finalN = np.append(iN, N[i_n_eos+n_eos:])
+        
+        if show:
+            lines = plt.plot(finalN, finalP, n, p, N, P)
+            plt.xlabel(r'$n/n_0$', fontsize=18)
+            plt.ylabel(r'$P \, [MeV^4] $', fontsize=18)
+            plt.legend(lines, ['interpolated', 'crust', 'RMF'], loc=0)
+            plt.show()
+        
+        self.dr = eos.KVDriver()
+        self.dr.set(finalE, finalP, finalN*self.n0)
+        nstar = np.linspace(nmin, nmax, npoints)
+                
+        MR = []
+        Mgrav = []
+        for _n in nstar:
+            MR.append(eos.star_crust2(_n, 3, self.dr, 1e-11))
+            lastN = self.dr.getLastN(self.dr.nSize)[:-1]
+            lastR = self.dr.getLastR(self.dr.nSize)[:-1]
+            lastM = self.dr.getLastM(self.dr.nSize)[:-1]
+            dx = lastR[1] - lastR[0]
+            
+            grav_mult = []
+            for i, r in enumerate(lastR):
+                grav_mult.append( r**2 / sqrt(1 - 2 * 1.4677 * lastM[i] / r))
+                
+            grav_mult = np.array(grav_mult)
+            res = np.multiply(lastN, grav_mult)
+            Mgrav.append((0.0004898007281478712)*np.trapz(res, dx=dx))               
+            
+        MR = np.array(MR)
+        Mgrav = np.array(Mgrav)
+        print MR
+        print Mgrav
+#         return nstar, MR[:, 0], MR[:,1], self.m_pi**4*self.C.M[0]*MR[:,2]
+        return (nstar, MR[:, 0], MR[:,1], 931.5/self.m_pi*MR[:,2],
+                931.5/self.m_pi * Mgrav)
+    
+    def concentrations(self):
+        if not self.set:
+            print 'Concentrations: wrapper is not set! Pass.'
+            return
+        
+        rho = []
+        sp = 1 + self.C.sprime
+        for _r in self.rho:
+            if np.sum(_r[sp:]) > 0:
+                rho.append(_r[sp:]/np.sum(_r[sp:]))
+            else:
+                rho.append([1.]+[0. for i in _r[sp+1:]])
+        
+        return np.array(rho)
+    
+    def dumpEos(self, folderName):
+        if not os.path.exists(folderName):
+            os.makedirs(folderName)
+            
+#         if not self.set:
+        self.reset(nmin = 0., nmax = 8. * self.n0, npoints=800)
+        
+        Esymm = []
+        f = 1e-6
+        flist_symm = []
+        nlist_symm = []
+        for n in self.n:
+#             print f
+#             print eos.EBind(np.array([f, n/2, n/2]), self.C)
+            f, = eos.f_eq(np.array([n/2, n/2]), np.array([f]), 1, self.C)
+            flist_symm.append(f)
+            nlist_symm.append(np.array([n/2, n/2]))
+            Esymm.append(eos.EBind(np.array([f, n/2, n/2]), self.C))
+        
+        Esymm[0] = 0.
+#         n_symm = np.array(nlist_symm)
+        Psymm = self.Psymm(self.n)
+        
+        EN = []
+        eps_N=[]
+        f = 1e-6
+        flist_n = []
+        
+        for n in self.n:
+#             print f
+#             print eos.EBind(np.array([f, n/2, n/2]), self.C)
+            f, = eos.f_eq(np.array([n, 0.]), np.array([f]), 1, self.C)
+            flist_n.append(f)
+            EN.append(eos.EBind(np.array([f, n, 0.]), self.C))
+            eps_N.append(eos._E(np.array([f, n, 0]), self.C))
+        
+        EN[0] = 0.
+      
+#         PN = self.n[1:]*np.diff(EN)/(self.n[1]-self.n[0]) - EN[1:]
+#         PN = np.insert(PN, 0, 0.)
+        eps_N = np.array(eps_N)
+        PN = self.P_N(self.n)
+#         PN = self.n[:]*self.diffArray(eps_N, self.n[1]-self.n[0]) - eps_N[:]
+#         
+#         PN *= self.m_pi**4 * self.const
+        
+        rho = self.concentrations()
+        
+        table = []
+        
+        for i, _n in enumerate(self.n):
+            table.append([_n/self.n0, Esymm[i], Psymm[i], flist_symm[i],
+                         self.E[i], self.P[i], rho[i,1], self.rho[i, 0], 
+                         EN[i], PN[i], flist_n[i], self.mu_e[i]*self.m_pi])
+        
+        tab = tabulate(table, ['n/n_0', 'e_{symm} [MeV]',
+                               'P_{symm} [MeV / fm^3] ', 
+                               'f(n){symm}' ,
+                               'E_NS [m_\pi^4]',
+                               'P_NS, [m_\pi^4]',
+                               'n_p/n', 'f(n){NS}',
+                               'E_N [MeV]','P_N [MeV/fm^3]', 
+                               'f(n){Pure NM}', 
+                               'mu_e [MeV]'],
+                       tablefmt='plain')
+        
+        with open(os.path.join(folderName, 'eos.dat'), 'w') as f:
+            f.write(tab)
+        
+        return
+
+    def dumpMasses(self, folderName):
+        if not os.path.exists(folderName):
+            os.makedirs(folderName)
+            
+        if not self.set:
+            self.reset(nmin = 0., nmax = 8. * self.n0, npoints=800)
+            
+        if not self.driverSet:
+            self.setDriver()
+            
+        n, m, r, mb = self.stars(npoints = 100)
+        table = np.array([n/self.n0, m, r, mb]).transpose()
+        f = open(os.path.join(folderName, 'masses.dat'), 'w')
+        tab = tabulate(table, ['n/n_0',
+                               'M [M_{sun}]',
+                               'R [km]',
+                               'M_B [M_sun]'],
+                       tablefmt='plain')
+        f.write(tab)
+        f.close()
+        return n, m, r
+        
+    def dumpHyper(self, folderName, npoints=400):
+        if not os.path.exists(folderName):
+            os.makedirs(folderName)
+            
+        self.reset(hyper = 1, nmin = 0., nmax = 8. * self.n0,
+                    npoints=npoints, iter=100)
+        self.setDriver()
+        n, m, r, mg1, = self.stars(npoints=100)
+        
+        mtab = np.array([n/self.n0, m, r]).transpose()
+        
+        mtable = tabulate(mtab, ['n/n_0','M/M_sun', 'R [km]'], tablefmt='plain')
+        
+        with open(join(folderName, 'mass_hyper.dat'), 'w') as f:
+            f.write(mtable)
+        
+        rho = self.concentrations()
+        print rho
+        table = []
+        for i, _n in enumerate(self.n):
+            table.append(np.concatenate(([_n/self.n0, self.E[i],
+                                           self.P[i]], rho[i])))
+        
+        tab = tabulate(table, ['n/n_0',
+                               'E_NS [m_\pi^4]',
+                               'P_NS, [m_\pi^4]',
+                               'x_n',
+                               'x_p',
+                               'x_Lambda',
+                               'x_Sigma-', 'x_Sigma0', 'x_Sigma+',
+                               'x_Xi-', 'x_Xi0'],
+                       tablefmt='plain')
+        
+        with open(os.path.join(folderName, 'hyper.dat'), 'w') as f:
+            f.write(tab)
+            
+        tab = []
+        for i, n in enumerate(self.n):
+            f = self.rho[i, 0]
+            tab.append([n/self.n0,
+                        self.C.phi_n(0, f), 
+                        self.C.phi_n(2, self.C.Xs(2,f) * f),
+                        self.C.phi_n(3, self.C.Xs(3,f) * f),
+                        self.C.phi_n(6, self.C.Xs(6,f) * f)])
+        
+        table = tabulate(tab, ['n/n0', 'N', 'Lambda', 'Sigma', 'Xi'],
+                         tablefmt='plain')
+        
+        with open(join(folderName, 'hyper_meff.dat'), 'w') as f:
+            f.write(table)
+            
+        self.C.phi_meson = 1
+        
+        self.reset(hyper = 1, nmin = 0., nmax = 8. * self.n0,
+                    npoints=npoints, iter=100)
+        
+        self.setDriver()
+        n, m, r, mg1 = self.stars(npoints=100)
+        
+        mtab = np.array([n/self.n0, m, r]).transpose()
+        
+        mtable = tabulate(mtab, ['n/n_0','M/M_sun', 'R [km]'], tablefmt='plain')
+        
+        with open(join(folderName, 'mass_hyper_phi.dat'), 'w') as f:
+            f.write(mtable)
+        
+        
+        drho = rho
+        rho = self.concentrations()
+        drho -= rho
+        print rho
+        table = []
+        for i, _n in enumerate(self.n):
+            table.append(np.concatenate(([_n/self.n0, self.E[i],
+                                           self.P[i]], rho[i])))
+        
+        
+        
+        tab = tabulate(table, ['n/n_0',
+                               'E_NS [m_\pi^4]',
+                               'P_NS, [m_\pi^4]',
+                               'x_n',
+                               'x_p',
+                               'x_Lambda',
+                               'x_Sigma-', 'x_Sigma0', 'x_Sigma+',
+                               'x_Xi-', 'x_Xi0'],
+                       tablefmt='plain')
+        
+        with open(os.path.join(folderName, 'hyper_phi.dat'), 'w') as f:
+            f.write(tab)
+        
+        tab = []
+        for i, n in enumerate(self.n):
+            f = self.rho[i, 0]
+            tab.append([n/self.n0,
+                        self.C.phi_n(0, f), 
+                        self.C.phi_n(2, self.C.Xs(2,f) * f),
+                        self.C.phi_n(3, self.C.Xs(3,f) * f),
+                        self.C.phi_n(6, self.C.Xs(6,f) * f)])
+        
+        table = tabulate(tab, ['n/n0', 'N', 'Lambda', 'Sigma', 'Xi'],
+                         tablefmt='plain')
+        
+        with open(join(folderName, 'hyper_meff_phi.dat'), 'w') as f:
+            f.write(table)
+        
+        self.C.phi_meson = 0
+        
+            
+    def dumpAll(self, folderName,filename='data.zip'):
+        self.dumpEos(folderName)
+        n, m ,r = self.dumpMasses(folderName)
+        mmax = max(m)
+        rho = self.concentrations()
+        print rho[:, 1]
+        print abs(rho[:,1] - [0.14 for i in rho[:,1]])
+        print np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]]))
+        ndu = self.n[np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]]))]
+        mdu = m[np.argmin(abs(n - [ndu for i in n]))]
+        tabParams= [['Cs', self.C.Cs],
+                 ['Co', self.C.Co],
+                 ['Cr', self.C.Cr],
+                 ['b', self.C.b],
+                 ['c', self.C.c],
+                 ['Csp', self.C.Csp]
+                 ]
+        
+        tabPart = [['m_N', self.m_pi*self.C.M[0]],
+                   ['m_Lambda', self.m_pi*self.C.M[2]],
+                   ['m_Sigma', self.m_pi*self.C.M[4]],
+                   ['m_Xi', self.m_pi*self.C.M[6]]                 
+                   ]
+        
+        tabRes = [['E_bind [MeV]',eos.EBind(np.array([self.C.f0, self.n0/2,
+                                                      self.n0/2]), self.C)],
+                  ['K [MeV]', self.K()],
+                  ["K' [MeV]", self.Kprime()],
+                  ['J [MeV]', self.J()],
+                  ['L [MeV]', self.L()],
+                  ['M_max [M_sun]', mmax],
+                  ['M_DU [M_sun]', mdu],
+                  ['n_DU [n_0]', ndu/self.n0]
+                  ]
+        Params = tabulate(tabParams,floatfmt='.10f',tablefmt='plain')
+        Part = tabulate(tabPart,tablefmt='plain')
+        Res = tabulate(tabRes,tablefmt='plain')
+        f = open(os.path.join(folderName, 'props.dat'), 'w')
+        f.write(Params + '\n' + Part + '\n' + Res + '\n')
+        f.close()
+        self.dumpScalings(folderName)
+        self.dumpHyper(folderName)
+        with ZipFile(join(folderName, filename), 'w') as zip:
+            for f in glob(join(folderName, '*.dat')):
+                zip.write(f)
+                
+                
+        
+    def dumpScalings(self, folderName):
+        if not self.set:
+            self.reset(nmin = 0., nmax = 4., npoints = 1000)
+        
+        tabNS = []
+        for i, _r in enumerate(self.rho):
+            f = _r[0]
+            C = self.C
+            tabNS.append([self.n[i]/self.n0,
+                          f, 
+                          C.eta_s(f) + 2*C.Cs*C.U(f)/(C.M[0]**4 * f**2),
+                          C.eta_o(f),
+                          C.eta_r(f), 
+                          C.phi_n(0, f), 
+                          C.U(f)])
+        
+        tabF = []
+        for f in np.linspace(0., 1., 100., endpoint=False):
+            C = self.C
+            tabF.append([f, C.eta_s(f) + 2*C.Cs*C.U(f)/(C.M[0]**4 * f**2),
+                          C.eta_o(f), C.eta_r(f),
+                          C.eta_p(f), C.phi_n(0, f), C.U(f)])
+        
+        tableNS = tabulate(tabNS, headers=['n/n_0',
+                                           'f(n)',
+                                           'eta_sigma', 
+                                           'eta_omega',
+                                           'eta_rho',
+                                           'Phi_N',
+                                           'U'],tablefmt='plain')
+        
+        tableF = tabulate(tabF, headers=['f',
+                                         'eta_sigma', 
+                                         'eta_omega',
+                                         'eta_rho',
+                                         'eta_phi',
+                                         'Phi_N',
+                                         'U'],tablefmt='plain')
+        
+        with open(os.path.join(folderName, 'scalingsNS.dat'), 'w') as f:
+            f.write(tableNS)
+            
+        with open(os.path.join(folderName, 'scalingsF.dat'), 'w') as f:
+            f.write(tableF)
+            
+            
+    def dumpMassesCrust(self, folderName ,ncut_crust=.6, ncut_eos=.8):
+        if not os.path.exists(folderName):
+            os.makedirs(folderName)
+            
+        n, m, r, mb1, mb2 = self.stars_crust(ncut_crust=ncut_crust, 
+                                   ncut_eos=ncut_eos,npoints = 100, show=0)
+        print m
+        print mb1
+        table = np.array([n/self.n0, m, r, mb1, mb2]).transpose()
+        f = open(os.path.join(folderName, 'masses_crust.dat'), 'w')
+        tab = tabulate(table, ['n/n_0','M [M_{sun}]',
+                                'R [km]','M_B_rect [M_{sun}]',
+                                'M_B_trap [M_{sun}]'],
+                       tablefmt='plain')
+        f.write(tab)
+        f.close()
+        return n, m, r, mb1, mb2
+    
+    def dumpLandauParams(self, folderName):
+        if not os.path.exists(folderName):
+            os.makedirs(folderName)
+            
+        n_f0 = np.linspace(0., 8*self.n0, 400, endpoint=0)
+        f0 = self.f0(n_f0)
+        tab_f0 = np.array([n_f0/self.n0, f0]).transpose()
+        table_f0 = tabulate(tab_f0, ['n/n_0', 'F_0'], tablefmt='plain')
+        with open(join(folderName, 'f0.dat'), 'w') as f:
+            f.write(table_f0)
+        
+        f1 = self.f1(n_f0)
+        tab_f1 = np.array([n_f0/self.n0, f1]).transpose()
+        table_f1 = tabulate(tab_f1, ['n/n_0', 'F_1'], tablefmt='plain')
+            
+        with open(join(folderName, 'f1.dat'), 'w') as f:
+            f.write(table_f1)
+        
+        return n_f0, f0, f1
+        
+    def dumpPotentialsNS(self, folderName, show=False):
+        if not os.path.exists(folderName):
+            os.makedirs(folderName)
+        
+        self.reset()
+        
+        pots = []
+        
+        for i, _r in enumerate(self.rho):
+            pots.append(self.n[i] + eos.potentials(_r, 5, self.C))
+            
+        print pots
+        
+        if show:
+            plt.plot(self.n/self.n0, pots)
+#             plt.plot(self.n/self.n0, np.sum(pots, axis=1)*135.)
+            plt.xlabel(r'$n/n_0$')
+            plt.ylabel(r'$Terms \, [m_pi^4]$')
+            plt.show()
+            
+        table = tabulate(pots, ['n/n_0', 'sigma', 'sigma^*',
+                                 'omega', 'rho', 'phi'],
+                         tablefmt='plain')
+        
+        with open(join(folderName,'potsNS.dat'), 'w') as f:
+            f.write(table)
+            
+        return pots
+            
+    def dumpHinHPotentials(self):
+        sp = 1 + self.C.sprime
+        pots = []
+        n = np.linspace(0., 8.*self.n0, 400)
+        for k in [2, 3, 7]:    
+            f = np.array([0.0 for i in range(sp)])
+            pot = []
+            for _n in n:
+                n_f = np.array([0.0 for i in range(8)])
+                n_f[k] = _n
+                f = eos.f_eq(n_f, f, sp, self.C)
+                print 'f=', f
+                print 'n_f=', n_f
+                n_mu = np.insert(n_f, 0, f)
+                print 'insert=', n_mu
+                pot.append(eos.mu(n_mu, k+sp, self.C)-self.C.M[k])
+            print pot
+            pots.append(pot)
+        print pots
+        pots=np.array(pots)
+        print pots.shape, n.shape
+        plt.plot(n/self.n0, pots.transpose())
+        plt.show()
+        
+    def dumpMeffHyper(self, folderName):
+        for phi_meson, suff in enumerate(['', '_phi']):
+            self.C.phi_meson = phi_meson
+            self.reset(hyper=1, nmin=0., nmax=8*self.n0, npoints=400)
+            tab = []
+            for i, n in enumerate(self.n):
+                f = self.rho[i, 0]
+                tab.append([n,
+                            self.C.phi_n(0, f), 
+                            self.C.phi_n(2, self.C.Xs(2,f) * f),
+                            self.C.phi_n(3, self.C.Xs(3,f) * f),
+                            self.C.phi_n(6, self.C.Xs(6,f) * f)])
+            
+            table = tabulate(tab, ['n/n0', 'N', 'Lambda', 'Sigma', 'Xi'],
+                             tablefmt='plain')
+            
+            with open(join(folderName, 'hyper_meff'+suff+'.dat')) as f:
+                f.write(table)
+        
+    def testPodsiedlowski(self, n_crust, n_eos, folderName):
+        n, m, r, mb1, mb2 = self.stars_crust(ncut_crust=n_crust, ncut_eos=n_eos)
+        iM = interpolate.interp1d(n, m)
+        iMb1 = interpolate.interp1d(n, mb1)
+        iMb2 = interpolate.interp1d(n, mb2)
+        
+        iN = np.linspace(n[0], n[-1], 100)
+        plt.plot(iMb1(iN), iM(iN))
+        rect = plt.Rectangle([1.366, 1.248], 0.009, 0.002)
+        plt.gca().add_patch(rect)
+        plt.xlim([1.32, 1.39])
+        plt.ylim([1.225, 1.275])
+        plt.xlabel(r'$M_B/M_{\odot}$')
+        plt.ylabel(r'$M_G/M_{\odot}$')
+        if not os.path.exists(folderName):
+            os.mkdir(folderName)
+        
+        plt.savefig(join(folderName,'podsiedlowski.pdf'))
+        plt.show()    
+     
+    def testDanielewicz(self):
+        UKlahnY = []
+        UKlahnX = []
+        with open('klahnUpper', 'r') as f:
+            for line in f:
+                _n, p = line.strip().split()
+                UKlahnY.append(float(p))
+                UKlahnX.append(float(_n)/0.16)
+        plt.semilogy(UKlahnX, UKlahnY, c = 'grey')
+        
+        LKlahnX = []
+        LKlahnY = []
+        with open('klahnLower', 'r') as f:
+            for line in f:
+                _n, p = line.strip().split()
+                LKlahnY.append(float(p))
+                LKlahnX.append(float(_n)/0.16)
+        plt.semilogy(LKlahnX, LKlahnY, c = 'grey')
+        
+        n_p = np.linspace(0.0, 4.0, 800)
+        plt.plot(n_p[:]/self.n0, self.Psymm(n_p))
+        plt.show()
+        
+    def testDU(self, folderName):
+        if not self.set:
+            self.reset(hyper=0, npoints=1000)
+        rho = self.concentrations()
+        n, m, r = self.dumpMasses(folderName)
+        ndu = self.n[np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]]))]
+        mdu = m[np.argmin(abs(n - [ndu for i in n]))]
+        return 'n_DU = %.2f n_0, M_DU = %.2f M_sun'%(ndu/self.n0, mdu)
+    
+    def testHyperBind(self, show=True):
+        n = np.linspace(0., 4.*self.n0, 100, endpoint=0)
+        f = 0.
+        self.C.sprime = 0
+        EL = []
+        ES = []
+        EX = []
+        for _n in n:
+            n_f = np.array([_n/2, _n/2]+[0.0 for i in range(6)])
+            f, = eos.f_eq(n_f, np.array([f]), 1, self.C)
+            print np.array([f]), n_f
+            n_mu = np.insert(n_f, 0, f)
+            EL.append(eos.mu(n_mu, 2+1, self.C) - self.C.M[2])
+            ES.append(eos.mu(n_mu, 3+1, self.C) - self.C.M[3])
+            EX.append(eos.mu(n_mu, 6+1, self.C) - self.C.M[6])
+            
+        print EL
+        print ES
+        print EX
+        
+        EL = self.m_pi*np.array(EL)
+        ES = self.m_pi*np.array(ES)
+        EX = self.m_pi*np.array(EX)
+        
+        
+        if show:
+            plt.ylim([-50, 50])
+            plt.plot(n/self.n0, EL, n/self.n0, ES, n/self.n0, EX)
+            plt.show()
+
+        return EL, ES, EX
+        
+        
+    def K(self):
+        return eos.K(self.n0, self.C)
+    
+    def J(self):
+        return eos.J(self.n0, self.C)
+    
+    def L(self):
+        return 3*self.n0*derivative(lambda z: eos.J(z, self.C),
+                                    self.n0, dx=1e-3)
+    
+    def Kprime(self):
+        return -3*self.n0*(derivative(lambda z: eos.K(z, self.C),
+                                      self.n0, dx=1e-3, order=3) - 
+                2*eos.K(self.n0,self.C)/self.n0)
+        
+    def Ksymm(self):
+        return 9*self.n0**2 * derivative(lambda z: eos.J(z, self.C),
+                                         self.n0, dx=1e-3, n=2)
+        
+        
+    def _f0(self, n, f, multiply=True):
+        C = self.C
+        mn = C.M[0]
+        pf = eos.p_f(n/2)
+        f, = eos.f_eq(np.array([n/2, n/2]), np.array([f]), 1, C)
+
+        meff = mn * C.phi_n(0, f) 
+        res = C.Co/(mn**2 * C.eta_o(f))
+        dPhi = derivative(lambda z: C.phi_n(0, z), f, dx=1e-3)
+        dEtaO = derivative(lambda z: C.eta_o(z), f, dx=1e-3)
+    #     print 'dEtaO = ', dEtaO
+        U = lambda z: C.U(z) + mn**4 * z**2 * (C.eta_s(z))/ (2* C.Cs)
+        d2U = derivative(lambda z: U(z), f, dx=1e-3, n=2)
+        d2EtaO = derivative(lambda z: C.eta_o(z), f, dx=1e-3, n=2)
+        d2Phi = derivative(lambda z: C.phi_n(0, z), f, dx=1e-3, n=2)
+    #     print n, d2Phi, d2EtaO, 2* C.Cs/mn**2 * d2Phi * C.phi_n(0,f)* I3num(n/2, meff)
+        eta_contrib = derivative(lambda z: 1./C.eta_o(z), f, dx=1e-3, n=2)#2*dEtaO**2 / C.eta_o(f)**3 - d2EtaO / C.eta_o(f)**2
+    #     print 'n= %f, f = %f, eta_contrib = %.12f'%(n, f, eta_contrib)
+        res2 = -C.Cs / mn**4 #* C.phi_n(0, f) * dPhi/ (sqrt(pf**2 + meff**2) * mn**2)
+        num = (C.Co*n*dEtaO/(mn**2 * C.eta_o(f)**2) - mn**2 * C.phi_n(0, f) * dPhi / sqrt(pf**2 + meff**2))**2
+        
+        res2 *= num
+    #     res2 *= - mn**2 * C.phi_n(0, f) * dPhi / sqrt(pf**2 + meff**2)
+        denom = (2 * C.Cs / mn**2 * dPhi**2 * I1num(n/2, meff) + d2U * C.Cs/mn**4 + 
+            C.Cs * C.Co * n**2 * eta_contrib / (2*mn**6) + 
+            2* C.Cs/mn**2 * d2Phi * C.phi_n(0,f) * I3num(n/2, meff))
+        res2 /= denom
+        mult = 1.
+        if multiply:
+            mult = 4 * pf * sqrt(pf**2 + meff**2) / (2 * pi**2)
+        return f, (res + res2)*mult
+    
+    def f0(self, n, multiply=True):
+        f = 0.
+        res = []
+        for _n in n:
+            f, _res = self._f0(_n, f,multiply=multiply)
+            res.append(_res)
+        
+        return np.array(res)
+    
+    def f0_der_NM(self, f, n, multiply = True):
+        C = self.C
+        mn = C.M[0]
+        pf = eos.p_f(n)
+        f, = eos.f_eq(np.array([n, 0.]), np.array([f]), 1, C)
+        
+        meff = mn*C.phi_n(0, f)
+        
+        print f
+        mu = lambda z, f: derivative(lambda x: eos._E(np.array([f, x, 0.]), C), z, dx=1e-3)
+        
+        dmu_df = derivative(lambda x: mu(n, x), f, dx=1e-3)
+        dmu_dn = derivative(lambda x: mu(x, f), n, dx=1e-3)
+        d2E_df = derivative(lambda z: eos._E(np.array([z, n, 0.]), C), f, dx=1e-3, n=2)
+    #     print 'dmu_dn = ', dmu_dn, ' ?= ', C.Co/ mn**2 /C.eta_o(f) + (3 * pi**2)**(2./3) * (n/2)**(-1./3) / sqrt(pf**2 + meff**2) / 6
+    #     print derivative(lambda x: eos._E(np.array([f, x, 0.]), C), n, dx=1e-3, n=2)
+        res = dmu_dn - (3 * pi**2)**(2./3) * (n)**(-1./3) / sqrt(pf**2 + meff**2) / 6 - dmu_df**2 / d2E_df
+        
+        mult = 4 * pf * sqrt(pf**2 + meff**2) / (2 * pi**2)
+        if multiply:
+            res *= mult
+        return f, res
+    
+    def _f0_nm(self, f, n, multiply=True):
+        pass
+    
+    def f0_nm(self, n, multiply=True):
+        pass
+    
+    def _f1(self,n, f):
+        f_f1 = f
+        C = self.C
+        pf = eos.p_f(n/2)
+        mn = C.M[0]
+        
+        f_f1, = eos.f_eq(np.array([n/2, n/2]), np.array([f]), 1, C)
+        f = f_f1
+        meff = mn*C.phi_n(0,f)
+        
+        res = - C.Co * pf**2/(mn**2 * C.eta_o(f) * (pf**2 + meff**2))
+        res /= (1. + 2 * C.Co/(mn**2 * C.eta_o(f)) * ( (2./3.) * I1num(n/2, meff) + 
+                                                       meff**2 * I4num(n/2, meff)))
+        
+        mult = 4 * pf * sqrt(pf**2 + meff**2) / (2 * pi**2)
+        return f, res*mult
+    
+    def f1(self, n):
+        f = 0.
+        res = []
+        for _n in n:
+            f, f1 = self._f1(_n, f)
+            res.append(f1)
+        return np.array(res)
+    
+    
+    def UofE(self, i, n):
+        f = eos.f_eq(n, np.array([0.]), 1, self.C)
+        pots = eos.potentials(np.insert(n, 0, f), 5, self.C)
+        print pots
+        V = self.C.X_o[i] * pots[2]
+        S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*f[0]))
+        Uopt = lambda z: z + self.C.M[0] - sqrt((z + self.C.M[0] - V)**2 - S*(2 * self.C.M[i] + S))
+        erange = np.linspace(-50./self.m_pi, 10., 100)
+#         plt.plot(erange, self.m_pi*Uopt(erange))
+#         plt.show()
+        return self.m_pi*erange, self.m_pi*Uopt(erange)
+    
+    def dumpUofE(self, folderName, show=False):
+        nU = np.array([self.n0/2, self.n0/2])
+        if show:
+            lines = []
+        ulist = []
+        for i in [0, 2, 3, 6]:
+            e, u = self.UofE(i, nU)
+            if i == 0:
+                ulist.append(e)
+            ulist.append(u)
+            if show:
+                line, = plt.plot(e, u)
+                lines.append(line)
+        if show:
+            plt.legend(lines, ['N', 'L', 'S', 'X'])
+            plt.show()
+        
+        ulist = np.array(ulist).transpose()
+        tab = tabulate(ulist, ['E [MeV]', 'U_N [MeV]', 'U_L [MeV]',
+                               'U_S, [Mev]', 'U_X [MeV]'], tablefmt='plain')
+        
+        with open(join(folderName, 'UofE.dat'), 'w') as f:
+            f.write(tab)
+            
+    def testHyper(self, z_l = 1., a_l = 1.):
+        self.reset(hyper=1, nmin = 0., nmax = 8*self.n0, npoints=200)
+        print self.E
+        rho = self.concentrations()
+        fig, ax = plt.subplots(1, 3)
+        ax[0].plot(self.n/self.n0, rho)
+        self.setDriver()
+        n, m, r, mg = self.stars(npoints = 100)
+        ax[1].plot(n/self.n0, m)
+        ax2lines = []
+        l, = ax[2].plot(self.n/self.n0, self.rho[:, 0])
+        ax2lines.append(l)
+        if self.C.sigma_kind == 1:
+            l2, = ax[2].plot(self.n/self.n0, map(lambda z: self.C.Xs(2, z), 
+                                           self.rho[:,0]))
+            ax2lines.append(l2)
+            ax[2].legend(ax2lines, ['f(n)', 'x_sigma'], loc=0)
+        
+        plt.show()
+        
+    def diffArray(self, src, dx):
+        res = []
+        res.append((src[1] - src[0])/dx)
+        _src = src[1:-1]
+        for i, _s in enumerate(_src):
+            res.append((src[i+2] - src[i])/(2*dx))
+        n = src.size
+        res.append((src[n-1]-src[n-2])/dx)
+        return np.array(res)
+    
+    def P_chem(self, _n, leptons=True):
+        sp = 1+self.C.sprime
+        res = []
+        for n in _n:
+            mu_e = eos.mu(n, sp, self.C) - eos.mu(n, sp+1, self.C)
+            n_e = 0.
+            n_mu = 0.
+            if (mu_e**2 - self.m_e**2 > 0):
+                n_e += (mu_e**2 - self.m_e**2)**(1.5)/(3 * pi**2)
+            
+            if (mu_e**2 - self.m_mu**2 > 0):
+                n_mu +=  (mu_e**2 - self.m_mu**2)**(1.5)/(3 * pi**2)
+            
+            if leptons:
+                E = eos.E(n, self.C)
+            else:
+                E = eos._E(n, self.C)
+            
+            sum = 0.
+            
+            for i, r in enumerate(n[sp:]):
+                sum += r *eos.mu(n, i+sp, self.C)
+            
+            if leptons:
+                sum += n_e * mu_e + n_mu * mu_e
+
+            res.append(sum - E)
+        return np.array(res)
+            

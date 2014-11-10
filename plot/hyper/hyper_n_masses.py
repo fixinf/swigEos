@@ -11,7 +11,7 @@ from pylab import pause
 from scipy import interpolate
 imgfolder = os.path.join('..','img')
 
-C = eos.KVOR_mod()
+C = eos.KVOR_mod2()
 C.SetHyperConstants(2)
 wr = Wrapper(C)
 n = np.linspace(0.0, 4.0, 2000)
@@ -60,20 +60,31 @@ C.Csp = 380.0
 
 C.alpha = 0.85
 C.z = 0.65
-
 C.omega_a = 6.45
 C.omega_f = 0.53
-         
-C.rho_a = -200.0
-C.rho_f = 0.4
-     
-C.beta = 0.5
-C.gamma = 8.00
-         
+          
+# C.rho_a = -1500.
+# C.rho_f = 0.6
+      
+C.beta = 0.8
+C.gamma = 7.5
+          
 C.phi_a = -0.85
 C.phi_f = 0.28
-  
+
 C.d = -5.5
+
+C.rho_f = 0.75
+C.rho_a = 1000
+# C.omega_f = 0.6
+f0 = 0.27
+C.rho_kind = 1
+C.rho_power = 2.0
+C.omega_c = -15000
+
+
+
+suffix = 'Mod/MOD_rhoa_%.2f'%C.rho_a
 
 f0 = 0.27
 
@@ -87,6 +98,7 @@ wr.solve(f0 = C.f0, iter = 3000)
 print C.f0
 nmax = 5.0
 C.SetHyperConstants(2)
+C.set_xs(np.array([1.0, 1., -28., 30. , 30., 30., -15., -15.]))
 C.sprime = 0
 C.phi_meson = 1
 hyper = 1
@@ -129,7 +141,7 @@ print rho
 plt.plot(wr.n/wr.n0, rho)
 plt.show()
 print sc
-with open('hyper_n_%.2f_%i_%i.dat' % (C.f0, C.phi_meson, C.sprime), 'w') as f:
+with open(suffix+'hyper_n_%.2f_%i_%i.dat' % (C.f0, C.phi_meson, C.sprime), 'w') as f:
     for i, r in enumerate(rho):
         f.write('%f   ' % (wr.n[i]/wr.n0))
         for _r in r:
@@ -139,7 +151,7 @@ with open('hyper_n_%.2f_%i_%i.dat' % (C.f0, C.phi_meson, C.sprime), 'w') as f:
 mlist = np.array(mlist)
 
 for j,m in enumerate(mlist):
-    with open('mass_scaling_%.2f_%i_%i.dat'%(flist[j], C.phi_meson, C.sprime),'w') as f:
+    with open(suffix+'mass_scaling_%.2f_%i_%i.dat'%(flist[j], C.phi_meson, C.sprime),'w') as f:
         for i, _n in enumerate(n_star):
             print m[i]
             print max(m)
