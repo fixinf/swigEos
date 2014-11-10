@@ -109,14 +109,21 @@ namespace calc{
 		if (C->sprime){
 			fp = n[1];
 		}
-		double m_eff_arg = C->X_s[i]*(C->M[0]/C->M[i])*f + C->X_sp[i]*(C->M[0]/C->M[i])*fp;
+		double xs = 0.;
+		if (C->sigma_kind == 0){
+			xs = C->X_s[i];
+		}
+		else{
+			xs = C->Xs(i, f);
+		}
+		double m_eff_arg = xs*(C->M[0]/C->M[i])*f + C->X_sp[i]*(C->M[0]/C->M[i])*fp;
 //		printf("f = %f, m_eff_arg = %f \n", f, m_eff_arg);
 		double m_eff = C->M[i] * C->phi_n(i,m_eff_arg);
 		double res = sqrt(pow(p_f(n[i+sp]), 2.0) + pow(m_eff, 2.0));
 //		double res = 0.0;
 		res += C->X_o[i]*out[2];
 		res += C->X_r[i]*C->T[i]*out[3];
-		res += C->X_sp[i]*out[4];
+		res += C->X_p[i]*out[4];
 //		printf("mu[%i] res = %f \n", i, res);
 		return res;
 	}
@@ -188,8 +195,14 @@ namespace calc{
 
 		for (int i = 1; i < m; i++){
 			hx[i] = p_f(p[i]);
-
-			double m_eff = C->M[i+1]*C->phi_n(i+1,C->X_s[i+1] * (C->M[0]/C->M[i+1]) * f  + C->X_sp[i+1] * (C->M[0]/C->M[i+1]) * fp);
+			double xs = 0.;
+			if (C->sigma_kind == 0){
+				xs = C->X_s[i+1];
+			}
+			else{
+				xs = C->Xs(i+1, f);
+			}
+			double m_eff = C->M[i+1]*C->phi_n(i+1, xs * (C->M[0]/C->M[i+1]) * f  + C->X_sp[i+1] * (C->M[0]/C->M[i+1]) * fp);
 
 			double res = pow(
 					mu_n - C->Q[i+1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i+1] * sum_o / C->eta_o(f)
@@ -246,7 +259,15 @@ double _E(double * n, int dimN, set_const * C){
 		printf("res_Uf : %f \n", res);
 	}
 	for (int i = sc; i < dimN; ++i){
-		meff_arg = C->X_s[i-sc] * (C->M[0]/C->M[i-sc]) * f + C->X_sp[i-sc] * (C->M[0]/C->M[i-sc])*fp;
+		double xs = 0.;
+		if (C->sigma_kind == 0){
+			xs = C->X_s[i-sc];
+		}
+		else{
+			xs = C->Xs(i-sc, f);
+		}
+//		printf("xs = %f \n", xs);
+		meff_arg = xs * (C->M[0]/C->M[i-sc]) * f + C->X_sp[i-sc] * (C->M[0]/C->M[i-sc])*fp;
 		res += kineticInt(n[i], (C->M)[i-sc] * C->phi_n(i-sc,meff_arg), f);
 //		printf("i = %i, n[i] = %f, pf(n[i]) = %f \n", i, v.n[i], calc::p_f(v.n[i]));
 //		printf("K = %f \n", kineticInt(v.n[i], (C->M)[i] * C->phi_n(v.f), v.f));

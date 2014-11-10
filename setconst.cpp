@@ -258,6 +258,23 @@ void set_const::set_xs(double* x, int dimX) {
 	}
 }
 
+void set_const::set_hs_z(double* x, int dimX) {
+	printf("hey! \n");
+	this->hs_z.clear();
+	for (int i = 0; i < dimX; i++){
+		printf("%f \n", x[i]);
+		this->hs_z.push_back(x[i]);
+	}
+}
+
+void set_const::set_hs_alpha(double* x, int dimX) {
+	this->hs_alpha.clear();
+	for (int i = 0; i < dimX; i++){
+		this->hs_alpha.push_back(x[i]);
+	}
+}
+
+
 double set_const::func(double x){
 	if (x <= 0){
 		return 0.0;
@@ -265,4 +282,13 @@ double set_const::func(double x){
 	else{
 		return exp(-exp_alpha/x);
 	}
+}
+
+double set_const::Xs(int i, double f) {
+	double res = this->X_s[i];
+//	printf("i = %i \n", i);
+	if (i > 1){
+		res *= pow((1 + hs_z[i] * f0)/ (1 + hs_z[i]*f), hs_alpha[i]);
+	}
+	return res;
 }

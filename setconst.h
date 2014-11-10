@@ -72,6 +72,7 @@ public:
 		this->phi_meson = 0;
 		this->sprime = 0;
 		this->Csp = 1.0;
+		this->sigma_kind = 0;
 	}
 	set_const(double, double, double, double, double, double);
 	//			Cs		Co		Cr		b		c		z
@@ -101,6 +102,8 @@ public:
 	std::vector<double> X_s;
 	std::vector<double> X_o;
 	std::vector<double> X_p;
+	std::vector<double> hs_z;
+	std::vector<double> hs_alpha;
 	vec X_r;
 	vec X_sp;
 	std::vector<double> Q;
@@ -117,6 +120,11 @@ public:
 	void set_xp(double * x, int dimX);
 	void set_xs(double * x, int dimX);
 	double func(double x);
+	double Xs(int i, double f);
+	void set_hs_z(double* x, int dimX);
+	void set_hs_alpha(double* x, int dimX);
+	int sigma_kind;
+	bool muons;
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;
