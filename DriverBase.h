@@ -31,10 +31,14 @@ public:
 	double * lastNstar;
 	double * lastRstar;
 	double * lastMstar;
+	double * lastPstar;
+	double * lastEstar;
 	int nSize;
 	void getLastN(double * N, int dimN);
 	void getLastR(double * N, int dimN);
 	void getLastM(double * N, int dimN);
+	void getLastP(double * N, int dimN);
+	void getLastE(double * N, int dimN);
 };
 
 #endif /* TOVDRIVER_H_ */

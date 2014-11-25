@@ -12,6 +12,8 @@ DriverBase::DriverBase() {
 	this->lastNstar = 0;
 	this->lastRstar = 0;
 	this->lastMstar = 0;
+	this->lastEstar = 0;
+	this->lastPstar = 0;
 }
 
 DriverBase::DriverBase(string fname) {
@@ -82,6 +84,30 @@ void DriverBase::getLastM(double * N, int dimN){
 	}
 	else{
 		printf("Last M not set! \n");
+		return;
+	}
+}
+
+void DriverBase::getLastE(double * N, int dimN){
+	if (this->lastEstar){
+		for (int i = 0; i < dimN; i++){
+			N[i] = this->lastEstar[i];
+		}
+	}
+	else{
+		printf("Last E not set! \n");
+		return;
+	}
+}
+
+void DriverBase::getLastP(double * N, int dimN){
+	if (this->lastPstar){
+		for (int i = 0; i < dimN; i++){
+			N[i] = this->lastPstar[i];
+		}
+	}
+	else{
+		printf("Last P not set! \n");
 		return;
 	}
 }

@@ -31,5 +31,5 @@ extern double mu(double * n, int dimN, int i, set_const * C);
 
 extern float sumTest(double * in, int n);
 extern float sumTest2(double * in, int n, double * in2, int n2);
-
+extern void solveF(double n, double E, double P, double * init, int dimInit, double * out, int dimOut, set_const * C);
 #endif /* EOS_H_ */

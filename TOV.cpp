@@ -271,13 +271,27 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 	if (D->lastMstar != 0){
 		delete D->lastMstar;
 	}
-//	D->nSize = n_points - 1;
 
+	if (D->lastEstar != 0){
+			delete D->lastEstar;
+	}
+
+	if (D->lastPstar != 0){
+			delete D->lastPstar;
+	}
+
+
+
+//	D->nSize = n_points - 1;
+	printf("Allocating... ");
 	D->lastNstar = new double[n_points-1];
 	D->lastRstar = new double[n_points-1];
 	D->lastMstar = new double[n_points-1];
+	D->lastEstar = new double[n_points-1];
+	D->lastPstar = new double[n_points-1];
+	printf(" done.\n");
 	for (i = 1; i <= n_points; i++) {
-//			printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
+			printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
 		double ti = i * t1 / n_points;
 		if ((y[0] > delta * P_init)&&(D->NofP(y[0]) > nmin)) {
 			status = gsl_odeiv2_driver_apply(d, &t, ti, y);
@@ -302,6 +316,8 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 		D->lastNstar[i-1] = D->NofE(y[2]);
 		D->lastRstar[i-1] = ti;
 		D->lastMstar[i-1] = y[1];
+		D->lastEstar[i-1] = y[2];
+		D->lastPstar[i-1] = y[0];
 	}
 	return;
 }

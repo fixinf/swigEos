@@ -12,16 +12,20 @@
 				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 				<configuration artifactExtension="so" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="intel.linux.x86_64.so.rel.377573276_14.0.0" name="Release" parent="intel.linux.x86_64.so.rel.377573276_14.0.0" preannouncebuildStep="Generate SWIG wrapped c++ file" prebuildStep="swig -c++ -python -o eos_wrap.cpp ./eos_wrap.i">
 					<folderInfo id="intel.linux.x86_64.so.rel.377573276._14.0.0" name="/" resourcePath="">
-						<toolChain id="intel.toolchain.linux.x86_64.so.rel.1423936779_14.0.0" name="Intel Toolchain for Shared Library on Intel(R) 64">
-							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.linux.x86_64.so.rel_14.0.0.1800984490" name="Platform.So.Release" osList="linux"/>
-							<builder buildPath="${workspace_loc:/swigEos}/Release" id="cdt.managedbuild.builder.xlupc.exe.debug.1550165828" managedBuildOn="false" superClass="cdt.managedbuild.builder.xlupc.exe.debug"/>
+						<toolChain id="intel.toolchain.linux.x86_64.so.dbg_14.0.0.728127756" name="Intel Toolchain for Shared Library on Intel(R) 64" superClass="intel.toolchain.linux.x86_64.so.dbg_14.0.0">
+							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF" id="intel.platform.linux.x86_64.so.dbg.1911444656_14.0.0" name="Platform.So.Debug" osList="linux" superClass="intel.platform.linux.x86_64.so.dbg_14.0.0"/>
+							<builder buildPath="${workspace_loc:/swigEos}/Release" id="intel.builder.linux.x86_64.so.dbg.1209463794_14.0.0" managedBuildOn="false" name="Intel Builder.Release" superClass="intel.builder.linux.x86_64.so.dbg_14.0.0"/>
+							<tool id="intel.cpp.compilestep.linux.x86_64.so.dbg.815235706_14.0.0" name="Intel Intel(R) 64 C++ Compiler " superClass="intel.cpp.compilestep.linux.x86_64.so.dbg_14.0.0"/>
+							<tool id="intel.c.compilestep.linux.x86_64.so.dbg.118576405_14.0.0" name="Intel Intel(R) 64 C Compiler" superClass="intel.c.compilestep.linux.x86_64.so.dbg_14.0.0"/>
+							<tool id="intel.c.linkstep.so.linux.x86_64.dbg.1140402418_14.0.0" name="Intel Intel(R) 64 C Linker" superClass="intel.c.linkstep.so.linux.x86_64.dbg_14.0.0"/>
+							<tool id="intel.cpp.linkstep.so.linux.x86_64.dbg.1820219461_14.0.0" name="Intel Intel(R) 64 C++ Linker" superClass="intel.cpp.linkstep.so.linux.x86_64.dbg_14.0.0"/>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -39,28 +43,7 @@
 				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.AbsoftErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.intel.IntelCompilerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.GFortranErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.ptp.cdt.compilers.core.PGIErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.G95FortranErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.LaheyFortranErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.NAGErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.PGIErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.errorparsers.xlc.XlcErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.Open64ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.autotools.core.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.errorparsers.xlf.XLFCompilerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.IntelFortranErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.ptp.cdt.compilers.core.Open64ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.photran.core.CrayErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.ptp.cdt.compilers.core.CrayErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ICCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
@@ -229,6 +212,7 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/swigEos"/>
 		</configuration>
+		<configuration configurationName="Debug_g"/>
 		<configuration configurationName="Release_g">
 			<resource resourceType="PROJECT" workspacePath="/swigEos"/>
 		</configuration>

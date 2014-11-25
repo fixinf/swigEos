@@ -419,3 +419,85 @@ float sumTest2(double * in, int n, double * in2, int n2){
 	}
 	return res;
 }
+
+struct fun_eq2_params{
+	double E;
+	double P;
+	double n;
+	double Co;
+	double Cr;
+	double mn;
+};
+
+void fun_n_eq(double * p, double * hx, int m, int n, void * adata){
+	fun_eq2_params * params = (fun_eq2_params *) adata;
+	double f = p[0];
+	double np = p[1];
+	double nn = params->n - np;
+	double mn = params->mn;
+	printf("f = %f, np = %f \n", f, np);
+	hx[0] = (params->E + params->P -
+			 params->Co * pow(params->n/mn, 2) -
+			 params->Cr * pow((np - nn)/mn, 2)/4);
+	hx[0] -= nn*pow(pow(p_f(nn),2) + pow(mn*(1-f),2), 0.5) +
+			 np*pow(pow(p_f(np),2) + pow(mn*(1-f),2), 0.5);
+	double ne = 0.;
+	double nmu = 0.;
+	double mu_e = pow(pow(p_f(nn),2) + pow(mn*(1-f),2), 0.5) -
+				  pow(pow(p_f(np),2) + pow(mn*(1-f),2), 0.5) +
+				  params->Cr * (nn - np)/(2*mn*mn);
+	printf("mu_e = %f \n", mu_e);
+	if (mu_e > m_e){
+		ne += pow(mu_e*mu_e - m_e*m_e, 1.5)/(3*M_PI*M_PI);
+	}
+
+	if (mu_e > m_mu){
+		nmu += pow(mu_e*mu_e - m_mu*m_mu, 1.5)/(3*M_PI*M_PI);
+	}
+	hx[0] -= ne*mu_e + nmu*mu_e;
+	hx[1] = ne + nmu - np;
+	printf("out[0] = %f, out[1] = %f \n", hx[0], hx[1]);
+}
+
+void solveF(double n, double E, double P, double * init, int initN, double * out, int dim_Out, set_const * C){
+	fun_eq2_params par = {E, P, n, C->Co, C->Cr, C->M[0]};
+	int m = 2;
+	double opts[5];
+	double * x = new double[m];
+	double * lb = new double[m];
+	double * fun = new double[m];
+	double info[LM_INFO_SZ];
+	int iter = 1000;
+	//double x[3] = {v.n[0], v.n[1], v.f};
+
+	for (int i = 0; i < m; i++){
+		x[i] = init[i];
+		lb[i] = 0.0;
+//		if (i > 2) lb[i] = -100500.0;
+	}
+
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
+		opts[4]= -1e-5;
+
+	printf("Invoking solver \n");
+	dlevmar_bc_dif(fun_n_eq, x, NULL, m, m, lb, NULL, NULL, iter, opts, info, NULL, NULL, &par);
+
+	printf("info: ");
+	for (int i = 0; i < LM_INFO_SZ; i++){
+		printf(" %i : %f ", i, info[i]);
+	}
+	printf("\n");
+
+	printf("n = %f, f = %e", n, x[0]);
+	printf(",n_p = %e ", x[1]);
+	printf("\n");
+
+	fun_n_eq(x, fun, m, m, &par);
+	for (int i = 0; i < m; i++){
+		printf("f%i = %e  ", i, fun[i]);
+	}
+	printf("\n");
+	out[0] = x[0];
+	out[1] = x[1];
+}
+
