@@ -476,3 +476,39 @@ def myModDiffL(beta=0.8, gamma = 7.5):
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
+
+def KVORLowerK(f0, K):
+    C = eos.KVOR_mod2()
+    C.Csp = 1.
+    C.Cs = 178.9560101100
+    C.Co =87.5996399401
+    C.Cr = 100.6364207940
+    C.b = 0.0073248882
+    C.c = 0.0028050590
+    print C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2)
+    C.d = 0.
+    C.SetHyperConstants(2)
+    C.omega_kind = 1
+#     C.omega_a = 1000
+#     C.omega_f = 0.4
+#Smooth version:
+    
+    C.rho_kind = 1
+    C.rho_power = 2
+    C.gamma = 5.2
+    C.beta = 1.2
+    C.alpha = 1.
+    
+    C.omega_a = 0.
+    C.omega_f = 0.387
+    
+    C.phi_gamma = 3.
+    C.phi_z = 3.5
+    C.f0 = f0
+    wr = Wrapper(C)
+    wr.solve(f0=f0, K0=K)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+    

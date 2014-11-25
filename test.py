@@ -3,6 +3,7 @@ from Wrapper import Wrapper
 from pylab import *
 from numpy import array, linspace
 from matplotlib.widgets import Slider, CheckButtons, RadioButtons
+import Models
 # x = linspace(0.0, 3.0, 100)
 # l = plot(x, sin(x),x, sin(2*x),x, sin(3*x))
 # colors = [c.properties()['color'] for c in l]
@@ -44,10 +45,9 @@ print C.X_s[7]
 
 
 wr = Wrapper(C)
-
-for f in linspace(C.f0, f0, 20):
-    C.f0 = f
-    wr.solve(f0=C.f0, K0=240.) 
+K = 240
+for _K in linspace(wr.K(), K, 4):
+    wr.solve(f0=C.f0, K0=_K) 
 
 # pause(5)
 
@@ -59,7 +59,7 @@ LowerY = [7.5, 17.49, 40.0, 60.0, 60.0]
 fig, ax = subplots(2,2)
 n_p = linspace(0.0, 4.0, 1000)
 p = wr.Psymm(n_p)
-lp, = ax[0][0].semilogy(n_p[1:]/wr.n0, p)
+lp, = ax[0][0].semilogy(n_p[:]/wr.n0, p)
 ax[0][0].plot(UpperX, UpperY, LowerX, LowerY)
 ax[0][0].set_xlabel(r'$n/n_0$', fontsize=14)
 ax[0][0].set_ylabel(r'$P_{symm}$', fontsize=14)
@@ -67,7 +67,7 @@ ax[0][0].set_ylabel(r'$P_{symm}$', fontsize=14)
 wr.reset(hyper=0, npoints=2000, iter=100)
 wr.setDriver()
 
-_n, _M, _R = wr.stars(0.5, 4.0, 100)
+_n, _M, _R, mg= wr.stars(0.5, 4.0, 100)
 mline, = ax[0][1].plot(_n/wr.n0, _M)
 legend([mline],[max(_M)])
 #
@@ -229,7 +229,7 @@ for hyper in [0,1]:
                 ax[1][1].plot(N/wr.n0, E, linestyle=styles[iter])
                 ax[1][1].set_xlabel(r'$n/n_0$', fontsize=14)
                 ax[1][1].set_ylabel(r'$\varepsilon \quad [m_\pi^4]$', fontsize=14)
-                _n, _M, _R = wr.stars(0.5, 4.0, 100)
+                _n, _M, _R, mg = wr.stars(0.5, 4.0, 100)
                 mline, = ax[0][1].plot(_n/wr.n0, _M, linestyle=styles[iter])
                 mlines.append(mline)
                 ax[0][1].set_xlabel(r'$n/n_0$', fontsize=14)

@@ -14,6 +14,10 @@ from glob import glob
 from os.path import join
 from pylab import sqrt, pi
 from AuxIntegrals import I1num, I2num, I3num, I4num
+from scipy.interpolate import interp1d, interp2d
+from types import *
+from scipy import integrate
+from scipy.optimize import root
 
 
 class Wrapper():
@@ -142,14 +146,32 @@ class Wrapper():
                     self.m_pi**4 * self.C.M[0] * res[:,2]) 
         
         
-    def Esymm(self, n, f=0.0):
+    def Esymm(self, n, f=0.0, ret_f=False):
         res = []
-        f = 0.0
+        flist = []
         for z in n:
             f, = eos.f_eq(np.array([z/2,z/2]), np.array([f]), 1, self.C)
 #             res.append((eos.E(np.array([f, z/2, z/2]), self.C))/z - self.C.M[0])
             res.append((eos.E(np.array([f, z/2, z/2]), self.C)))
-        return np.array(res)
+            flist.append(f)
+        if not ret_f:
+            return np.array(res)
+        else:
+            return np.array(res), np.array(flist)
+        
+    def Eneutr(self, n, f=0.0, ret_f=False):
+        res = []
+        flist = []
+        for z in n:
+            f, = eos.f_eq(np.array([z,0.]), np.array([f]), 1, self.C)
+#             res.append((eos.E(np.array([f, z/2, z/2]), self.C))/z - self.C.M[0])
+            res.append((eos._E(np.array([f, z, 0.]), self.C)))
+            flist.append(f)
+        if not ret_f:
+            return np.array(res)
+        else:
+            return np.array(res), np.array(flist)
+            
         
     def Psymm(self, n):
         nlist = []
@@ -523,7 +545,7 @@ class Wrapper():
         f.write(Params + '\n' + Part + '\n' + Res + '\n')
         f.close()
         self.dumpScalings(folderName)
-        self.dumpHyper(folderName)
+#         self.dumpHyper(folderName)
         with ZipFile(join(folderName, filename), 'w') as zip:
             for f in glob(join(folderName, '*.dat')):
                 zip.write(f)
@@ -568,12 +590,14 @@ class Wrapper():
                                          'eta_phi',
                                          'Phi_N',
                                          'U'],tablefmt='plain')
-        
-        with open(os.path.join(folderName, 'scalingsNS.dat'), 'w') as f:
-            f.write(tableNS)
-            
-        with open(os.path.join(folderName, 'scalingsF.dat'), 'w') as f:
-            f.write(tableF)
+        if folderName is not None:
+            with open(os.path.join(folderName, 'scalingsNS.dat'), 'w') as f:
+                f.write(tableNS)
+                
+            with open(os.path.join(folderName, 'scalingsF.dat'), 'w') as f:
+                f.write(tableF)
+                
+        return np.array(tabNS)
             
             
     def dumpMassesCrust(self, folderName ,ncut_crust=.6, ncut_eos=.8):
@@ -981,4 +1005,190 @@ class Wrapper():
 
             res.append(sum - E)
         return np.array(res)
+    
+    def Jdiff(self, n):
+        nf_n = np.array([n, 0.])
+        nf_s = np.array([n/2, n/2])
+        f_n = eos.f_eq(nf_n, np.array([self.C.f0]), 1, self.C)
+        f_s = eos.f_eq(nf_s, np.array([self.C.f0]), 1, self.C)
+#         print f_n, f_s
+        EN = eos.EBind(np.concatenate((f_n, nf_n)), self.C)
+        ES = eos.EBind(np.concatenate((f_s, nf_s)), self.C)
+        return EN - ES
+    
+    def Ldiff(self):
+        return 3*self.n0*derivative(lambda z: self.Jdiff(z),
+                                    self.n0, dx=1e-3)
+        
+    def Ksymm_diff(self):
+        return 9*self.n0**2 * derivative(lambda z: self.Jdiff(z),
+                                         self.n0, dx=1e-3, n=2)
+        
+    def dumpChi(self, folderName):
+        scalings = self.dumpScalings(None)
+        chi_s = []
+        chi_o = []
+        chi_r = []
+        
+        for i, _n in enumerate(scalings[:,0]):
+            chi_s.append(self.C.phi_n(0, scalings[i, 1]) / sqrt(scalings[i, 2]))
+            chi_o.append(self.C.phi_n(0, scalings[i, 1]) / sqrt(scalings[i, 3]))
+            chi_r.append(self.C.phi_n(0, scalings[i, 1]) / sqrt(scalings[i, 4]))
+        
+        tab = np.array([scalings[:, 0], chi_s, chi_o, chi_r]).transpose()
+        table = tabulate(tab, ['n/n0', 'chi_s', 'chi_o', 'chi_r'], 
+                         tablefmt='plain')
+        
+        with open(join(folderName, 'chi_N.dat'), 'w') as f:
+            f.write(table)
             
+        return tab
+            
+    def dumpStarProfile(self, n_c, folderName=None, file_suffix=None):
+        n, m, r, mg1, mg2 = self.stars_crust(nmin=2*self.n0, nmax=n_c*self.n0,
+                                             npoints=2)
+        
+        dr = self.dr
+        nSize = self.dr.nSize
+        N = dr.getLastN(nSize)[:-1]
+        R = dr.getLastR(nSize)[:-1]
+        M = dr.getLastM(nSize)[:-1]
+        E = dr.getLastE(nSize)[:-1]
+        P = dr.getLastP(nSize)[:-1]
+        
+        if folderName is not None:
+            if not os.path.exists(folderName):
+                os.makedirs(folderName)
+            
+            fname = 'starDump_n=%.2f'%(n_c)
+            if file_suffix is not None:
+                fname+=file_suffix
+            
+            fname += '.dat'
+            tab = np.array([N/self.n0, M, R, E, P]).transpose()
+            table = tabulate(tab, ['n/n_0', 'M/M_sun', 'R [km]', 'E [m_pi^4]',
+                                   'P [m_pi^4]'], tablefmt='plain')
+            
+            with open(join(folderName, fname), 'w') as f:
+                f.write(table)
+        
+        return N, M, R, E, P
+    
+    
+class EosConstructor(object):
+    def __init__(self):
+        self.Fs = None
+        self.Fn = None
+        self.Fx = None
+        self.eta_o = lambda z: 1
+        self.eta_r = lambda z: 1
+        self.setConstants()
+        self.setParams()
+    
+    def setFs(self, Fs, n=None):
+        if isinstance(Fs, interp1d):
+            self.Fs = Fs
+        else:
+            if n is not None:
+                self.Fs = interp1d(n, Fs, kind='cubic')
+            else:
+                raise RuntimeError("""setFs requires either spline or x 
+                and y data""")
+    
+    def getFs(self):
+        assert self.Fs is not None
+        return self.Fs
+    
+    def setFn(self, Fn, n=None):
+        if isinstance(Fn, interp1d):
+            self.Fn = Fn
+        else:
+            if n is not None:
+                self.Fn = interp1d(n, Fn, kind='cubic')
+            else:
+                raise RuntimeError("""setFn requires either spline or x 
+                        and y data""")
+    
+    def getFn(self):
+        assert self.Fn is not None
+        return self.Fn
+    
+    def setScaling(self, eta_o, eta_r):
+        assert isinstance(eta_o, LambdaType) and isinstance(eta_r, LambdaType)
+        self.eta_o = eta_o
+        self.eta_r = self.eta_r
+    
+    def getFx(self):
+        pass
+    
+    def setConstants(self, Co=54.6041, Cr=121.69):
+        self.Co = Co
+        self.Cr = Cr
+        
+    def setParams(self, mn=939./135, m_pi=135.):
+        self.mn=mn
+        self.m_pi = m_pi
+        
+    def checkReady(self):
+        assert self.Fn is not None
+        assert self.Fs is not None
+        assert isinstance(self.eta_o, LambdaType)
+        assert isinstance(self.eta_r, LambdaType)
+        
+    def pf(self, n):
+        return (3*pi**2*n)**(1./3.)    
+        
+    def ES(self, n):
+        f = self.Fs
+        C = lambda z: self.Co / self.eta_o(f(z))
+        res = integrate.quad(lambda z: sqrt(self.pf(z/2)**2 +
+                                            self.mn**2*(1-f(z))**2) + 
+                             C(z) * z/self.mn**2, 0., n)[0]
+        return res
+        
+    def EN(self, n):
+        f = self.Fn
+        C = lambda z: self.Co / self.eta_o(f(z))+ self.Cr / 4. / self.eta_r(f(z))
+        res = integrate.quad(lambda z: sqrt(self.pf(z)**2 +
+                                            self.mn**2*(1-f(z))**2) + 
+                             C(z) * z/self.mn**2, 0., n)[0]
+        return res
+    
+    def PN(self, n):
+        return n*derivative(lambda z: self.EN(z), n, dx=1e-4) - self.EN(n)
+    
+class FromEos(EosConstructor):
+    def __init__(self):
+        super(FromEos, self).__init__()
+        
+    def FsFromEos(self, E, P, N):
+        assert E.shape == P.shape == N.shape
+        res = []
+        fEs = 0.
+        C = lambda z: self.Co / self.eta_o(z)
+        for i, _n in enumerate(N):
+            fEs = root(lambda z: z - (1 - sqrt((E[i] + P[i] - C(z)
+             * _n**2 / self.mn**2)**2 / (_n**2) - self.pf(_n/2)**2)/self.mn), [fEs], tol=1e-11).x
+            res.append(fEs)
+        res = np.array(res)[:,0]
+        print res
+        assert res.shape == N.shape 
+        self.Fs = interp1d(N, res, kind='cubic')
+        return res
+    
+    def FnFromEos(self, E, P, N):
+        assert E.shape == P.shape == N.shape
+        res = []
+        fEn = 0.
+        C = lambda z: self.Co / self.eta_o(z) + self.Cr / 4 / self.eta_r(z)
+        for i, _n in enumerate(N):
+            fEn = root(lambda z: z - (1 - sqrt((E[i] + P[i] - C(z)
+             * _n**2 / self.mn**2)**2 / (_n**2) - self.pf(_n)**2)/self.mn), [fEn], tol=1e-11).x
+            res.append(fEn)
+        
+        res = np.array(res)[:,0]
+        self.Fn = interp1d(N, res, kind='cubic')
+        return res
+    
+            
+        

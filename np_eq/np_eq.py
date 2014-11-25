@@ -11,13 +11,18 @@ def np_eq(n, J, L, n0):
     eps = (n - n0)/n0
     return (n/6.) * (1 - (1 + 128 * (J + L*eps/3.)**(3) / (pi**2 * n) )**(-1))
 
-C = Models.waleckaMatsui()
+C = Models.KVOR()
 wr = Wrapper(C)
 
 
 
 J = wr.J()/wr.m_pi
 L = wr.L()/wr.m_pi
+
+print J*wr.m_pi, wr.Jdiff(wr.n0)
+print wr.L(), wr.Ldiff()
+print wr.Ksymm(), wr.Ksymm_diff()
+exit()
 
 wr.reset()
 

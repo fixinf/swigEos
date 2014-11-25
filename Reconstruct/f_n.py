@@ -1,5 +1,6 @@
 import matplotlib
 from tabulate import tabulate
+from gtk.keysyms import PesetaSign
 matplotlib.use('QT4Agg')
 from math import pi
 from numpy import sqrt, arange, array
@@ -15,7 +16,7 @@ from Wrapper import Wrapper
 from scipy.integrate.odepack import odeint
 
 m_pi=135.0
-m_N = 938.0/m_pi
+m_N = 939.0/m_pi
 m_om = 782.0/m_pi
 Co = 54.6041
 Cs = 164.462
@@ -23,6 +24,15 @@ Cr = 121.69
 b = 0.0202832
 c = 0.0471633
 d = 0.0
+
+C = eos.Walecka()
+C.Cs = Cs
+C.Co = Co
+C.Cr = Cr
+C.b = b
+C.c = c
+
+wr = Wrapper(C)
 
 def pf(n):
     return (3 * pi**2 * n)**(1.0/3.0)
@@ -132,9 +142,6 @@ def _E_N(n):
     return res*135
 
 
-# plot(nrange, map(lambda z:_E_N(z)/z - m_N*135, nrange), nrange, map(lambda z: _E(z, my_fpS)/z - m_N*135, nrange))
-# plot(nrange, map(lambda z: E(z, f_eq(z))/z - m_N*135, nrange),nrange, map(lambda z: EN(z, f_eq(z))/z - m_N*135, nrange))
-# show()
 
 ########################Constructing f(n)#############################
 # f0 = 0.15
@@ -159,8 +166,8 @@ def _E_N(n):
 # show()
 
 #######################Fitting to Landau params######################
-C = Models.waleckaMatsui()
-C2 =  Models.KVOR()
+C2 = Models.waleckaMatsui()
+# C2 =  Models.KVOR()
 wr = Wrapper(C2)
 # 
 # lomb_n = []
@@ -185,14 +192,14 @@ wr = Wrapper(C2)
 # plt.show()
 
 nrange2 = np.linspace(0., 4.5, 100)
-nrange = np.linspace(0., 4., 100)
+nrange = np.linspace(0., 2., 100)
 F0 = wr.f0(nrange2, multiply=False)
 
 
 iF0 = interp1d(nrange2, F0)
 # iF0 = interp1d(lomb_n, lomb_f0)
 
-Co = C2.Co*1.01
+Co = C2.Co*0.7
 
 def func_f_solve(f, n):
     f = float(f)
@@ -232,11 +239,55 @@ my_fpS = interp1d(pflistS, flist[:,0], kind='cubic', bounds_error=False, fill_va
 
 def _E(n, fp):
     res = Co*n**2/(2*C.M[0]**2)
-    print pf(n/2)
+#     print pf(n/2)
     int = 2*quad(lambda z:func_integr(z, fp), 0.0, pf(n/2))[0]
 #     print 'int = ', int
     res += int
-    return res*135
+    return res
+
+##########################################################################3
+### TEST E(n), P(n) -> f(n)
+cAPR = 1.0/0.16
+nAPR=cAPR*np.array([-1e-2, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.8, 0.96])
+APR = np.array([0.0, -6.48, -12.13, -15.04, -16.00, -15.09, -12.88, -5.03, 2.13, 15.46, 
+             34.39, 58.35, 121.25, 204.02])
+
+aprEps = nAPR*wr.n0*APR/wr.m_pi + C.M[0]*nAPR*wr.n0
+i_apr_eps = interp1d(nAPR*wr.n0, aprEps, kind='cubic')
+print nAPR*wr.n0
+i_apr_P = lambda z: z*derivative(i_apr_eps, z, dx=1e-3) - i_apr_eps(z)
+
+print  i_apr_eps(wr.n0), i_apr_P(wr.n0)
+
+wrEs, wrF= wr.Esymm(nrange, ret_f=1)
+pEs = wr.Psymm(nrange) / wr.const / wr.m_pi**4
+
+
+
+# plt.plot(i_apr_eps(nrange), i_apr_P(nrange), wrEs, pEs)
+# plt.show()
+
+wrEs = i_apr_eps(nrange)
+pEs = i_apr_P(nrange)
+
+fEs = 1 - sqrt((wrEs + pEs - Co * nrange**2 / C.M[0]**2)**2 / (nrange**2) - pflistS**2)/C.M[0]
+fEs = np.nan_to_num(fEs)
+fEs[0] = 0.
+print fEs
+print wrF
+lines = plot(nrange, fEs, nrange, wrF)
+legend(lines, ['my', 'orig'])
+show()
+ifEs = interp1d(pflistS, fEs, kind='cubic', bounds_error=False, fill_value=pflistS[0])
+print fEs
+eInt = map(lambda z: _E(z, ifEs), nrange)
+print wrEs
+print eInt
+lines = plot(nrange, eInt, nrange, wrEs)
+legend(lines, ['my', 'orig'])
+show()
+
+
 
 ebind_new = map(lambda z: _E(z, my_fpS)/z - m_N*135, nrange)
 

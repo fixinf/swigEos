@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 from pylab import *
 import Models
 
-C = Models.KVOR()
+# C = Models.KVOR()
 fname_0='KVOR/f0.dat'
 fname_1='KVOR/f1.dat'
-# C = Models.waleckaMatsui()
+C = Models.waleckaMatsui()
 # C = eos.Walecka()
 C.SetHyperConstants(2)
 C.Csp = 1.
@@ -146,12 +146,19 @@ nlist = np.linspace(0., 4., 100)
 
 klist = []
 f0list = []
+k1list = []
+f1list = []
+with open('MatsuiF0.dat', 'r') as f:
+    for line in f:
+        k, f = line.split()
+        klist.append(float(k))
+        f0list.append(float(f))
 
-# with open('MatsuiF0.dat', 'r') as f:
+# with open('MatsuiF1.dat', 'r') as f:
 #     for line in f:
 #         k, f = line.split()
-#         klist.append(float(k))
-#         f0list.append(float(f))
+#         k1list.append(float(k))
+#         f1list.append(float(f))
 
 
 n0 = 0.3*wr.n0#2*(1.42 * 197.33 / 135.)**3 /(3 * pi **2)
@@ -242,7 +249,8 @@ ax[0].plot(nlist/wr.n0, map(lambda z: f0_der(z) - f0(z), nlist))
 # plt.plot(nlist/wr.n0, map(f0, nlist))
 # plt.plot(nlist/wr.n0, map(f1, nlist))
 ax[0].plot(nlist/wr.n0, [-1. for i in nlist], c='red', ls='--')
-# ax[0].plot(klist, f0list)
+ax[0].plot(klist, f0list)
+# ax[0].plot(k1list, f1list)
 
 # plt.xlim([0., 5.])
 plt.show()
@@ -253,10 +261,10 @@ table0 = tabulate(tab0, tablefmt='plain')
 tab1 = np.array([nlist/wr.n0, map(f1, nlist)]).transpose()
 table1 = tabulate(tab1, tablefmt='plain')
 
-with open(fname_0, 'w') as f:
-    f.write(table0)
-
-with open(fname_1, 'w') as f:
-    f.write(table1)    
+# with open(fname_0, 'w') as f:
+#     f.write(table0)
+# 
+# with open(fname_1, 'w') as f:
+#     f.write(table1)    
 
 

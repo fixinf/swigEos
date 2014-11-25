@@ -1,10 +1,13 @@
-import eosWrap as eos
-from Wrapper import Wrapper
 import matplotlib
 matplotlib.use("QT4Agg")
+
+import eosWrap as eos
+from Wrapper import Wrapper
+
 from pylab import *
 from numpy import array, linspace
 from matplotlib.widgets import Slider, CheckButtons, RadioButtons
+import Models
 
 # x = linspace(0.0, 3.0, 100)
 # l = plot(x, sin(x),x, sin(2*x),x, sin(3*x))
@@ -12,34 +15,35 @@ from matplotlib.widgets import Slider, CheckButtons, RadioButtons
 # print colors
 # show()
 
-C = eos.KVOR_mod()
-C.SetHyperConstants(2)
+# C = eos.KVOR_mod()
+C = Models.myMod()
+# C.SetHyperConstants(2)
+# # 
+# C.alpha = 0.85
+# C.z = 0.65
+#     
+# C.omega_a = 4.0
+# C.omega_f = 0.55
 # 
-C.alpha = 0.85
-C.z = 0.65
-    
-C.omega_a = 4.0
-C.omega_f = 0.55
-
-C.phi_a = -0.5
-C.phi_f = 0.29
-    
-C.d = -2.6
-    
-C.phi_gamma = 3.0
-C.phi_z = 3.5
- 
-C.sprime = 0
-C.Csp = 380.0
-    
-C.beta = 0.6
-C.gamma = 1.0
-
-
-C.rho_f = 0.35
-C.rho_a = +80.0
-
-f0 = 0.28
+# C.phi_a = -0.5
+# C.phi_f = 0.29
+#     
+# C.d = -2.6
+#     
+# C.phi_gamma = 3.0
+# C.phi_z = 3.5
+#  
+# C.sprime = 0
+# C.Csp = 380.0
+#     
+# C.beta = 0.6
+# C.gamma = 1.0
+# 
+# 
+# C.rho_f = 0.35
+# C.rho_a = +80.0
+# 
+# f0 = 0.28
 
 
 # 
@@ -65,23 +69,22 @@ print C.X_s[7]
 wr = Wrapper(C)
 C.Csp = 1.0
 n0 = wr.n0
-K0 = 275.0
+K0 = 240.0
 print eos.EBind(np.array([0.195, wr.n0/2, wr.n0/2]), C)
 print eos.f_eq(np.array([n0/2, n0/2]), np.array([0.0]), 1, C)
 
 print C.f0
-wr.solve()
 
-wr.solve(f0=f0, iter=3000)
+
+wr.solve(f0=C.f0, iter=3000)
 print C.f0
-exit()
+# exit()
 # pause(10)
 # wr.solve(0.26, -16, 275, 32 )
 # wr.solve(0.26, -16, 275, 32 )
 # pause(10)
-# for f in linspace(C.f0, f0, 20):
-#     C.f0 = f
-#     wr.solve(f0=C.f0, K0=K0) 
+
+wr.solve(f0=C.f0, K0=K0) 
 
 # pause(5)
 
@@ -120,7 +123,7 @@ LowerY = [7.5, 17.49, 40.0, 60.0, 60.0]
 fig, ax = subplots(2,2)
 n_p = linspace(0.0, 4.0, 2000)
 p = wr.Psymm(n_p)
-lp, = ax[0][0].semilogy(n_p[1:]/wr.n0, p)
+lp, = ax[0][0].semilogy(n_p[:]/wr.n0, p)
 ax[0][0].plot(UpperX, UpperY, LowerX, LowerY, c='red')
 # ax[0][0].plot(UpperX_old, UpperY_old, c='blue')
 ax[0][0].plot(UKlahnX, UKlahnY, c = 'green')
@@ -130,7 +133,7 @@ ax[0][0].set_ylabel(r'$P_{symm}$', fontsize=14)
 wr.reset(hyper=0, npoints=2000, iter=100)
 wr.setDriver()
 
-_n, _M, _R = wr.stars(0.5, 4.0, 100)
+_n, _M, _R, mg = wr.stars(0.5, 4.0, 100)
 mline, = ax[0][1].plot(_n/wr.n0, _M)
 legend([mline],[max(_M)])
 
@@ -206,7 +209,7 @@ def Update(val):
     if needM:
         wr.reset(hyper=0, npoints=2000, iter=100)
         wr.setDriver()
-        _n, _M, _R = wr.stars(0.5, 4.0, 100)
+        _n, _M, _R, mg = wr.stars(0.5, 4.0, 100)
         mline.set_ydata(_M)
         ax[0,1].legend([mline],[max(_M)], loc = 3)
         rho = []
