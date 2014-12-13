@@ -65,6 +65,7 @@ def waleckaMatsui():
     C.SetHyperConstants(2)
     C.Cs = 266.9
     C.Co = 195.7
+    C.Cr = 54.71
     C.b = 0
     C.c = 0
     C.set_hs_alpha(np.array([0. for i in range(8)]))
@@ -258,6 +259,74 @@ def KVOR_cut_02():
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
 
+def KVOR_cut_0196():
+    C = eos.KVOR_mod2()
+    C.Csp = 1.
+    C.Cs = 178.9560101100
+    C.Co =87.5996399401
+    C.Cr = 100.6364207940
+    C.b = 0.0073248882
+    C.c = 0.0028050590
+    print C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2)
+    C.d = 0.
+    C.SetHyperConstants(2)
+    C.omega_kind = 1
+#     C.omega_a = 1000
+#     C.omega_f = 0.4
+#Smooth version:
+    
+    C.rho_kind = 1
+    C.rho_power = 2
+    C.gamma = 5.2
+    C.beta = 1.2
+    C.alpha = 1.
+    
+    C.omega_a = 200
+    C.omega_f = 0.196
+    
+    C.phi_gamma = 3.
+    C.phi_z = 3.5
+    wr = Wrapper(C)
+#     wr.solve(f0=C.f0)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+def KVOR_cut_0196_narrow():
+    C = eos.KVOR_mod2()
+    C.Csp = 1.
+    C.Cs = 178.9560101100
+    C.Co =87.5996399401
+    C.Cr = 100.6364207940
+    C.b = 0.0073248882
+    C.c = 0.0028050590
+    print C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2)
+    C.d = 0.
+    C.SetHyperConstants(2)
+    C.omega_kind = 1
+#     C.omega_a = 1000
+#     C.omega_f = 0.4
+#Smooth version:
+    
+    C.rho_kind = 1
+    C.rho_power = 2
+    C.gamma = 5.2
+    C.beta = 1.2
+    C.alpha = 1.
+    
+    C.omega_a = 20000
+    C.omega_f = 0.196
+    
+    C.phi_gamma = 3.
+    C.phi_z = 3.5
+    wr = Wrapper(C)
+#     wr.solve(f0=C.f0)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
 def KVOR_cut_05():
     C = eos.KVOR_mod2()
     C.Csp = 1.
@@ -392,11 +461,11 @@ def myMod3():
 def myModLowerK(K=275.):
     C = eos.KVOR_mod2()
     
-    C.Cs = 227.8259926550
+    C.Cs = 232.2635684167
     C.Co = 134.8826104284
     C.Cr = 93.1990895430
-    C.b = 0.0055916190
-    C.c = -0.0121228812 
+    C.b = 0.0063104759
+    C.c = -0.0119543213  
     C.alpha = 0.85
     C.z = 0.65
     
@@ -475,6 +544,95 @@ def myModDiffL(beta=0.8, gamma = 7.5):
     C.SetHyperConstants(2)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
+    C.Hyper = 0
+    return C
+
+def myModDiffL_J30(beta=0.8, gamma = 7.5):
+    C = eos.KVOR_mod2()
+    
+    C.Cs = 227.8259926550
+    C.Co = 134.8826104284
+    C.Cr = 93.1990895430
+    C.b = 0.0055916190
+    C.c = -0.0121228812 
+    C.alpha = 0.85
+    C.z = 0.65
+    
+    C.omega_a = 6.45
+    C.omega_f = 0.53
+    
+    C.beta = beta
+    C.gamma = gamma
+              
+    C.phi_a = -0.85
+    C.phi_f = 0.28
+    
+    C.d = -5.5
+    
+    C.rho_f = 0.75
+    C.rho_a = 1000
+
+    C.f0 = 0.27
+    C.rho_kind = 1
+    C.rho_power = 2.0
+    C.omega_c = -15000
+    
+    C.SetHyperConstants(2)
+    
+    C.Csp = 380.
+    
+    C.phi_gamma = 3.0
+    C.phi_z=3.5
+    
+    wr = Wrapper(C)
+    wr.solve(f0 = C.f0, J0=30)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+def myModDiffL_J28(beta=0.8, gamma = 7.5):
+    C = eos.KVOR_mod2()
+    
+    C.Cs = 227.8259926550
+    C.Co = 134.8826104284
+    C.Cr = 93.1990895430
+    C.b = 0.0055916190
+    C.c = -0.0121228812 
+    C.alpha = 0.85
+    C.z = 0.65
+    
+    C.omega_a = 6.45
+    C.omega_f = 0.53
+    
+    C.beta = beta
+    C.gamma = gamma
+              
+    C.phi_a = -0.85
+    C.phi_f = 0.28
+    
+    C.d = -5.5
+    
+    C.rho_f = 0.75
+    C.rho_a = 1000
+
+    C.f0 = 0.27
+    C.rho_kind = 1
+    C.rho_power = 2.0
+    C.omega_c = -15000
+    
+    C.SetHyperConstants(2)
+    
+    C.Csp = 380.
+    
+    C.phi_gamma = 3.0
+    C.phi_z=3.5
+    
+    wr = Wrapper(C)
+    wr.solve(f0 = C.f0, J0=28.)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
     return C
 
 def KVORLowerK(f0, K):
@@ -511,4 +669,237 @@ def KVORLowerK(f0, K):
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
+
+def myModLow():
+    C = eos.KVOR_mod2()
     
+    C.Cs = 227.8259926550
+    C.Co = 134.8826104284
+    C.Cr = 93.1990895430
+    C.b = 0.0055916190
+    C.c = -0.0121228812 
+    C.alpha = 0.85
+    C.z = 0.65
+    
+    C.omega_a = 6.45
+    C.omega_f = 0.53
+    
+    C.beta = 0.8
+    C.gamma = 7.5
+              
+    C.phi_a = -0.85
+    C.phi_f = 0.28
+    
+    C.d = -5.5
+    
+    C.rho_f = 0.75
+    C.rho_a = 1000
+
+    C.f0 = 0.27
+    C.rho_kind = 1
+    C.rho_power = 2.0
+    C.omega_c = -15000
+    
+    C.SetHyperConstants(2)
+    
+    C.Csp = 380.
+    
+    C.phi_gamma = 3.0
+    C.phi_z=3.5
+    
+    wr = Wrapper(C)
+#     wr.solve(f0 = C.f0)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+
+def myMod240():
+    C = eos.KVOR_mod2()
+    
+    
+    C.Cs = 234.1580555799
+    C.Co = 134.8826104616
+    C.b = 0.0046776700
+    C.c = -0.0029781609
+    C.Cr = 93.1990895430
+    
+    C.alpha = 0.4
+    C.z = 0.65
+    
+    C.omega_a = 0.8
+    C.omega_f = 0.55
+    
+    C.beta = 0.8
+    C.gamma = 7.5
+              
+    C.phi_a = -0.0
+    C.phi_f = 0.28
+    
+    C.d = -0.5
+    
+    C.rho_f = 0.75
+    C.rho_a = 1000
+
+    C.f0 = 0.27
+    C.rho_kind = 1
+    C.rho_power = 2.0
+    C.omega_c = -20000
+    
+    C.SetHyperConstants(2)
+    
+    C.Csp = 380.
+    
+    C.phi_gamma = 3.0
+    C.phi_z=3.5
+    
+    wr = Wrapper(C)
+    wr.solve(f0 = C.f0, K0=240.)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+def myMod240_L(beta=0.8, gamma=7.5):
+    C = eos.KVOR_mod2()
+    
+    
+    C.Cs = 234.1580555799
+    C.Co = 134.8826104616
+    C.b = 0.0046776700
+    C.c = -0.0029781609
+    C.Cr = 93.1990895430
+    
+    C.alpha = 0.4
+    C.z = 0.65
+    
+    C.omega_a = 0.8
+    C.omega_f = 0.55
+    
+    C.beta = beta
+    C.gamma = gamma
+              
+    C.phi_a = -0.0
+    C.phi_f = 0.28
+    
+    C.d = -0.5
+    
+    C.rho_f = 0.75
+    C.rho_a = 1000
+
+    C.f0 = 0.27
+    C.rho_kind = 1
+    C.rho_power = 2.0
+    C.omega_c = -20000
+    
+    C.SetHyperConstants(2)
+    
+    C.Csp = 380.
+    
+    C.phi_gamma = 3.0
+    C.phi_z=3.5
+    
+    wr = Wrapper(C)
+    wr.solve(f0 = C.f0, K0=240.)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    C.Hyper = 0
+    return C
+
+
+def myMod240J30():
+    C = eos.KVOR_mod2()
+    
+    
+    C.Cs = 234.1580555799
+    C.Co = 134.8826104616
+    C.b = 0.0046776700
+    C.c = -0.0029781609
+    C.Cr = 93.1990895430
+    
+    C.alpha = 0.4
+    C.z = 0.65
+    
+    C.omega_a = 0.8
+    C.omega_f = 0.55
+    
+    C.beta = 0.8
+    C.gamma = 7.5
+              
+    C.phi_a = -0.0
+    C.phi_f = 0.28
+    
+    C.d = -0.5
+    
+    C.rho_f = 0.75
+    C.rho_a = 1000
+
+    C.f0 = 0.27
+    C.rho_kind = 1
+    C.rho_power = 2.0
+    C.omega_c = -20000
+    
+    C.SetHyperConstants(2)
+    
+    C.Csp = 380.
+    
+    C.phi_gamma = 3.0
+    C.phi_z=3.5
+    
+    wr = Wrapper(C)
+    wr.solve(f0 = C.f0, K0=240., J0=30.)
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+def myMod240J28():
+    C = eos.KVOR_mod2()
+    
+    
+    C.Cs = 234.1580555799
+    C.Co = 134.8826104616
+    C.b = 0.0046776700
+    C.c = -0.0029781609
+    C.Cr = 93.1990895430
+    
+    C.alpha = 0.4
+    C.z = 0.65
+    
+    C.omega_a = 0.8
+    C.omega_f = 0.55
+    
+    C.beta = 0.8
+    C.gamma = 7.5
+              
+    C.phi_a = -0.0
+    C.phi_f = 0.28
+    
+    C.d = -0.5
+    
+    C.rho_f = 0.75
+    C.rho_a = 1000
+
+    C.f0 = 0.27
+    C.rho_kind = 1
+    C.rho_power = 2.0
+    C.omega_c = -20000
+    
+    C.SetHyperConstants(2)
+    
+    C.Csp = 380.
+    
+    C.phi_gamma = 3.0
+    C.phi_z=3.5
+    
+    wr = Wrapper(C)
+    wr.solve(f0 = C.f0, K0=240., J0=30.)
+    wr.solve(f0 = C.f0, K0=240., J0=29.)
+    wr.solve(f0 = C.f0, K0=240., J0=28.)
+
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C

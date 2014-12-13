@@ -10,28 +10,40 @@ C = Models.waleckaMatsui()
 wr = Wrapper(C)
 n = np.linspace(0., 8*wr.n0, 80, endpoint=0)
 from scipy.interpolate import interp1d
-
-
+import eosWrap as eos
+from pylab import sqrt
 #################### TEST ES ######################
 E, fs0 = wr.Esymm(n, ret_f=1)
 P = wr.Psymm(n)/wr.const/wr.m_pi**4
- 
+f_eq = 0.
+for i,_n in enumerate(n):
+    f_eq, = eos.f_eq(np.array([_n/2, _n/2]), np.array([f_eq]), 1, C) 
+    print E[i] + P[i], _n * eos.mu(np.array([f_eq, _n/2, _n/2]), 1, C), _n*(
+          C.Co * _n / C.M[0]**2 + sqrt(eos.p_f(_n/2)**2 + C.M[0]**2*(1-f_eq)**2))
+    f_eq_new = (E[i] + P[i] - C.Co * _n**2 / C.M[0]**2)
+
+
 Eos1 = FromEos()
+print Eos1.mn, C.M[0]
+# exit()
 # Eos1.setScaling(lambda z: (1 + 1.65*0.2)/(1 + 1.65*z),
 #                 lambda z: 1.)
-Eos1.setConstants(Co=C.Co*0.6)
- 
+Eos1.setConstants(Co=C.Co)
+
 Eos2 = EosConstructor()
 Eos2.setConstants(Co=Eos1.Co)
 fs = Eos1.FsFromEos(E, P, n)
-# plt.plot(n/wr.n0, fs, n/wr.n0, fs0)
-# plt.show()
-# exit()
+
+plt.plot(n/wr.n0, fs, n/wr.n0, fs0)
+plt.show()
+exit()
+
 Eos2.setFs(fs0, n)
-# Es2 = map(lambda z: Eos1.ES(z), n)
-# lines = plt.plot(n, E, n, Es2)
-# plt.legend(lines, ['old', 'new'], loc=0)
-# plt.show()
+Es2 = map(lambda z: Eos1.ES(z), n)
+
+lines = plt.plot(n, E, n, Es2)
+plt.legend(lines, ['old', 'new'], loc=0)
+plt.show()
 
 #################### TEST EN ######################
 

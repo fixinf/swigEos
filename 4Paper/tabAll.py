@@ -7,12 +7,13 @@ from tabulate import tabulate
 from os.path import join
 
 
-# models = [Models.KVOR, Models.KVOR_cut_mod, Models.myMod]
+models = [Models.KVOR, Models.KVOR_cut_mod, Models.myMod240]
 # models = [Models.myMod3]
 # models = [Models.KVOR_cut_mod]
 K = 240
 f0 = 0.27
-models = [Models.KVOR_cut_02]
+# models = [Models.KVOR_cut_0196_narrow]
+
 
 for model in models:
     if model.__name__ == 'KVORLowerK':
@@ -44,6 +45,12 @@ for model in models:
 #     wr.dumpAll(folderName, folderName+'.zip')
 #     wr.dumpScalings(folderName)
 #     wr.dumpChi(folderName)
-    wr.dumpMassesCrust(ncut_crust=0.6, ncut_eos=0.8, folderName=folderName)
+#     wr.dumpUofE_anti(folderName)
+    wr.dumpLandauParamsNM(folderName)
+    C.Hyper = 0
+    C.phi_meson=1
+
+#     wr.dumpJ(folderName)
+#     wr.dumpMassesCrust(ncut_crust=0.6, ncut_eos=0.8, folderName=folderName)
 #     wr.dumpLandauParams(folderName)
 

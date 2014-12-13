@@ -30,7 +30,7 @@ def I2num(n, m):
     p = eos.p_f(n)
     res = quad(lambda z: z**2*sqrt(z**2 + m**2), 0, p)[0]
     res /= pi**2
-    return res
+    return res 
 
 def I3(n, m):
     p = eos.p_f(n)
