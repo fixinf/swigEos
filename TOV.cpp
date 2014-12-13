@@ -251,7 +251,7 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 	int i;
 	double step = 0.0;
 	double r_init = 1e-6;
-	double t = r_init, t1 = 30.0 + r_init;
+	double t = r_init, t1 = 50.0 + r_init;
 	double P_init = D->PofN(rho_init);
 	double E_init = D->EofN(rho_init);
 	double y[3] = { D->PofN(rho_init), 1.333 * M_PI * pow(r_init, 3.0) * 1.4766,
@@ -261,37 +261,51 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 	double Dim = pow(135.,4);
 	int status = eq_volkov(r_init, y, f, NULL);
 	int n_points = 10000;
+
+	printf("Deleting... ");
+
 	if (D->lastNstar != 0){
+		printf("N... ");
 		delete D->lastNstar;
 	}
 	if (D->lastRstar != 0){
+		printf("N... ");
 		delete D->lastRstar;
 	}
 
 	if (D->lastMstar != 0){
+		printf("N... ");
 		delete D->lastMstar;
 	}
 
 	if (D->lastEstar != 0){
-			delete D->lastEstar;
+		printf("N... ");
+		delete D->lastEstar;
 	}
 
 	if (D->lastPstar != 0){
-			delete D->lastPstar;
+		printf("N... ");
+		delete D->lastPstar;
 	}
 
+	printf(" done.\n");
 
 
 //	D->nSize = n_points - 1;
 	printf("Allocating... ");
+	printf("N... ");
 	D->lastNstar = new double[n_points-1];
+	printf("R... ");
 	D->lastRstar = new double[n_points-1];
+	printf("M... ");
 	D->lastMstar = new double[n_points-1];
+	printf("E... ");
 	D->lastEstar = new double[n_points-1];
+	printf("P... ");
 	D->lastPstar = new double[n_points-1];
 	printf(" done.\n");
 	for (i = 1; i <= n_points; i++) {
-			printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
+//			printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
 		double ti = i * t1 / n_points;
 		if ((y[0] > delta * P_init)&&(D->NofP(y[0]) > nmin)) {
 			status = gsl_odeiv2_driver_apply(d, &t, ti, y);

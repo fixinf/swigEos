@@ -110,7 +110,7 @@ double f_eq(double * n, int dimN, set_const * C, double init){
 	//double x[3] = {v.n[0], v.n[1], v.f};
 	x[0] = init;
 	lb[0] = 0.0;
-	ub[0] = 1.0;
+	ub[0] = C->fmax;
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-20;
 	opts[4]= -1e-5;
 	int iter = 300;
@@ -175,8 +175,8 @@ void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int di
 		debug = 0;
 	}
 
-	ub[0] = 1.0;
-	ub[1] = 1.0;
+	ub[0] = C->fmax;
+	ub[1] = 1.;
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-24;
 		opts[4]= -1e-5;
 	int iter = 300;

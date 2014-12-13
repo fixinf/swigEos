@@ -29,6 +29,12 @@ KVOR_mod2::KVOR_mod2() : KVOR_mod() {
 	this->exp_alpha = 0;
 	this->Csp = 1.;
 	this->rho_power = 2.;
+	omega_f_low = 1.;
+	omega_a_low = 0.;
+	rho_f_low = 0.;
+	rho_a_low = 0.;
+	rho_gamma_low = 3.;
+	this->Delta = 0.;
 }
 
 KVOR_mod2::~KVOR_mod2() {
@@ -42,6 +48,9 @@ double KVOR_mod2::eta_o(double f){
 //	res *= (tanh(1e5*pow(f - f0,3)) + 1)/2 ;
 //	res += 1;
 	if (f < this->omega_f){
+		if (f < this->omega_f_low)
+		return res + omega_a_low * pow(f - omega_f_low, 3.);
+
 		return res;
 	}
 	else{
@@ -61,6 +70,16 @@ double KVOR_mod2::eta_r(double f){
 	double res = pow((1 + beta * pow(f, rho_power))/(1 + beta*pow(f0, rho_power)), gamma);
 //	printf("%i \n", rho_kind);
 	if (f < this->rho_f){
+		if (f < this->rho_f_low){
+//			double R = 2 * pow(this->M[0], 2) * Delta + Cs - Co/this->eta_o(0.);
+//			R = 4*Cr/R;
+//			double etar0 = pow((1 + beta * pow(0., rho_power))/(1 + beta*pow(f0, rho_power)), gamma);
+//			double mult = (1 - (1 - R) / etar0 * pow((1 - f/rho_f_low), rho_a_low));
+//			printf("f = %f, mult = %f \n", f, mult);
+//			return res * mult;
+			return res + rho_a_low*pow(f - rho_f_low, 3.);
+		}
+
 		return res;
 	}
 	else{

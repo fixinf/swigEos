@@ -13,6 +13,7 @@
 #include "solve.h"
 #include "KVORmod.h"
 #include "KVORmod2.h"
+#include "InterpolatedScalings.h"
 %}
 
 %include "std_vector.i"
@@ -60,3 +61,5 @@ namespace std{
 %include "aux.h"
 
 %include "solve.h"
+%apply (double * INPLACE_ARRAY1, int DIM1) {(double * f_in, int dimF_in), (double * y_in, int dimY_in)};
+%include "InterpolatedScalings.h"

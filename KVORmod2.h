@@ -27,6 +27,12 @@ public:
 	double phi_a;
 	double phi_gamma;
 	double phi_z;
+	double omega_f_low;
+	double rho_f_low;
+	double omega_a_low;
+	double rho_a_low;
+	double rho_gamma_low;
+	double Delta;
 	double omega_c;
 	int rho_kind;
 	double rho_power;

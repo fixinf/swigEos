@@ -125,6 +125,7 @@ public:
 	void set_hs_alpha(double* x, int dimX);
 	int sigma_kind;
 	bool muons;
+	double fmax;
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;

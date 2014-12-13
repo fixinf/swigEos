@@ -106,6 +106,7 @@ void set_const::init(double C_s, double C_o, double C_r, double b, double c, dou
 	this->b = b;
 	this->c = c;
 	this->z = z;
+	this->fmax = 1.;
 	this->exp_alpha = 1.0;
 }
 
