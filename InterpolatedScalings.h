@@ -24,16 +24,23 @@ public:
 	virtual double eta_o(double);
 	virtual double eta_r(double);
 	virtual double eta_p(double);
-
+	bool debug;
 	void set_eta_s(double * f_in, int dimF_in, double * y_in, int dimY_in);
 	void set_eta_o(double * f_in, int dimF_in, double * y_in, int dimY_in);
+	void set_eta_r(double * f_in, int dimF_in, double * y_in, int dimY_in);
+	void set_U(double * f_in, int dimF_in, double * y_in, int dimY_in);
+	bool rho_akima;
 //	alglib::spline1dinterpolant * splineU;
 
 private:
 	gsl_spline * splineU;
 	gsl_spline * splineO;
+	gsl_spline * splineR;
+	gsl_spline * splineS;
 	gsl_interp_accel * accU;
 	gsl_interp_accel * accO;
+	gsl_interp_accel * accR;
+	gsl_interp_accel * accS;
 
 };
 
