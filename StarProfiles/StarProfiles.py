@@ -34,11 +34,13 @@ else:
 C = model(*args)
 
 wr = Wrapper(C)
-wr.dumpStarProfile(6.331, folderName)
+C.Hyper=0
+wr.dumpStarProfile(5.67, folderName)
 exit()
 # wr.reset()
 # wr.setDriver()
 n_star = 5.25*wr.n0
+
 n, m, r, mg1, mg2 = wr.stars_crust(nmin=wr.n0, nmax=n_star+0.01, npoints=2)
 
 E = wr.dr.getLastE(wr.dr.nSize)

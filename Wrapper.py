@@ -19,6 +19,9 @@ from types import *
 from scipy import integrate
 from scipy.optimize import root
 from scipy.optimize import bisect
+import inspect
+from multiprocessing import Queue, Process
+import time
 
 
 class Wrapper():
@@ -27,12 +30,17 @@ class Wrapper():
         self.m_pi = 135.0
         self.m_e = 0.5/self.m_pi
         self.m_mu = 105./self.m_pi
-        self.n0 = (197.33/self.m_pi)**3 * 0.16
+        self.n0 = C.n0
         self.set = False
         self.driverSet = False
         self.const = 197.33*(0.16/self.n0)**(4.0/3.0)*self.m_pi**(-4.0)
-
-    def reset(self, hyper=False, nmin=0.1, nmax = 4.0, npoints = 400, iter=30):
+        
+    def stepE(self, n, last, f, lenLast, iter, C, que):
+        rho = eos.stepE(n, last, f, len(last), iter, C) 
+        que.put(rho)
+        
+    def reset(self, hyper=False, nmin=0.1, nmax = 4.0, npoints = 400,
+               iter=30, verbose=0, timeout=None):
         if hyper:
             init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         else:
@@ -50,18 +58,7 @@ class Wrapper():
         pb = prog.ProgressBar(fd=writer)
         pb.start()
         self.mu_e = []
-#         get_res = lambda z: self.rho = z
-#         rs = p.map_async(lambda z: eos.stepE(z, last, len(last), iter, self.C),
-#                 self.n, callback=get_res)
-#         p.close()
-#         while True:
-#             if rs.ready():
-#                 break
-#             else:
-#                 pb.update(100*rs._number_left/len(self.n))
-#
-#         for i in rs:
-#             self.rho.append(i)
+
         sp = 1 + self.C.sprime
         f = np.array([0.0 for i in range(sp)])
         for _i, i in enumerate(self.n):
@@ -69,12 +66,35 @@ class Wrapper():
                 pass
 
             pb.update(100 * _i / len(self.n))
-            rho = eos.stepE(i, last, f, len(last), iter, self.C)
-#             print rho, eos.mu(rho, 1, self.C), eos.mu(rho, 2, self.C)
-
+            if timeout is None:
+                rho = eos.stepE(i, last, f, len(last), iter, self.C)
+            else:
+                queue = Queue()
+                p = Process(target=self.stepE, args=(i, last, f, len(last),
+                                                  iter, self.C, queue))
+                p.start()
+                p.join(timeout)
+                if p.is_alive():
+                    p.terminate()
+                    print "timeout reached"
+                    self.rho = np.ascontiguousarray(self.rho[:])
+                    self.n = self.n[: self.rho.shape[0]]
+                    _E = map(lambda z: eos.E(z, self.C), self.rho)
+                    self.E = np.ascontiguousarray(np.array(_E[:]))
+                    self.P = np.ascontiguousarray(self.P_chem(self.rho))
+                    self.set=1
+                    return
+#                     p.join() #Needed???
+                rho = queue.get(timeout=1)
+                print rho
+#                 exit()
+    
             self.rho.append(rho.copy())
             self.rho[_i]=np.insert(self.rho[_i],0, i - np.sum(rho))
             f = eos.f_eq(self.rho[_i], f, sp, self.C)
+            if verbose:
+                print f, rho
+                print self.C.eta_r(f[0]), self.C.Cr/self.C.eta_r(f[0])
             for j in range(sp):
                 self.rho[_i]=np.insert(self.rho[_i], j, f[j])
 
@@ -208,7 +228,7 @@ class Wrapper():
     def star_print(self, z):
         return eos.star_crust(z, 3, self.dr, 1e-11)
 
-    def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = .75, nmax = 4.0, npoints=50, crust="crust.dat", show=False):
+    def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = .4, nmax = 4.0, npoints=50, crust="crust.dat", show=False):
         self.reset(nmin = 0., hyper=self.C.Hyper, nmax = nmax, npoints = 1000)
         E, P, N = self.EPN()
         N = N/self.n0
@@ -407,9 +427,10 @@ class Wrapper():
 
         return
 
-    def dumpMasses(self, folderName):
-        if not os.path.exists(folderName):
-            os.makedirs(folderName)
+    def dumpMasses(self, folderName=None):
+        if folderName is not None:
+            if not os.path.exists(folderName):
+                os.makedirs(folderName)
 
         if not self.set:
             self.reset(nmin = 0., nmax = 8. * self.n0, npoints=800)
@@ -418,26 +439,27 @@ class Wrapper():
             self.setDriver()
 
         n, m, r, mb = self.stars(npoints = 100)
-        table = np.array([n/self.n0, m, r, mb]).transpose()
-        f = open(os.path.join(folderName, 'masses.dat'), 'w')
-        tab = tabulate(table, ['n/n_0',
-                               'M [M_{sun}]',
-                               'R [km]',
-                               'M_B [M_sun]'],
-                       tablefmt='plain')
-        f.write(tab)
-        f.close()
+        if folderName is not None:
+            table = np.array([n/self.n0, m, r, mb]).transpose()
+            f = open(os.path.join(folderName, 'masses.dat'), 'w')
+            tab = tabulate(table, ['n/n_0',
+                                   'M [M_{sun}]',
+                                   'R [km]',
+                                   'M_B [M_sun]'],
+                           tablefmt='plain')
+            f.write(tab)
+            f.close()
         return n, m, r
 
-    def dumpHyper(self, folderName, npoints=400):
+    def dumpHyper(self, folderName, npoints=400, verbose=False):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
-
+#         self.C.phi_meson = 1
         self.reset(hyper = 1, nmin = 0., nmax = 8. * self.n0,
-                    npoints=npoints, iter=100)
+                    npoints=npoints, iter=100, verbose=verbose, timeout=6)
         self.setDriver()
         n, m, r, mg1, = self.stars(npoints=100)
-
+        
         mtab = np.array([n/self.n0, m, r]).transpose()
 
         mtable = tabulate(mtab, ['n/n_0','M/M_sun', 'R [km]'], tablefmt='plain')
@@ -496,14 +518,14 @@ class Wrapper():
             f.write(mtable)
 
 
-        drho = rho
+#         drho = rho
         rho = self.concentrations()
-        drho -= rho
-        print rho
+#         drho -= rho
+#         print rho
         table = []
         for i, _n in enumerate(self.n):
             table.append(np.concatenate(([_n/self.n0, self.E[i],
-                                           self.P[i]], rho[i])))
+                                           self.P[i]], rho[i], [self.rho[i, 0]])))
 
 
 
@@ -514,7 +536,7 @@ class Wrapper():
                                'x_p',
                                'x_Lambda',
                                'x_Sigma-', 'x_Sigma0', 'x_Sigma+',
-                               'x_Xi-', 'x_Xi0'],
+                               'x_Xi-', 'x_Xi0', 'f'],
                        tablefmt='plain')
 
         with open(os.path.join(folderName, 'hyper_phi.dat'), 'w') as f:
@@ -568,6 +590,7 @@ class Wrapper():
                   ["K' [MeV]", self.Kprime()],
                   ['J [MeV]', self.J()],
                   ['L [MeV]', self.L()],
+                  ['Ksym [MeV]', self.Ksymm()],
                   ['M_max [M_sun]', mmax],
                   ['M_DU [M_sun]', mdu],
                   ['n_DU [n_0]', ndu/self.n0]
@@ -575,6 +598,12 @@ class Wrapper():
         Params = tabulate(tabParams,floatfmt='.10f',tablefmt='plain')
         Part = tabulate(tabPart,tablefmt='plain')
         Res = tabulate(tabRes,tablefmt='plain')
+        
+#         cPar = ''
+#         for member in inspect.getmembers(self.C, inspect.isdatadescriptor):
+#             print member
+#         
+#         exit()
         f = open(os.path.join(folderName, 'props.dat'), 'w')
         f.write(Params + '\n' + Part + '\n' + Res + '\n')
         f.close()
@@ -789,7 +818,7 @@ class Wrapper():
             with open(join(folderName, 'hyper_meff'+suff+'.dat')) as f:
                 f.write(table)
 
-    def testPodsiedlowski(self, n_crust, n_eos, folderName):
+    def testPodsiedlowski(self, n_crust=0.6, n_eos=0.9, folderName=None):
         n, m, r, mb1, mb2 = self.stars_crust(ncut_crust=n_crust, ncut_eos=n_eos)
         iM = interpolate.interp1d(n, m)
         iMb1 = interpolate.interp1d(n, mb1)
@@ -803,10 +832,11 @@ class Wrapper():
         plt.ylim([1.225, 1.275])
         plt.xlabel(r'$M_B/M_{\odot}$')
         plt.ylabel(r'$M_G/M_{\odot}$')
-        if not os.path.exists(folderName):
-            os.mkdir(folderName)
-
-        plt.savefig(join(folderName,'podsiedlowski.pdf'))
+        if folderName is not None:
+            if not os.path.exists(folderName):
+                os.mkdir(folderName)
+    
+            plt.savefig(join(folderName,'podsiedlowski.pdf'))
         plt.show()
 
     def testDanielewicz(self):
@@ -832,13 +862,14 @@ class Wrapper():
         plt.plot(n_p[:]/self.n0, self.Psymm(n_p))
         plt.show()
 
-    def testDU(self, folderName):
+    def testDU(self, folderName=None):
         if not self.set:
             self.reset(hyper=0, npoints=1000)
         rho = self.concentrations()
         n, m, r = self.dumpMasses(folderName)
         ndu = self.n[np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]]))]
         mdu = m[np.argmin(abs(n - [ndu for i in n]))]
+        print 'n_DU = %.2f n_0, M_DU = %.2f M_sun'%(ndu/self.n0, mdu)
         return 'n_DU = %.2f n_0, M_DU = %.2f M_sun'%(ndu/self.n0, mdu)
 
     def testHyperBind(self, show=True):
@@ -893,7 +924,9 @@ class Wrapper():
         return 9*self.n0**2 * derivative(lambda z: eos.J(z, self.C),
                                          self.n0, dx=1e-3, n=2)
 
-
+    def ESbind(self, n):
+        return self.m_pi*(self.Esymm(n)/n - self.C.M[0])
+    
     def _f0(self, n, f, multiply=True):
         C = self.C
         mn = C.M[0]
@@ -1062,7 +1095,7 @@ class Wrapper():
 
 
     def UofE(self, i, n):
-        f = eos.f_eq(n, np.array([0.]), 1, self.C)
+        f = eos.f_eq(n, np.array([self.C.f0]), 1, self.C)
         pots = eos.potentials(np.insert(n, 0, f), 5, self.C)
         print pots
         V = self.C.X_o[i] * pots[2]
@@ -1122,7 +1155,7 @@ class Wrapper():
             f.write(tab)
 
     def UofE_anti(self, i, n):
-        f = eos.f_eq(n, np.array([0.]), 1, self.C)
+        f = eos.f_eq(n, np.array([self.C.f0]), 1, self.C)
         pots = eos.potentials(np.insert(n, 0, f), 5, self.C)
         print pots
         V = -self.C.X_o[i] * pots[2]
@@ -1274,6 +1307,44 @@ class Wrapper():
             f.write(table)
         return n, res
 
+    def dumpVs(self, folderName=None):
+#         n = np.linspace(0., 8*self.n0, 80, endpoint=0)
+#         Es = self.Esymm(n)
+#         Ps = self.Psymm(n)/self.const/self.m_pi**4
+#         Vs = np.diff(Ps)/np.diff(Es)
+        
+        self.reset(hyper=0, nmin=0., nmax=8*self.n0)
+        
+        vsNs = np.diff(self.P)/np.diff(self.E)
+        tab = np.array([self.n[1:]/self.n0, vsNs]).transpose()
+        table = tabulate(tab, ['n/n0', 'vsNs'], tablefmt='plain')
+        
+        if folderName is not None:
+            with open(join(folderName, 'vsNs.dat'), 'w') as f:
+                f.write(table)        
+        
+        if folderName is None:
+            plt.plot(self.n[1:]/self.n0, vsNs)
+            plt.ylim([0., 1])
+            plt.show()        
+        
+    def getContrib(self):
+        om = []
+        rho = []
+#         xo = np.array([self.C.X_o[i] for i in range(8)])
+#         xr = np.array([self.C.X_o[i] for i in range(8)])
+#         t3 = np.array([self.C.T[i] for i in range(8)])
+        for r in self.rho:
+            om_sum = 0.
+            rho_sum = 0.
+            f = r[0]
+            for i, _r in enumerate(r[1:]):
+                om_sum += self.C.X_o[i] * _r
+                rho_sum += self.C.X_r[i] * _r * self.C.T[i]
+            om.append(self.C.Co*om_sum**2 / (2 * self.C.M[0]**2 * self.C.eta_o(f)))
+            rho.append(self.C.Cr*rho_sum**2 / (2 * self.C.M[0]**2 * self.C.eta_r(f)))
+        return np.array([om, rho]).transpose()
+    
 class EosConstructor(object):
     def __init__(self):
         self.Fs = None

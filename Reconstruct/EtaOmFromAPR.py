@@ -27,7 +27,7 @@ EC.setParams()
 #               eta_r=lambda z: 1.)
 
 cAPR = 1.0/0.16
-nAPR=cAPR*np.array([0., 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.8, 0.96])
+nAPR=cAPR*np.array([0.0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.8, 0.96])
 APR = np.array([0.0, -6.48, -12.13, -15.04, -16.00, -15.09, -12.88, -5.03, 2.13, 15.46, 
              34.39, 58.35, 121.25, 204.02])
 
@@ -46,14 +46,17 @@ i_apr_P2 = lambda z: z*derivative(i_apr_eps2, z, dx=1e-5, order=7) - i_apr_eps2(
 
 n = np.linspace(0, 1.*wr.n0, 100)
 
+print i_apr_P(wr.n0), i_apr_P2(wr.n0)
+
 # plt.plot(n, i_apr_eps(n), n, i_apr_eps2(n))
 plt.plot(n[1:], i_apr_P(n[1:]), n[1:], i_apr_P2(n[1:]))
-plt.plot()
-
 plt.show()
 
-# i_apr_eps = i_apr_eps2
-# i_apr_P = i_apr_P2
+i_apr_eps = i_apr_eps2
+i_apr_P = i_apr_P2
+
+plt.plot(n, map(lambda z: 135*(i_apr_eps(z)/z - C.M[0]), n), n, 135*(wr.Esymm(n)/n - C.M[0]))
+plt.show()
 
 E, fs0 = wr.Esymm(n, ret_f=1)
 P = wr.Psymm(n) / wr.const / wr.m_pi**4
@@ -110,7 +113,9 @@ plt.show()
 
 # eta_o = map(C.eta_o, Fs)
 print max(Fs)
-plt.plot(Fs, eta_o)
+fig, ax = plt.subplots(2,1)
+ax[0].plot(n, eta_o, n, map(C.eta_o, fs0))
+ax[1].plot(n, map(lambda z: 135*(i_apr_eps(z)/z - C.M[0]), n), n, 135*(wr.Esymm(n)/n - C.M[0]))
 plt.show()
 
 # eta_o[10] += 0.01
