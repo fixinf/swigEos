@@ -3,7 +3,7 @@ import numpy as np
 import multiprocessing as mp
 import multi_progress as prog
 from numpy import dtype, argmin
-from scipy import interpolate
+from scipy import interpolate, optimize
 import matplotlib.pyplot as plt
 import sys
 import os
@@ -172,6 +172,7 @@ class Wrapper():
         res = []
         flist = []
         for z in n:
+#             print z
             f, = eos.f_eq(np.array([z/2,z/2]), np.array([f]), 1, self.C)
 #             res.append((eos.E(np.array([f, z/2, z/2]), self.C))/z - self.C.M[0])
             res.append((eos.E(np.array([f, z/2, z/2]), self.C)))
@@ -228,8 +229,12 @@ class Wrapper():
     def star_print(self, z):
         return eos.star_crust(z, 3, self.dr, 1e-11)
 
-    def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = .4, nmax = 4.0, npoints=50, crust="crust.dat", show=False):
-        self.reset(nmin = 0., hyper=self.C.Hyper, nmax = nmax, npoints = 1000)
+    def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = .4, nmax = 4.0,
+                     npoints=50, crust="crust.dat", show=False, crustName=None):
+        neos= 1000
+        if self.C.Hyper:
+            neos = 1000
+        self.reset(nmin = 0., hyper=self.C.Hyper, nmax=nmax, npoints=neos, timeout=5)
         E, P, N = self.EPN()
         N = N/self.n0
         e = []
@@ -243,7 +248,7 @@ class Wrapper():
                     e.append(float(_e))
                     p.append(float(_p))
                     n.append(float(_n))
-        n_eos = 3
+        n_eos = 5
         i_n_eos = np.argmin(abs(N - [ncut_eos for i in N]))
 
         plist = np.append(p[:],P[i_n_eos:(i_n_eos+n_eos)])
@@ -274,11 +279,18 @@ class Wrapper():
         finalN = np.append(iN, N[i_n_eos+n_eos:])
 
         if show:
-            lines = plt.plot(finalN, finalP, n, p, N, P)
+            lines = plt.plot(finalN, finalP*self.m_pi**4, n, p, N, P)
             plt.xlabel(r'$n/n_0$', fontsize=18)
+            plt.xlim([0, 2])
             plt.ylabel(r'$P \, [MeV^4] $', fontsize=18)
             plt.legend(lines, ['interpolated', 'crust', 'RMF'], loc=0)
             plt.show()
+
+        if crustName is not None:
+            tab = np.array([finalN, finalE, finalP]).transpose()
+            table = tabulate(tab, ['n/n0', 'E','P'], tablefmt='plain')
+            with open(crustName, 'w') as f:
+                f.write(table)
 
         self.dr = eos.KVDriver()
         self.dr.set(finalE, finalP, finalN*self.n0)
@@ -309,14 +321,14 @@ class Wrapper():
         return (nstar, MR[:, 0], MR[:,1], 931.5/self.m_pi*MR[:,2],
                 931.5/self.m_pi * Mgrav)
 
-    def stars_crust_hyper(self, ncut_crust=0.6, ncut_eos = 0.9,
-                         inter='linear', nmin = 1., nmax = 4.0,
-                         npoints=50, crust="crust.dat", show=False):
+    def stars_crust_hyper(self, ncut_crust=0.6, ncut_eos = 0.8,
+                         inter='linear', nmin = .4, nmax = 4.0,
+                         npoints=100, crust="crust.dat", show=False):
         hyp_old = self.C.Hyper
         self.C.Hyper=1
-        res = self.stars_crust(ncut_crust=0.6, ncut_eos = 0.9,
-                         inter='linear', nmin = 1., nmax = 4.0,
-                         npoints=50, crust="crust.dat", show=False)
+        res = self.stars_crust(ncut_crust=ncut_crust, ncut_eos = ncut_eos,
+                         inter=inter, nmin = nmin, nmax = nmax,
+                         npoints=npoints, crust=crust, show=show)
         self.C.Hyper=hyp_old
         return res
 
@@ -451,28 +463,53 @@ class Wrapper():
             f.close()
         return n, m, r
 
-    def dumpHyper(self, folderName, npoints=400, verbose=False):
+    def dumpHyper(self, folderName, npoints=400, verbose=False, filename=''):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
-#         self.C.phi_meson = 1
+    
+        #SCALINGS(f) no phi 
+        frange = np.linspace(0, 1, 100)
+        phi_sc = map(self.C.eta_p, frange)
+        etap_tab = np.array([frange, phi_sc]).transpose()
+        etap_table = tabulate(etap_tab, ['f', 'eta_p'], tablefmt='plain')
+        with open(join(folderName, 'etap.dat'), 'w') as f:
+            f.write(etap_table)
+        
+        tab = []
+        for _f in frange:
+            _tab = []
+            _tab.append(_f)
+            for i in xrange(2, 8):
+                _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
+            tab.append(_tab)
+        etap_tab = np.array(tab)#.transpose()
+        etap_table = tabulate(etap_tab, ['f', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
+        with open(join(folderName, 'xi_s.dat'), 'w') as f:
+            f.write(etap_table)
+            
+        #RESET no phi
+        self.C.phi_meson = 0
         self.reset(hyper = 1, nmin = 0., nmax = 8. * self.n0,
                     npoints=npoints, iter=100, verbose=verbose, timeout=6)
+        
+        #MASSES no phi
         self.setDriver()
-        n, m, r, mg1, = self.stars(npoints=100)
+        n, m, r, mg1, mg2 = self.stars_crust_hyper(npoints=100)
         
         mtab = np.array([n/self.n0, m, r]).transpose()
 
         mtable = tabulate(mtab, ['n/n_0','M/M_sun', 'R [km]'], tablefmt='plain')
 
-        with open(join(folderName, 'mass_hyper.dat'), 'w') as f:
+        with open(join(folderName, 'mass_hyper'+filename+'.dat'), 'w') as f:
             f.write(mtable)
-
+            
+        #CONCENTRATIONS no phi
         rho = self.concentrations()
         print rho
         table = []
         for i, _n in enumerate(self.n):
             table.append(np.concatenate(([_n/self.n0, self.E[i],
-                                           self.P[i]], rho[i])))
+                                           self.P[i]], rho[i], [self.rho[i,0]] )))
 
         tab = tabulate(table, ['n/n_0',
                                'E_NS [m_\pi^4]',
@@ -481,11 +518,13 @@ class Wrapper():
                                'x_p',
                                'x_Lambda',
                                'x_Sigma-', 'x_Sigma0', 'x_Sigma+',
-                               'x_Xi-', 'x_Xi0'],
+                               'x_Xi-', 'x_Xi0', 'f(n)'],
                        tablefmt='plain')
 
-        with open(os.path.join(folderName, 'hyper.dat'), 'w') as f:
+        with open(os.path.join(folderName, 'hyper'+filename+'.dat'), 'w') as f:
             f.write(tab)
+
+        #EFF. MASSES no phi
 
         tab = []
         for i, n in enumerate(self.n):
@@ -499,35 +538,93 @@ class Wrapper():
         table = tabulate(tab, ['n/n0', 'N', 'Lambda', 'Sigma', 'Xi'],
                          tablefmt='plain')
 
-        with open(join(folderName, 'hyper_meff.dat'), 'w') as f:
+        with open(join(folderName, 'hyper_meff'+filename+'.dat'), 'w') as f:
             f.write(table)
 
+        #SOUND SPEED no phi
+        
+        vsNs = np.gradient(self.P)/np.gradient(self.E)
+        tab = np.array([self.n[:]/self.n0, vsNs]).transpose()
+        table = tabulate(tab, ['n/n0', 'vs^2'], tablefmt='plain')
+        
+        if folderName is not None:
+            with open(join(folderName, 'vsHyper.dat'), 'w') as f:
+                f.write(table)            
+        
+        #SCALINGS 2 no phi
+        frange = np.linspace(0, 1, 100)
+        phi_sc = map(self.C.eta_p, frange)
+        chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
+        etap_tab = np.array([frange, phi_sc]).transpose()
+        etap_table = tabulate(etap_tab, ['f', 'eta_p'], tablefmt='plain')
+        with open(join(folderName, 'etap.dat'), 'w') as f:
+            f.write(etap_table)
+#         print chi_p
+        chi_tab = np.array([frange, chi_p]).transpose()
+#         print chi_tab
+        chi_table = tabulate(chi_tab, ['f', 'chi_p'], tablefmt='plain')
+        with open(join(folderName, 'chi_p.dat'), 'w') as f:
+            f.write(chi_table)
+        
+        tab = []
+        for _f in frange:
+            _tab = []
+            _tab.append(_f)
+            for i in xrange(2, 8):
+                _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
+            tab.append(_tab)
+        etap_tab = np.array(tab)#.transpose()
+        etap_table = tabulate(etap_tab, ['f', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
+        with open(join(folderName, 'xi_s.dat'), 'w') as f:
+            f.write(etap_table)
+            
+        frange = self.rho[:, 0]
+        phi_sc = map(self.C.eta_p, frange)
+        etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
+        with open(join(folderName, 'etap_N.dat'), 'w') as f:
+            f.write(etap_table)
+        
+        chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
+        chi_tab = np.array([self.n/self.n0, chi_p]).transpose()
+        chi_table = tabulate(chi_tab, ['n/n0', 'chi_p'], tablefmt='plain')
+        with open(join(folderName, 'chi_p_N.dat'), 'w') as f:
+            f.write(chi_table)
+        
+        tab = []
+        for j, _f in enumerate(frange):
+            _tab = []
+            _tab.append(self.n[j]/self.n0)
+            for i in xrange(2, 8):
+                _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
+            tab.append(_tab)
+        etap_tab = np.array(tab)#.transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
+        with open(join(folderName, 'xi_s_N.dat'), 'w') as f:
+            f.write(etap_table)
+        
+        #RESET phi
         self.C.phi_meson = 1
-
         self.reset(hyper = 1, nmin = 0., nmax = 8. * self.n0,
                     npoints=npoints, iter=100)
-
+ 
+        #MASSES phi
         self.setDriver()
-        n, m, r, mg1 = self.stars(npoints=100)
+        n, m, r, mg1, mg2 = self.stars_crust_hyper(npoints=100)
 
         mtab = np.array([n/self.n0, m, r]).transpose()
 
         mtable = tabulate(mtab, ['n/n_0','M/M_sun', 'R [km]'], tablefmt='plain')
 
-        with open(join(folderName, 'mass_hyper_phi.dat'), 'w') as f:
+        with open(join(folderName, 'mass_hyper_phi'+filename+'.dat'), 'w') as f:
             f.write(mtable)
 
-
-#         drho = rho
+        #CONCENTRATIONS phi
         rho = self.concentrations()
-#         drho -= rho
-#         print rho
         table = []
         for i, _n in enumerate(self.n):
             table.append(np.concatenate(([_n/self.n0, self.E[i],
                                            self.P[i]], rho[i], [self.rho[i, 0]])))
-
-
 
         tab = tabulate(table, ['n/n_0',
                                'E_NS [m_\pi^4]',
@@ -539,9 +636,10 @@ class Wrapper():
                                'x_Xi-', 'x_Xi0', 'f'],
                        tablefmt='plain')
 
-        with open(os.path.join(folderName, 'hyper_phi.dat'), 'w') as f:
+        with open(os.path.join(folderName, 'hyper_phi'+filename+'.dat'), 'w') as f:
             f.write(tab)
 
+        #EFF. MASSES phi
         tab = []
         for i, n in enumerate(self.n):
             f = self.rho[i, 0]
@@ -554,11 +652,46 @@ class Wrapper():
         table = tabulate(tab, ['n/n0', 'N', 'Lambda', 'Sigma', 'Xi'],
                          tablefmt='plain')
 
-        with open(join(folderName, 'hyper_meff_phi.dat'), 'w') as f:
+        with open(join(folderName, 'hyper_meff_phi'+filename+'.dat'), 'w') as f:
             f.write(table)
 
-        self.C.phi_meson = 0
+        #SOUND SPEED phi
+        vsNs = np.gradient(self.P)/np.gradient(self.E)
+        tab = np.array([self.n[:]/self.n0, vsNs]).transpose()
+        table = tabulate(tab, ['n/n0', 'vs^2'], tablefmt='plain')
+        
+        if folderName is not None:
+            with open(join(folderName, 'vsHyperPhi.dat'), 'w') as f:
+                f.write(table)
 
+        #SCALINGS 2 phi
+        frange = self.rho[:, 0]
+        phi_sc = map(self.C.eta_p, frange)
+        etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
+        with open(join(folderName, 'etap_N_phi.dat'), 'w') as f:
+            f.write(etap_table)
+        
+        chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
+        chi_tab = np.array([self.n/self.n0, chi_p]).transpose()
+        chi_table = tabulate(chi_tab, ['n/n0', 'chi_p'], tablefmt='plain')
+        with open(join(folderName, 'chi_p_N.dat'), 'w') as f:
+            f.write(chi_table)
+        
+        tab = []
+        for j, _f in enumerate(frange):
+            _tab = []
+            _tab.append(self.n[j]/self.n0)
+            for i in xrange(2, 8):
+                _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
+            tab.append(_tab)
+        etap_tab = np.array(tab)#.transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
+        with open(join(folderName, 'xi_s_N_phi.dat'), 'w') as f:
+            f.write(etap_table)   
+
+        self.C.phi_meson = 0
+        
 
     def dumpAll(self, folderName,filename='data.zip'):
         self.dumpEos(folderName)
@@ -593,11 +726,12 @@ class Wrapper():
                   ['Ksym [MeV]', self.Ksymm()],
                   ['M_max [M_sun]', mmax],
                   ['M_DU [M_sun]', mdu],
-                  ['n_DU [n_0]', ndu/self.n0]
+                  ['n_DU [n_0]', ndu/self.n0],
+                  ['n_0 [fm^-3]', self.n0 * (135/197.33)**3]
                   ]
         Params = tabulate(tabParams,floatfmt='.10f',tablefmt='plain')
-        Part = tabulate(tabPart,tablefmt='plain')
-        Res = tabulate(tabRes,tablefmt='plain')
+        Part = tabulate(tabPart,tablefmt='plain',floatfmt='.10f')
+        Res = tabulate(tabRes,tablefmt='plain',floatfmt='.10f')
         
 #         cPar = ''
 #         for member in inspect.getmembers(self.C, inspect.isdatadescriptor):
@@ -644,7 +778,7 @@ class Wrapper():
                                            'eta_omega',
                                            'eta_rho',
                                            'Phi_N',
-                                           'U'],tablefmt='plain')
+                                           'U'],tablefmt='plain', floatfmt='.10f')
 
         tableF = tabulate(tabF, headers=['f',
                                          'eta_sigma',
@@ -652,7 +786,7 @@ class Wrapper():
                                          'eta_rho',
                                          'eta_phi',
                                          'Phi_N',
-                                         'U'],tablefmt='plain')
+                                         'U'],tablefmt='plain', floatfmt='.10f')
         if folderName is not None:
             with open(os.path.join(folderName, 'scalingsNS.dat'), 'w') as f:
                 f.write(tableNS)
@@ -686,14 +820,15 @@ class Wrapper():
         
         return n, m, r, mb1, mb2
     
-    def dumpMassesCrust(self, folderName ,ncut_crust=.6, ncut_eos=.8, hyper=False):
+    def dumpMassesCrust(self, folderName ,ncut_crust=.6, ncut_eos=.8, hyper=False, show=False, inter='linear'):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
         
         self.C.hyper = hyper
         
+        crustName = join(folderName, 'crustEos.dat')
         n, m, r, mb1, mb2 = self.stars_crust(ncut_crust=ncut_crust,
-                                   ncut_eos=ncut_eos,npoints = 100, show=0)
+                                   ncut_eos=ncut_eos,npoints = 100, show=show, inter=inter, crustName=crustName)
         print m
         print mb1
         table = np.array([n/self.n0, m, r, mb1, mb2]).transpose()
@@ -842,7 +977,7 @@ class Wrapper():
     def testDanielewicz(self):
         UKlahnY = []
         UKlahnX = []
-        with open('klahnUpper', 'r') as f:
+        with open('/home/const/workspace2/swigEosWrapper/klahnUpper', 'r') as f:
             for line in f:
                 _n, p = line.strip().split()
                 UKlahnY.append(float(p))
@@ -851,7 +986,7 @@ class Wrapper():
 
         LKlahnX = []
         LKlahnY = []
-        with open('klahnLower', 'r') as f:
+        with open('/home/const/workspace2/swigEosWrapper/klahnLower', 'r') as f:
             for line in f:
                 _n, p = line.strip().split()
                 LKlahnY.append(float(p))
@@ -1099,7 +1234,7 @@ class Wrapper():
         pots = eos.potentials(np.insert(n, 0, f), 5, self.C)
         print pots
         V = self.C.X_o[i] * pots[2]
-        S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*f[0]))
+        S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*self.C.M[0]/self.C.M[i]*f[0]))
         Uopt = lambda z: z + self.C.M[0] - sqrt((z + self.C.M[0] - V)**2 - S*(2 * self.C.M[i] + S))
         erange = np.linspace(-50./self.m_pi, 10., 100)
 #         plt.plot(erange, self.m_pi*Uopt(erange))
@@ -1159,7 +1294,7 @@ class Wrapper():
         pots = eos.potentials(np.insert(n, 0, f), 5, self.C)
         print pots
         V = -self.C.X_o[i] * pots[2]
-        S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*f[0]))
+        S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*self.C.M[0]/self.C.M[i]*f[0]))
         Uopt = lambda z: z + self.C.M[0] - sqrt((z + self.C.M[0] - V)**2 - S*(2 * self.C.M[i] + S))
         erange = np.linspace(-50./self.m_pi, 10., 100)
 #         plt.plot(erange, self.m_pi*Uopt(erange))
@@ -1264,7 +1399,7 @@ class Wrapper():
         return tab
 
     def dumpStarProfile(self, n_c, folderName=None, file_suffix=None):
-        n, m, r, mg1, mg2 = self.stars_crust(nmin=2*self.n0, nmax=n_c*self.n0,
+        n, m, r, mg1, mg2 = self.stars_crust(nmin=2*self.n0, nmax=n_c,
                                              npoints=2)
 
         dr = self.dr
@@ -1279,7 +1414,7 @@ class Wrapper():
             if not os.path.exists(folderName):
                 os.makedirs(folderName)
 
-            fname = 'starDump_n=%.2f'%(n_c)
+            fname = 'starDump_n=%.2f'%(n_c/self.n0)
             if file_suffix is not None:
                 fname+=file_suffix
 
@@ -1315,19 +1450,85 @@ class Wrapper():
         
         self.reset(hyper=0, nmin=0., nmax=8*self.n0)
         
-        vsNs = np.diff(self.P)/np.diff(self.E)
-        tab = np.array([self.n[1:]/self.n0, vsNs]).transpose()
+        vsNs = np.gradient(self.P)/np.gradient(self.E)
+        tab = np.array([self.n[:]/self.n0, vsNs]).transpose()
         table = tabulate(tab, ['n/n0', 'vsNs'], tablefmt='plain')
         
         if folderName is not None:
             with open(join(folderName, 'vsNs.dat'), 'w') as f:
-                f.write(table)        
-        
-        if folderName is None:
+                f.write(table)
+#             print self.n, type(self.n)
+            es = self.Esymm(self.n)
+            ps = self.Psymm(self.n)/self.const/self.m_pi**4
+            vs = np.gradient(ps)/np.gradient(es)
+            tab = np.array([self.n[:]/self.n0, vs]).transpose()
+            table = tabulate(tab, ['n/n0', 'vs_sym'], tablefmt='plain')
+            with open(join(folderName, 'vs_sym.dat'), 'w') as f:
+                f.write(table)
+            
+                    
+        else:
             plt.plot(self.n[1:]/self.n0, vsNs)
             plt.ylim([0., 1])
-            plt.show()        
+            plt.show()  
+            
+    def dumpVsHyper(self, folderName=None, show=0, npoints=1000):
+#         n = np.linspace(0., 8*self.n0, 80, endpoint=0)
+#         Es = self.Esymm(n)
+#         Ps = self.Psymm(n)/self.const/self.m_pi**4
+#         Vs = np.diff(Ps)/np.diff(Es)
+        self.C.phi_meson = 0
+        self.reset(hyper=1, nmin=0., nmax=8*self.n0, npoints=npoints, timeout=6)
         
+        vsNs = np.gradient(self.P)/np.gradient(self.E)
+        tab = np.array([self.n[:]/self.n0, vsNs]).transpose()
+        table = tabulate(tab, ['n/n0', 'vs^2'], tablefmt='plain')
+        
+        if folderName is not None:
+            with open(join(folderName, 'vsHyper.dat'), 'w') as f:
+                f.write(table)            
+                    
+        if show:
+            plt.plot(self.n[1:]/self.n0, vsNs)
+            plt.ylim([0., 1])
+            plt.show()
+            
+        self.C.phi_meson = 1
+        self.reset(hyper=1, nmin=0., nmax=8*self.n0, npoints=npoints, timeout=6)
+        
+        vsNs = np.gradient(self.P)/np.gradient(self.E)
+        tab = np.array([self.n[:]/self.n0, vsNs]).transpose()
+        table = tabulate(tab, ['n/n0', 'vs^2'], tablefmt='plain')
+        
+        if folderName is not None:
+            with open(join(folderName, 'vsHyperPhi.dat'), 'w') as f:
+                f.write(table)             
+        
+        if show:
+            plt.plot(self.n[1:]/self.n0, vsNs)
+            plt.ylim([0., 1])
+            plt.show()
+        
+        self.C.phi_meson = 0
+        
+            
+    def dumpVsSymLow(self, folderName=None):
+        n = np.linspace(0., 0.01, 1000)
+        es = self.Esymm(n)
+        ps = self.Psymm(n)/self.const/self.m_pi**4
+        vs = np.gradient(ps)/np.gradient(es)
+#         plt.plot(n[1:]/self.n0, vs)
+#         plt.show() 
+        tab = np.array([n[:]/self.n0, vs]).transpose()
+        table = tabulate(tab, ['n/n0','vs'], tablefmt='plain')
+        if folderName is not None:
+            with open(join(folderName, 'vs_sym_detail.dat'), 'w') as f:
+                f.write(table)
+        else:
+            plt.plot(n[1:]/self.n0, vs)
+            plt.show()
+        return n[1:], vs
+            
     def getContrib(self):
         om = []
         rho = []
@@ -1344,6 +1545,132 @@ class Wrapper():
             om.append(self.C.Co*om_sum**2 / (2 * self.C.M[0]**2 * self.C.eta_o(f)))
             rho.append(self.C.Cr*rho_sum**2 / (2 * self.C.M[0]**2 * self.C.eta_r(f)))
         return np.array([om, rho]).transpose()
+    
+    def eval_DU(self, crust=0):
+        if crust:
+            n,m,r,mg,mg2 = self.stars_crust()
+        else:
+            self.reset(npoints = 400)
+            self.setDriver()
+            n,m,r,mg = self.stars(npoints=50)
+        np = self.concentrations()[:, 1]
+        im = interp1d(n, m)
+        inp = interp1d(self.n, np)
+        
+        x_du=[]
+        l_n_e = []
+        l_n_mu = []
+        for _mu in self.mu_e:
+            n_e = 0
+            n_mu = 0
+            if _mu > self.m_e:
+                n_e += (_mu**2 - self.m_e**2)**(1.5)/(3*pi**2)
+            if _mu > self.m_mu:
+                n_mu += (_mu**2 - self.m_mu**2)**(1.5)/(3*pi**2)
+            
+            l_n_e.append(n_e)
+            l_n_mu.append(n_mu)
+            
+            if n_e + n_mu > 0:
+                x_du.append(1./(1 + (1 + (n_e/(n_e + n_mu))**(1./3))**3))
+            else:
+                x_du.append(0.11)
+        ix_du = interp1d(self.n, x_du)
+        res = optimize.minimize(lambda z: (inp(z) - ix_du(z))**2, [2.5*self.n0])
+        x = res.x[0]
+
+        print res
+        print x, x/self.n0
+        print im(x)
+        plt.plot(self.n, inp(self.n), self.n, ix_du(self.n))
+        plt.show()
+        return [x/self.n0, im(x)]
+    
+    def dumpHyperScalings(self, folderName):
+        if not os.path.exists(folderName):
+            os.makedirs(folderName)
+            
+        frange = np.linspace(0, 1, 100)
+        phi_sc = map(self.C.eta_p, frange)
+        chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
+        etap_tab = np.array([frange, phi_sc]).transpose()
+        etap_table = tabulate(etap_tab, ['f', 'eta_p'], tablefmt='plain')
+        with open(join(folderName, 'etap.dat'), 'w') as f:
+            f.write(etap_table)
+#         print chi_p
+        chi_tab = np.array([frange, chi_p]).transpose()
+#         print chi_tab
+        chi_table = tabulate(chi_tab, ['f', 'chi_p'], tablefmt='plain')
+        with open(join(folderName, 'chi_p.dat'), 'w') as f:
+            f.write(chi_table)
+        
+        tab = []
+        for _f in frange:
+            _tab = []
+            _tab.append(_f)
+            for i in xrange(2, 8):
+                _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
+            tab.append(_tab)
+        etap_tab = np.array(tab)#.transpose()
+        etap_table = tabulate(etap_tab, ['f', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
+        with open(join(folderName, 'xi_s.dat'), 'w') as f:
+            f.write(etap_table)
+            
+        self.reset(hyper=1, npoints=200, timeout=6)
+        frange = self.rho[:, 0]
+        phi_sc = map(self.C.eta_p, frange)
+        etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
+        with open(join(folderName, 'etap_N.dat'), 'w') as f:
+            f.write(etap_table)
+        
+        chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
+        chi_tab = np.array([self.n/self.n0, chi_p]).transpose()
+        chi_table = tabulate(chi_tab, ['n/n0', 'chi_p'], tablefmt='plain')
+        with open(join(folderName, 'chi_p_N.dat'), 'w') as f:
+            f.write(chi_table)
+        
+        tab = []
+        for j, _f in enumerate(frange):
+            _tab = []
+            _tab.append(self.n[j]/self.n0)
+            for i in xrange(2, 8):
+                _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
+            tab.append(_tab)
+        etap_tab = np.array(tab)#.transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
+        with open(join(folderName, 'xi_s_N.dat'), 'w') as f:
+            f.write(etap_table)
+            
+        frange = np.linspace(0, 1, 100)
+        self.C.phi_meson=1
+        
+        self.reset(hyper=1, npoints=400, timeout=6)
+        frange = self.rho[:, 0]
+        phi_sc = map(self.C.eta_p, frange)
+        etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
+        with open(join(folderName, 'etap_N_phi.dat'), 'w') as f:
+            f.write(etap_table)
+        
+        chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
+        chi_tab = np.array([self.n/self.n0, chi_p]).transpose()
+        chi_table = tabulate(chi_tab, ['n/n0', 'chi_p'], tablefmt='plain')
+        with open(join(folderName, 'chi_p_N.dat'), 'w') as f:
+            f.write(chi_table)
+        
+        tab = []
+        for j, _f in enumerate(frange):
+            _tab = []
+            _tab.append(self.n[j]/self.n0)
+            for i in xrange(2, 8):
+                _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
+            tab.append(_tab)
+        etap_tab = np.array(tab)#.transpose()
+        etap_table = tabulate(etap_tab, ['n/n0', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
+        with open(join(folderName, 'xi_s_N_phi.dat'), 'w') as f:
+            f.write(etap_table)   
+        
     
 class EosConstructor(object):
     def __init__(self):

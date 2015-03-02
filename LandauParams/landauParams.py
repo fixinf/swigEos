@@ -13,7 +13,7 @@ import Models
 # C = Models.KVOR()
 fname_0='KVOR/f0.dat'
 fname_1='KVOR/f1.dat'
-C = Models.waleckaMatsui()
+C = Models.myMod()
 # C = eos.Walecka()
 C.SetHyperConstants(2)
 C.Csp = 1.
@@ -235,7 +235,7 @@ print eos.K(wr.n0, C)
 f_0 = C.f0
 pf0 = eos.p_f(wr.n0/2)
 print 3 * pf0**2 /sqrt(pf0**2 + (C.M[0]*C.phi_n(0, C.f0))**2) * (1 + f0(wr.n0)) * 135.
-# exit()
+exit()
 denomlist=[]
 numlist=[]
 fig, ax = plt.subplots(2,1)

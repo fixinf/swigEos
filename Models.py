@@ -1,8 +1,10 @@
+import matplotlib.pyplot as plt
 from Wrapper import Wrapper
 import eosWrap as eos
 import numpy as np
 from scipy.misc.common import derivative
 from scipy import optimize
+from math import pi
 
 
 
@@ -28,8 +30,8 @@ def waleckaMatsui():
     C.Cr = 54.71
     C.b = 0
     C.c = 0
-    C.n0 = 1.21 * C.n0
-    C.f0 = 0.44476
+    C.n0 = ((1.42*197.33/135)**3) / ((3*pi**2)/2.)
+    C.f0 = 0.44
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
@@ -81,6 +83,12 @@ def KVOR_cut_mod():
     wr.solve(f0=C.f0)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
+#     return C
+    return KVOR_tan_04(C)
+
+def myModChi():
+    C = myMod()
+    C.phi_kind = 1
     return C
 
 def f_cut(x, C, C1):
@@ -91,7 +99,7 @@ def f_cut(x, C, C1):
     res = np.array(res)
     return np.sum(res*res)
 
-def KVOR_tan_04():
+def KVOR_tan_04(C1):
     C = eos.KVOR_cut()
     C.SetHyperConstants(2)
     C.omega_a = 300.
@@ -114,7 +122,7 @@ def KVOR_tan_04():
     C.omega_a = -0.5
     C.omega_f += 0.05
     
-    C1 = KVOR_cut_mod()
+#     C1 = KVOR_cut_mod()
     
     res = optimize.minimize(lambda z: f_cut(z, C, C1), [C.omega_b, C.omega_f])
     
@@ -127,6 +135,7 @@ def KVOR_tan_04():
     return C
 
 def KVOR_cut_03():
+#     return KVOR_tan_03()
     C = eos.KVOR_cut()
     C.SetHyperConstants(2)
     C.omega_kind = 1
@@ -149,9 +158,43 @@ def KVOR_cut_03():
     wr.solve(f0=C.f0)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
+#     return C
+    return KVOR_tan_03(C)
+
+def KVOR_cut_03_nosolve():
+#     return KVOR_tan_03()
+    C = eos.KVOR_cut()
+    C.SetHyperConstants(2)
+    C.omega_kind = 1
+    C.Csp = 1.
+    C.Cs = 179.5623289954
+    C.Co =87.5996301756
+    C.Cr = 100.6364192718 
+    C.b = 0.0077346088
+    C.c = 0.0003446263
+
+# 
+    C.omega_a = 200.
+    C.omega_f = 0.3
+    C.rho_f = 0.2
+    C.rho_a = 200.
+
+    C.phi_gamma = 3.
+    C.phi_z = 3.5
+    wr = Wrapper(C)
+#     wr.solve(f0=C.f0)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+#     return C
+    return KVOR_tan_03(C,solve=0)
+
+def KVOR_cut_03Chi():
+    C = KVOR_cut_03()
+    C.phi_kind = 1
+    C.phi_a = 0
     return C
 
-def KVOR_tan_03():
+def KVOR_tan_03(C1, solve=1):
     C = eos.KVOR_cut()
     C.SetHyperConstants(2)
     C.omega_a = 300.
@@ -171,10 +214,10 @@ def KVOR_tan_03():
     
     C.omega_kind = 2
     C.omega_b = 100
-    C.omega_a = -0.3
+    C.omega_a = -0.5
     C.omega_f += 0.05
     
-    C1 = KVOR_cut_03()
+#     C1 = KVOR_cut_03()
     
     res = optimize.minimize(lambda z: f_cut(z, C, C1), [C.omega_b, C.omega_f])
     
@@ -183,7 +226,8 @@ def KVOR_tan_03():
     C.phi_gamma = 3.
     C.phi_z = 3.5
     wr = Wrapper(C)
-    wr.solve(f0=C.f0)
+    if solve:
+        wr.solve(f0=C.f0)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
@@ -274,9 +318,34 @@ def KVOR_cut_02():
     wr.solve(f0=C.f0)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
-    return C
+    return KVOR_tan_02(C)
 
-def KVOR_tan_02():
+def KVOR_cut_02_nosolve():
+    C = eos.KVOR_cut()
+    C.SetHyperConstants(2)
+    C.omega_kind = 1
+    C.Csp = 1.
+    C.Cs = 179.5623289954
+    C.Co =87.5996301756
+    C.Cr = 100.6364192718 
+    C.b = 0.0077346088
+    C.c = 0.0003446263
+
+# 
+    C.omega_a = 200.
+    C.omega_f = 0.2
+    C.rho_f = 0.197
+    C.rho_a = 2000.
+
+    C.phi_gamma = 3.
+    C.phi_z = 3.5
+    wr = Wrapper(C)
+#     wr.solve(f0=C.f0)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return KVOR_tan_02(C, solve=False)
+
+def KVOR_tan_02(C1, solve=True):
     C = eos.KVOR_cut()
     C.SetHyperConstants(2)
     C.omega_a = 300.
@@ -284,11 +353,11 @@ def KVOR_tan_02():
     C.omega_kind = 1
     C.Csp = 1.
 #   
-    C.Cs = 179.5623289954
-    C.Co = 87.5996301756
+    C.Cs = 184.2559948015
+    C.Co = 87.5937257485
     C.Cr = 100.6364192718 
-    C.b = 0.0077346088
-    C.c = 0.0003446263
+    C.b = 0.0099933721
+    C.c = -0.0076379652
     C.omega_a = 300.
     C.omega_f = 0.4
 #     C.rho_f = 0.3
@@ -299,8 +368,6 @@ def KVOR_tan_02():
     C.omega_a = -0.2
     C.omega_f = 0.28
     
-    C1 = KVOR_cut_02()
-    
     res = optimize.minimize(lambda z: f_cut(z, C, C1), [C.omega_b, C.omega_f])
     
     print res.x
@@ -308,7 +375,10 @@ def KVOR_tan_02():
     C.phi_gamma = 3.
     C.phi_z = 3.5
     wr = Wrapper(C)
-    wr.solve(f0=C.f0)
+#     for f in np.linspace(0.3, C.omega_f, 10):
+#         C.omega_f = f
+    if solve:
+        wr.solve(f0=C.f0)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
@@ -377,6 +447,49 @@ def KVOR_cut_0196_narrow():
     wr = Wrapper(C)
 #     wr.solve(f0=C.f0)
     C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return KVOR_tan_0196(C)
+#     return C
+
+def KVOR_tan_0196(C1):
+    C = eos.KVOR_cut()
+    C.SetHyperConstants(2)
+    C.omega_a = 300.
+    C.omega_f = 0.3
+    C.omega_kind = 1
+    C.Csp = 1.
+#   
+    C.Cs = 184.2559948015
+    C.Co = 87.5937257485
+    C.Cr = 100.6364192718 
+    C.b = 0.0099933721
+    C.c = -0.0076379652
+    C.omega_a = 300.
+    C.omega_f = 0.4
+#     C.rho_f = 0.3
+#     C.rho_a = 1000.
+    
+    C.omega_kind = 2
+    C.omega_b = 120
+    C.omega_a = -0.8
+    C.omega_f = 0.197
+    
+    res = optimize.minimize(lambda z: f_cut(z, C, C1), [C.omega_b, C.omega_f])
+    
+    print res
+    
+    frange = np.linspace(0, 1, 1000)
+    plt.plot(frange, map(C.eta_o, frange))
+    plt.plot(frange, map(C1.eta_o, frange))
+    plt.show()
+    
+    C.phi_gamma = 3.
+    C.phi_z = 3.5
+    wr = Wrapper(C)
+#     for f in np.linspace(0.3, C.omega_f, 10):
+#         C.omega_f = f
+    wr.solve(f0=C.f0)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
@@ -846,7 +959,7 @@ def myMod240_L(beta=0.8, gamma=7.5):
     C.phi_z=3.5
     
     wr = Wrapper(C)
-#     wr.solve(f0 = C.f0, K0=240.)
+    
     C.SetHyperConstants(2)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
@@ -950,6 +1063,7 @@ def myMod240J28():
     return C
 
 def myMod():
+    return myModFinal()
     return myModR()
     C = myMod240_L(1.2, 7.5)
     C.Cs = 234.1580555929
@@ -1099,6 +1213,7 @@ def myModR():
     wr = Wrapper(C)
 #     wr.solve(f0 = C.f0)
     C.SetHyperConstants(2)
+    C.set_xs(np.array([0., 0., -28., 30., 30., 30., -15., -15.]))
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
@@ -1113,8 +1228,8 @@ def waleckaMatsuiCut():
     C.b = 0
     C.c = 0
     C.d = 0
-    C.n0 = 1.21 * C.n0
-    C.f0 = 0.44476
+    C.n0 = ((1.42*197.33/135)**3) / ((3*pi**2)/2.)
+    C.f0 = 0.44
     
     C.alpha = 0
     C.omega_f = 0.5
@@ -1124,4 +1239,115 @@ def waleckaMatsuiCut():
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
+
+def myModFinal():
+    C = myModR()
+    C.rho_kind = 6
+    C.rho_ld = 0
+    C.rho_sat_a = 10
+    C.rho_sat_f1 = 1
+    C.rho_sat_f2 = 1
+    C.gamma = 0.
     
+    C.beta = 3.80530423
+    C.rho_sat_val = 23.53502497
+    C.rho_f = 0.522
+    rho_f = 0.522
+    C.rho_d = -4
+    C.rho_width_f = C.f0
+    C.rho_a = 0.479673
+    C.rho_width_power = 1.
+    C.rho_a0 = -2
+    C.rho_a1 = 3
+    C.rho_a2 = 0.8
+    C.rho_a3 = -0
+    C.rho_a4 = 0
+    
+    C.rho_e = 6
+    
+    C.beta1 = 0*1.8
+    C.c1 = 80.
+    
+    C.omega_c = 0
+
+    C.omega_kind = 2
+    C.omega_a = 0.10669423
+    C.omega_b = 7.09984178
+    C.omega_f = 0.95
+    wr = Wrapper(C)
+    wr.solve(f0=C.f0, K0=240., J0=30.)
+    return C
+
+def myModNoPhi():
+    C1 = myMod()
+    wr1 = Wrapper(C1)
+    C1.rho_ld = 0
+    C1.rho_ld = 0
+    C1.rho_sat_a = 0 
+    C1.rho_sat_f1 = 1
+    C1.rho_sat_f2 = 1
+    C1.gamma = 0.
+    
+    
+    C1.beta = 0
+    C1.rho_sat_val = 0
+    C1.rho_f = 0.522
+    rho_f = 0.522
+    C1.rho_d = 0
+    C1.rho_width_f = C1.f0
+    C1.rho_a = 1
+    C1.rho_width_power = 0
+    C1.rho_a0 = 0.5
+    C1.rho_a1 = 2
+    C1.rho_a2 = 4
+    C1.rho_a3 = 0
+    C1.rho_a4 = 1
+    
+    C1.rho_e = 0
+    
+    C1.rho = 0
+    C1.drho = 0
+    C1.d2rho = 0
+    C1.d2om = 0
+    C1.dom = 0
+    C1.gamma2 = 0
+    
+    C1.rho_tan_a = 0
+    C1.rho_tan_b = 0
+    C1.rho_tan_c = 0
+    
+    C1.beta1 = 0*1.8
+    C1.beta2 = 0
+    C1.c1 = 80.
+    
+
+    C1.rho_tan_a = 3.
+
+    C1.rho_a3 = 2
+    C1.rho_a = 0.57682427
+    C1.rho_sat_f1 = 0.43248055
+    C1.rho_tan_a = 3.
+    C1.rho_a0 = -1.06792546
+    C1.rho_a1 = 9.72253398
+    C1.rho_tan_b = 9.84217103
+    C1.rho_a2 = 4
+    C1.rho_a4 = 1
+    C1.rho_tan_c = 0
+    frange = np.linspace(0, 1, 100)
+#     plt.plot(frange, map(C1.eta_r, frange))
+#     plt.show()
+    wr1.solve(f0 = C1.f0, K0=240., J0=30.)
+    return C1           
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            

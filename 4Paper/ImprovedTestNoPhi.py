@@ -22,28 +22,72 @@ print C2.eta_r(0.59)
 print derivative(lambda z: C1.eta_r(z), 0.27, dx=1e-3)
 # exit()
 
-rho_f = C2.rho_f
-def f(x):
-    C2.rho_a = x[0]
-    C2.rho_sat_val = x[1]
-    C2.beta = x[2]
-    res =[C2.eta_r(0.27)-1, derivative(C2.eta_r, 0.27, dx=1e-3) - 
-            derivative(C1.eta_r, 0.27, dx=1e-3), C2.eta_r(C2.rho_f) - C1.eta_r(rho_f)]
-    res = np.array(res)
-    return np.sum(res*res)
+# TEST OF RHO KIND 6
+C2.rho_kind = 6
+C2.rho_ld = 0
+C1.rho_ld = 0
+C2.rho_sat_a = 0 
+C2.rho_sat_f1 = 1
+C2.rho_sat_f2 = 1
+C2.gamma = 0.
+
+
+C2.beta = 0
+C2.rho_sat_val = 0
+C2.rho_f = 0.522
+rho_f = 0.522
+C2.rho_d = 0
+C2.rho_width_f = C2.f0
+C2.rho_a = 1
+C2.rho_width_power = 0
+C2.rho_a0 = 0.5
+C2.rho_a1 = 2
+C2.rho_a2 = 4
+C2.rho_a3 = 0
+C2.rho_a4 = -0.5
+
+C2.rho_e = 0
+
+C2.rho = 0
+C2.drho = 0
+C2.d2rho = 0
+C2.d2om = 0
+C2.dom = 0
+C2.gamma2 = 0
+
+C2.rho_tan_a = 0
+C2.rho_tan_b = 0
+C2.rho_tan_c = 0
+
+C2.beta1 = 0*1.8
+C2.beta2 = 0
+C2.c1 = 80.
+
+C1.rho = 0
+C1.drho = 0
+C1.d2rho = 0
+C1.d2om = 0
+C1.dom = 0
+C1.gamma2 = 0
+
+C1.rho_tan_a = 0
+C1.rho_tan_b = 0
+C1.rho_tan_c = 0
+
+C1.beta1 = 0*1.8
+C1.beta2 = 0
+C1.c1 = 80.
 
 npoints = 100
 
 frange = np.linspace(0., 1, 1000)
+
+plt.plot(frange, map(C2.eta_r, frange))
+plt.show()
+
 lines = []
 labels = []
 dlist = np.linspace(0, C2.rho_a0, 10)
-
-
-for d in dlist:
-    C2.rho_a0 = d
-    res = optimize.minimize(f, [C2.rho_f, C2.rho_sat_val, C2.beta]).x
-
 
 fig, ax = plt.subplots()
 
@@ -55,30 +99,16 @@ ax.plot(frange, map(C2.eta_r, frange))
 n_full = 100
 
 wr2.reset(npoints=n_full, iter=200)
-print res
-# En1 = wr2.Eneutr(n_full)
-# Pn1 = wr2.P_N(n_full)/wr2.const/wr2.m_pi**4
 vs1 = np.diff(wr2.P)/np.diff(wr2.E)
 np1 = wr2.concentrations()[:,1]
 fns1 = wr2.rho[:,0]
 etar1 = map(C2.eta_r, fns1)
  
-# 
-# C2.rho = 0
-# C2.drho = 0
-# C2.d2rho = 0
 
 C2.rho_ld = 0
 
 f1 = 0.4
-
-C2.rho = C1.eta_r(f1)
-C2.drho = derivative(C1.eta_r, f1, dx=1e-3)
-C2.d2rho = derivative(C1.eta_r, f1, dx=1e-3, n=2)
-
-# C2.rho = 0
-# C2.drho = 0
-# C2.d2rho = 0
+ 
 
 print C2.rho, C2.drho, C2.d2rho
 
@@ -94,8 +124,32 @@ def fun_low(x):
     res = np.array(map(lambda z: C2.eta_r(z) - C1.eta_r(z), fsmall))
     return np.sum(res**2)
 
-C2.rho_sat_f2 = f1
+def f(x):
+    C2.rho_a = x[0]
+    C2.rho_sat_f1 = x[1]
+#     C2.rho_tan_a = x[2]
+    C2.rho_a0 = x[3]
+    C2.rho_a1 = x[4]
+    C2.rho_tan_b = x[5]
+    f_match = C2.rho_f-0.05
+    res =[C2.eta_r(0.27)-1, derivative(C2.eta_r, 0.27, dx=1e-3) - 
+            derivative(C1.eta_r, 0.27, dx=1e-3), C2.eta_r(f_match) - C1.eta_r(f_match)]
+    res.append(C2.eta_r(0) - C1.eta_r(0))
+    res.append(C2.eta_r(0.1) - C1.eta_r(0.1))
+#     res.append(derivative(C2.eta_r, C2.rho_f-0.05, dx=1e-3) - derivative(C1.eta_r, C1.rho_f-0.05, dx=1e-3))
+    res = np.array(res)
+    return np.sum(res*res)
 
+
+C2.rho_sat_f1 = 0.4
+C2.rho_tan_a = 3.
+C2.rho_tan_b = 12
+C2.rho_a3 = 2
+res = optimize.minimize(f, [C2.rho_a, C2.rho_sat_f1, C2.rho_tan_a, C2.rho_a0, C2.rho_a1, C2.rho_tan_b,
+                            C2.rho_a2, C2.rho_a4])
+print res
+print res.x
+# exit()
 # print optimize.minimize(fun_low, [0,0])
 
 # C2.rho_tan_a = 7.4
@@ -221,10 +275,8 @@ print max(fNS)
 # exit()
 wr1.C.phi_meson=0
 wr1.reset(npoints=npoints, timeout=2, hyper=1)
-wr1.setDriver()
-n, m, r, mg = wr1.stars()
-print max(m)
-# exit()
+# wr1.setDriver()
+
 fig, ax = plt.subplots(2, 2)
 ax[0,0].plot(wr1.n/wr1.n0, wr1.getContrib(), nNS/wr1.n0, contribNS)
 ax[1,0].plot(wr1.n/wr1.n0, wr1.concentrations(), wr1.n/wr1.n0, wr1.rho[:,0], nNS/wr1.n0, fNS)
@@ -232,33 +284,10 @@ ax[0,1].plot(wr1.rho[:,0], map(wr1.C.eta_r, wr1.rho[:,0]))
 
 plt.show()
 
-
+n, m, r, mg, mg2 = wr1.stars_crust_hyper()
+print max(m)
 # exit()
-# wr2.reset(npoints=npoints)
 
+plt.plot(n/wr2.n0, m)
+plt.show()
 
-# f1 = wr1.rho[:, 0]
-# f2 = wr2.rho[:, 0]
-# n = wr1.n/wr1.n0
-# print f1-f2
-# 
-# lines = plt.plot(n, f1, n, f2)
-# plt.legend(lines, ['old','new'], loc=0)
-# plt.show()
-# 
-# lines=plt.plot(f1, map(C1.eta_r, f1), f2, map(C2.eta_r, f2))
-# plt.legend(lines, ['old','new'], loc=0)
-# plt.show()
-# 
-# wr2 = wr1
-# wr2.reset(hyper=1, npoints=npoints, verbose=1, iter=30, timeout=6)
-# 
-# lines = plt.plot(wr2.n/wr2.n0, wr2.rho[:,0], wr2.n/wr2.n0, wr2.concentrations())
-# plt.legend(lines, ['f','p', 's-','s0','s+','x-','x0'], loc=0)
-# plt.show()
-# 
-# fig, ax = plt.subplots(3, 1)
-# ax[0].plot(wr2.n/wr2.n0, wr2.rho[:, 0])
-# ax[1].plot(wr2.n/wr2.n0, map(wr2.C.eta_r, wr2.rho[:, 0]))
-# ax[2].plot(wr2.n/wr2.n0, map(wr2.C.eta_o, wr2.rho[:, 0]))
-# plt.show()

@@ -23,7 +23,7 @@ C1.omega_c = 0
 C1.omega_kind = 2
 C1.omega_a = 0.1
 C1.omega_b = 10
-C1.omega_f = 0.97
+C1.omega_f = 0.95
 
 npoints = 10
 f_solve = np.linspace(0.5, 1., npoints)
@@ -44,6 +44,8 @@ plt.plot(frange, map(C.eta_o, frange), frange, map(C1.eta_o, frange))
 plt.ylim([0.5, 1.5])
 plt.show()
 
+wr1.testDanielewicz()
+wr1.testPodsiedlowski()
 wr1.dumpVs()
 
 wr.reset()

@@ -18,21 +18,27 @@ wr = Wrapper(C)
 n = np.linspace(0.0, 4.0, 2000)
 
 cAPR = 1.0/0.16
-nAPR=cAPR*np.array([0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.8, 0.96])
-APR = np.array([-6.48, -12.13, -15.04, -16.00, -15.09, -12.88, -5.03, 2.13, 15.46, 
+nAPR=cAPR*np.array([0.0, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.8, 0.96])
+APR = np.array([0.0, -6.48, -12.13, -15.04, -16.00, -15.09, -12.88, -5.03, 2.13, 15.46, 
              34.39, 58.35, 121.25, 204.02])
 
+nrange = np.linspace(nAPR[0], nAPR[-1], 50)
+iAPR = interpolate.interp1d(nAPR, APR, kind='cubic')
+
 with open('APR.dat', 'w') as f:
-    for i, n in enumerate(nAPR):
-        f.write('%f %f \n'% (n, APR[i]))
+    for i, n in enumerate(nrange):
+        f.write('%f %f \n'% (n, iAPR(n)))
 # exit()    
 
-APR_N = np.array([4.45, 6.45 , 9.65, 13.29, 17.94, 22.92, 27.49, 38.82, 54.95, 75.13, 99.75, 127.58, 205.34, 305.87])
-nAPR_N = cAPR* np.array([0.02, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24,  0.32,  0.4, 0.48, 0.56, 0.64, 0.8, 0.96]) 
+APR_N = np.array([0., 4.45, 6.45 , 9.65, 13.29, 17.94, 22.92, 27.49, 38.82, 54.95, 75.13, 99.75, 127.58, 205.34, 305.87])
+nAPR_N = cAPR* np.array([0., 0.02, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24,  0.32,  0.4, 0.48, 0.56, 0.64, 0.8, 0.96]) 
+
+nrange = np.linspace(nAPR_N[0], nAPR_N[-1], 50)
+iAPR_N = interpolate.interp1d(nAPR_N, APR_N, kind='cubic')
 
 with open('APR_N.dat', 'w') as f:
     for i, n in enumerate(nAPR_N):
-        f.write('%f %f \n'% (n, APR_N[i]))
+        f.write('%f %f \n'% (n, iAPR_N(n)))
 exit()
 
 

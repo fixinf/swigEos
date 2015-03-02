@@ -8,17 +8,17 @@ from os.path import join
 from os import path
 import os
 
-model = Models.myMod
+model = Models.KVOR_cut_03
 C = model()
 C.set_xs(np.array([0., 0., -28., 30., 30., 30., -15., -15.]))
 wr = Wrapper(C)
 
 C.sigma_kind = 1
 
-zl = 3.
-zx = 3.
+zl = 3.5
+zx = 3.5
 
-alpha = 2.
+alpha = 5.5
 
 # wr.solve(f0=C.f0, J0=28., K0=240.)
 
@@ -30,16 +30,21 @@ if not path.exists(folder):
     os.makedirs(folder)
 
 C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
-C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
+C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zl, zl]))
 
 print 'hey'
 
-wr.reset(hyper=1, nmin=0., nmax=10.5*wr.n0, npoints=200)
+frange = np.linspace(0., 1., 100)
+scF = map(lambda z: ((1 + zl * C.f0) / (1 + zl * z))**alpha, frange)
+plt.plot(frange, scF)
+plt.show()
+
+wr.reset(hyper=1, nmin=0., nmax=8*wr.n0, npoints=200, timeout=3)
 wr.setDriver()
 
-frange = np.linspace(0., 1., 100)
+plt.plot(wr.n/wr.n0, wr.concentrations(), wr.n/wr.n0, wr.rho[:,0])
+plt.show()
 
-scF = map(lambda z: ((1 + zl * C.f0) / (1 + zl * z))**alpha, frange)
 scN = map(lambda z: ((1 + zl * C.f0) / (1 + zl * z))**alpha, wr.rho[:, 0])
 
 tabscF = np.array([frange, scF]).transpose()
@@ -54,7 +59,10 @@ with open(join(folder, 'scF.dat'), 'w') as f:
 with open(join(folder, 'scN.dat'), 'w') as f:
     f.write(tabscN)
 
-n, m, r, mg1, mg2 = wr.star_crust_hyper(npoints=30)
+n, m, r, mg1 = wr.stars(npoints=30)
+
+plt.plot(n/wr.n0, m)
+plt.show()
 
 mtable = tabulate(np.array([n/wr.n0, m, r]).transpose(), ['n/n_0', 'M/M_sun', 'R [km]'], tablefmt='plain')
 with open(join(folder, 'masses.dat'), 'w') as f:
