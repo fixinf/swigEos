@@ -158,7 +158,7 @@ int set_const::SetHyperConstants(int type){
 			case 2: //SU(6)
 				double _3xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
 				double _3xr[8] = { 1.0, 1.0, 0, 2.0, 2.0, 2.0, 1.0, 1.0};
-				double _3ebind[8] = {0, 0, -30, 30, 30, 30, -18, -18};
+				double _3ebind[8] = {0, 0, -28, 30, 30, 30, -15, -15};
 				double _3xp[8] = {0.0, 0.0, -sq2/3,-sq2/3,-sq2/3,-sq2/3,-2*sq2/3,-2*sq2/3};
 				for (int i =0; i<8; i++){
 					xo[i] = _3xo[i];
@@ -290,6 +290,9 @@ double set_const::Xs(int i, double f) {
 //	printf("i = %i \n", i);
 	if (i > 1){
 		res *= pow((1 + hs_z[i] * f0)/ (1 + hs_z[i]*f), hs_alpha[i]);
+		if (hyper_sigma_kind == 0){
+			return 0.;
+		}
 	}
 	return res;
 }

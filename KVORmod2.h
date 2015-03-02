@@ -1,5 +1,5 @@
 /*
- * KVORmod2.h
+2 * KVORmod2.h
  *
  *  Created on: 19 сент. 2014 г.
  *      Author: const
@@ -76,6 +76,7 @@ public:
 	double s(double f);
 	double s_exp(double f);
 	int umode;
+	int phi_kind;
 };
 
 class KVOR_cut: public KVOR_mod2{
@@ -85,6 +86,9 @@ public:
 	}
 
 	double eta_r(double f){
+		if (rho_kind == 9){
+			return 1;
+		}
 		double res = KVOR::eta_o(f)/(KVOR::eta_o(f) +
 			4*(this->Co/this->Cr)*(KVOR::eta_o(f)-1.0));
 

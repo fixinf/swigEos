@@ -126,6 +126,7 @@ public:
 	int sigma_kind;
 	bool muons;
 	double fmax;
+	bool hyper_sigma_kind;
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;

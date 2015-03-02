@@ -39,6 +39,39 @@ KVOR_mod2::KVOR_mod2() : KVOR_mod() {
 	this->rho_val = 0.;
 	rho_d = 0;
 	rho_ld = 0;
+	this->beta1 = 0;
+	this->beta2 = 0;
+	this->d2om = 0;
+	this->dom = 0;
+	this->drho = 0;
+	this->rho = 0;
+	this->d2rho = 0;
+	this->gamma2= 0;
+	this->rho_a = 0;
+	this->rho_a2 = 0;
+	this->rho_a = 0;
+	this->c1 = 0;
+	this->rho_a0 = 0;
+	this->rho_a1 = 0;
+	this->rho_a2 = 0;
+	this->rho_a3 = 0;
+	this->rho_a4 = 0;
+	this->rho_e = 0;
+	this->rho_b_low = 0;
+	this->rho_sat_a = 0;
+	this->rho_sat_f1 = 1;
+	this->rho_sat_f2 = 1;
+	this->rho_tan_a = 0;
+	this->rho_tan_b = 0;
+	this->rho_tan_c = 0;
+	this->omega_b = 0;
+	this->rho_sat_val = 0;
+	this->rho_width_f = 1;
+	this->rho_width_power = 0;
+	this->gamma = 0;
+	this->beta = 0;
+	this->rho_a = 0;
+	this->phi_kind = 0;
 }
 
 KVOR_mod2::~KVOR_mod2() {
@@ -89,31 +122,36 @@ double KVOR_mod2::eta_r(double f){
 	double f1, fs, s;
 
 	if (rho_kind == 6){
-		res = rho_a + rho_a0 * f/(1 + rho_a4 * f) + rho_a1*f*f/(1 + rho_a2*f*f + rho_a3*f*f*f) +
+		s = 0.5 * (1 + tanh(rho_tan_b * (f - this->rho_sat_f1)));
+
+		res = rho_a + rho_tan_a*s + rho_a0 * f/(1 + rho_a4 * f) + rho_a1*f*f/(1 + rho_a2*f*f + rho_a3*f*f*f) +
 				beta*exp(-rho_sat_val*pow(pow(f-rho_f,2)/(1+rho_d*pow(f - rho_width_f,1)/(1 + rho_e * pow(f - rho_width_f,2))), rho_width_power)) +
 				beta1*exp(-this->c1 * pow(f - rho_f, 2));
 
-		if (f > this->rho_sat_f1){
-			res += rho + drho*(f - rho_sat_f1) + 0.5*d2rho*pow(f - rho_sat_f1,2 )
-			+ rho_tan_a* tanh(rho_tan_b*pow(f/rho_sat_f1 - 1, 4));
-		}
-
-		if (f > rho_sat_f2){
-			res += rho_tan_a*pow(f/rho_sat_f2 - 1, 3) + rho_tan_b*pow(f/rho_sat_f2 - 1, 5)
-			+ rho_tan_c*pow(f/rho_sat_f2 - 1, 7);
-		}
-
-//		if (f < f0){
-//			res += rho_a_low*pow(f/f0-1,3)/pow(f0,3)
-//				+ rho_b_low*pow(f/f0-1,5)/pow(f0,5);
+//		if (f > this->rho_sat_f1){
+//			res = rho + drho*(f - rho_sat_f1) + 0.5*d2rho*pow(f - rho_sat_f1, 2)
+//			+ rho_tan_a * tanh(rho_tan_b*pow(f/rho_sat_f1 - 1, 3));
 //		}
 //
-//		if (rho_ld){
-//			if (f < f0)
-//			return 1 + drho*(f-f0) + d2rho*pow(f-f0,2)/2
-//					+ rho_a_low*pow(f-f0,3)/pow(f0,3)
-//					+ rho_b_low*pow(f-f0,5)/pow(f0,5);
+////		if (f > rho_sat_f2){
+////			res += rho_tan_a*pow(f/rho_sat_f2 - 1, 3) + rho_tan_b*pow(f/rho_sat_f2 - 1, 5)
+////			+ rho_tan_c*pow(f/rho_sat_f2 - 1, 7);
+////		}
+//		if (f > rho_sat_f2){
+//			res += rho_tan_a*tanh(rho_tan_b*pow(f/rho_sat_f2 - 1, 3));
 //		}
+//
+////		if (f < f0){
+////			res += rho_a_low*pow(f/f0-1,3)/pow(f0,3)
+////				+ rho_b_low*pow(f/f0-1,5)/pow(f0,5);
+////		}
+////
+////		if (rho_ld){
+////			if (f < f0)
+////			return 1 + drho*(f-f0) + d2rho*pow(f-f0,2)/2
+////					+ rho_a_low*pow(f-f0,3)/pow(f0,3)
+////					+ rho_b_low*pow(f-f0,5)/pow(f0,5);
+////		}
 
 		return res;
 	}
@@ -246,5 +284,12 @@ double KVOR_mod2::phi_n(int i, double f){
 }
 
 double KVOR_mod2::eta_p(double f){
-	return pow((1 + phi_z*this->f0)/(1 + phi_z*f), this->phi_gamma);
+	if (this->phi_kind == 0){
+		if (f < this->f0){
+			return 1.;
+		}
+		return pow((1 + phi_z*this->f0)/(1 + phi_z*f), this->phi_gamma);
+	}
+	else
+		return pow(1 - f, 2)/pow(1 + phi_a*f*f,2);
 }
