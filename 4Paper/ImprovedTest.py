@@ -27,8 +27,9 @@ def f(x):
     C2.rho_a = x[0]
     C2.rho_sat_val = x[1]
     C2.beta = x[2]
+    C2.rho_a0 = x[3]
     res =[C2.eta_r(0.27)-1, derivative(C2.eta_r, 0.27, dx=1e-3) - 
-            derivative(C1.eta_r, 0.27, dx=1e-3), C2.eta_r(C2.rho_f) - C1.eta_r(rho_f)]
+            derivative(C1.eta_r, 0.27, dx=1e-3), C2.eta_r(C2.rho_f) - C1.eta_r(rho_f), C2.eta_r(1) - 1.5]
     res = np.array(res)
     return np.sum(res*res)
 
@@ -42,8 +43,7 @@ dlist = np.linspace(0, C2.rho_a0, 10)
 
 for d in dlist:
     C2.rho_a0 = d
-    res = optimize.minimize(f, [C2.rho_f, C2.rho_sat_val, C2.beta]).x
-
+    res = optimize.minimize(f, [C2.rho_f, C2.rho_sat_val, C2.beta, C2.rho_a0]).x
 
 fig, ax = plt.subplots()
 
@@ -76,9 +76,6 @@ C2.rho = C1.eta_r(f1)
 C2.drho = derivative(C1.eta_r, f1, dx=1e-3)
 C2.d2rho = derivative(C1.eta_r, f1, dx=1e-3, n=2)
 
-# C2.rho = 0
-# C2.drho = 0
-# C2.d2rho = 0
 
 print C2.rho, C2.drho, C2.d2rho
 
@@ -98,13 +95,6 @@ C2.rho_sat_f2 = f1
 
 # print optimize.minimize(fun_low, [0,0])
 
-# C2.rho_tan_a = 7.4
-# C2.rho_tan_b = -6.6
-# C2.rho_tan_c = -3.27
-
-
-# C2.rho_tan_a = 2
-# C2.rho_tan_b = 10
 C2.rho_tan_c = 0
 
 print wr2.L(), wr2.J()
@@ -177,6 +167,9 @@ np2 = wr2.concentrations()[:,1]
 fns2 = wr2.rho[:,0]
 etar2 = map(C2.eta_r, fns2)
 
+wr2.solve(f0=C2.f0, K0=240., J0=30.)
+print wr2.J(), wr2.L()
+
 fig, ax = plt.subplots(2,2)
 ax[0,0].plot(wr2.n[1:]/wr2.n0, vs1, wr2.n[1:]/wr2.n0, vs2)
 ax[1,0].plot(wr2.n/wr2.n0, np1, wr2.n/wr2.n0, np2)
@@ -185,9 +178,15 @@ ax[1,1].plot(wr2.n/wr2.n0, etar1, wr2.n/wr2.n0, etar2)
 print C2.rho_tan_a, C2.rho_tan_b, C2.rho_tan_c
 plt.show()
 
-wr2.solve(f0=C2.f0, K0=240., J0=30.)
-print wr2.J(), wr2.L()
+Es, fs = wr2.Esymm(wr2.n,ret_f=1)
+plt.plot(wr2.n/wr2.n0, map(lambda z: 1./C2.eta_r(z),fs))
+plt.plot(wr2.n/wr2.n0, map(lambda z: 1./C1.eta_r(z),fs))
+plt.show()
 
+n, J2 = wr2.dumpJ()
+n, J1 = wr1.dumpJ()
+plt.plot(n/wr1.n0, J1, n/wr1.n0, J2)
+plt.show()
 
 # wr2.reset()
 # wr1.reset()
@@ -219,7 +218,7 @@ contribNS = wr1.getContrib()
 nNS = wr1.n
 print max(fNS)
 # exit()
-wr1.C.phi_meson=0
+wr1.C.phi_meson=1
 wr1.reset(npoints=npoints, timeout=2, hyper=1)
 wr1.setDriver()
 n, m, r, mg = wr1.stars()
@@ -231,6 +230,7 @@ ax[1,0].plot(wr1.n/wr1.n0, wr1.concentrations(), wr1.n/wr1.n0, wr1.rho[:,0], nNS
 ax[0,1].plot(wr1.rho[:,0], map(wr1.C.eta_r, wr1.rho[:,0]))
 
 plt.show()
+
 
 
 # exit()

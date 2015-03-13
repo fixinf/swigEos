@@ -10,7 +10,8 @@ from os.path import join
 models = [Models.KVOR, Models.KVOR_cut_mod, Models.KVOR_cut_02, Models.KVOR_cut_03, Models.myMod]
 # models = [Models.KVOR, Models.KVOR_cut_03, Models.myMod, Models.KVOR_cut_03Chi, Models.myModChi]
 # models = [Models.myModNoPhi]
-# models = [Models.myModChi]
+# models = [Models.myModChi, Models.KVOR_cut_03Chi]
+# models=[Models.myMod]
 # models=[Models.myModChi]
 # models = [Models.KVOR, Models.KVOR_cut_02]
 K = 240
@@ -88,11 +89,17 @@ for model in models:
 #     wr.dumpChi(folderName)
 #     wr.dumpUofE(folderName)
 #     wr.dumpUofE_anti(folderName)
-
+    C.phi_meson = 0
+#     wr.dumpUn(folderName)
+#     wr.dumpLandauParams(folderName)
+    wr.dumpScalingsSym(folderName)
+        
+#     wr.dumpMassesCrustHyper(folderName=folderName, ret_str=1)
+    C.phi_meson = 0
 #     wr.dumpLandauParams(folderName)
 #     wr.dumpLandauParamsNM(folderName)
 # 
-    wr.dumpJ(folderName)
+#     wr.dumpJ(folderName)
 # #     exit()
 #     C.Hyper = 0
 #     wr.dumpVs(folderName)
@@ -112,37 +119,40 @@ for model in models:
 #     wr.dumpVsHyper(folderName)
 #     wr.dumpHyperScalings(folderName)
 
-#     if ((model.__name__=='KVOR_cut_03Chi')
-#         or (model.__name__ == 'myModChi')
-#         ):
-#         Hyper = 1
-#         C.sigma_kind = 1
-# #         print '!!!!!!!!!!!!!!!!!!!!!!!!!!'
-# #         zl = 3.
-# #         zx = 3.
-# #         alpha = 2.5
-# #         C.phi_meson = 0
-# #         C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
-# #         C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zx, zx]))
-# # #         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
-# #         wr.dumpHyper(folderName+'Sigma', npoints=400, verbose=1)
-# #         wr.dumpHyperScalings(folderName+'Sigma')
-#         C.phi_a = 0.
-#         C.hyper_sigma_kind = 0
-#         app='0'
-#          
-#         zl = 2.
-#         zx = 2.
-#         alpha = 2.
-#         C.phi_gamma = 1.
-#         C.phi_z = 1
-#         C.phi_meson = 1
-#         C.phi_kind = 1 
+    if ((model.__name__=='KVOR_cut_03Chi')
+        or (model.__name__ == 'myModChi')
+        ):
+        Hyper = 1
+        C.sigma_kind = 1
+#         print '!!!!!!!!!!!!!!!!!!!!!!!!!!'
+#         zl = 3.
+#         zx = 3.
+#         alpha = 2.5
+#         C.phi_meson = 0
 #         C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
-# #         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
 #         C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zx, zx]))
+# #         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
+#         wr.dumpHyper(folderName+'Sigma', npoints=400, verbose=1)
+#         wr.dumpHyperScalings(folderName+'Sigma')
+#         wr.dumpMassesCrustHyper(folderName=folderName+'Sigma', ret_str=1)
+        
+        C.phi_a = 0.
+        C.hyper_sigma_kind = 0
+        app='0'
+          
+        zl = 2.
+        zx = 2.
+        alpha = 2.
+        C.phi_gamma = 1.
+        C.phi_z = 1
+        C.phi_meson = 1
+        C.phi_kind = 1 
+        C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
+#         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
+        C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zx, zx]))
 #         wr.dumpHyper(folderName+'SigmaPhi'+app, npoints=400, verbose=1)
-# #         wr.dumpHyperScalings(folderName+'SigmaPhi'+app)
-# #         wr.dumpVsHyper(folderName+'SigmaPhi'+app)
+        wr.dumpMassesCrustHyper(folderName=folderName+'SigmaPhi'+app, ret_str=1)
+#         wr.dumpHyperScalings(folderName+'SigmaPhi'+app)
+#         wr.dumpVsHyper(folderName+'SigmaPhi'+app)
     
 print DUs

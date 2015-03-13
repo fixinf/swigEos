@@ -1337,17 +1337,48 @@ def myModNoPhi():
 #     plt.plot(frange, map(C1.eta_r, frange))
 #     plt.show()
     wr1.solve(f0 = C1.f0, K0=240., J0=30.)
-    return C1           
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
+    return C1        
+    
+def Cubero():
+    C = eos.KVOR_cut()
+    C.M[0] = 939./135.
+    C.M[1] = 939./135.
+    C.z = 0
+    C.Cs = 183.683
+    C.Co = 64.545
+    C.Cr = 1e-16
+    C.Cr = 100.
+#     C.b = 0.017788
+#     C.c = 0.039674
+    C.b = 0.017788
+    C.c = 0.039674
+    C.n0 = 0.15/0.16 * C.n0
+    C.f0 = 0.15
+    return C
+
+def Cubero_cut03():
+    C = Cubero()
+    C.omega_kind = 2
+    C.omega_a = -0.5
+    C.omega_b = 50
+    C.omega_f = 0.3
+    return C
+
+def Cubero_cut04():
+    C = Cubero_cut03()
+    C.omega_f = 0.4
+    return C
+
+def Cubero_cut05():
+    C = Cubero_cut04()
+    C.omega_f = 0.5
+    return C
+
+def Cubero_cut02():
+    C = Cubero_cut03()
+    C.omega_f = 0.25
+    return C
+
+def myModNew():
+    C = myMod()
+    return C

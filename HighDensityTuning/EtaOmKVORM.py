@@ -21,8 +21,8 @@ C.omega_c = 0
 C1.omega_c = 0
 
 C1.omega_kind = 2
-C1.omega_a = 0.1
-C1.omega_b = 10
+C1.omega_a = 0.15669423
+C1.omega_b = 7.09984178
 C1.omega_f = 0.95
 
 npoints = 10
@@ -35,8 +35,8 @@ def func(x):
     res = np.array(res)
     return np.sum(res**2)
 
-res = optimize.minimize(func, [C1.omega_a, C1.omega_b])
-print res.x
+# res = optimize.minimize(func, [C1.omega_a, C1.omega_b])
+# print res.x
 
 frange = np.linspace(0, 1, 100)
 
@@ -44,8 +44,14 @@ plt.plot(frange, map(C.eta_o, frange), frange, map(C1.eta_o, frange))
 plt.ylim([0.5, 1.5])
 plt.show()
 
+n = np.linspace(0, 8*wr.n0, 100)
+
+Es, fs = wr.Esymm(n, ret_f=1)
+plt.plot(n/wr.n0, fs)
+plt.show()
+
 wr1.testDanielewicz()
-wr1.testPodsiedlowski()
+# wr1.testPodsiedlowski()
 wr1.dumpVs()
 
 wr.reset()

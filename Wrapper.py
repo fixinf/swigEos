@@ -229,13 +229,20 @@ class Wrapper():
     def star_print(self, z):
         return eos.star_crust(z, 3, self.dr, 1e-11)
 
-    def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = .4, nmax = 4.0,
-                     npoints=50, crust="crust.dat", show=False, crustName=None):
-        neos= 1000
+    def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = .6, nmax = 5.0,
+                     npoints=50, crust="crust.dat", show=False, crustName=None, ret_str=False, fasthyp=False, neutron=0):
+        neos= 100
         if self.C.Hyper:
             neos = 1000
-        self.reset(nmin = 0., hyper=self.C.Hyper, nmax=nmax, npoints=neos, timeout=5)
-        E, P, N = self.EPN()
+            if fasthyp:
+                neos = 100
+        if not neutron:
+            self.reset(nmin = 0., hyper=self.C.Hyper, nmax=nmax, npoints=neos, timeout=5)
+            E, P, N = self.EPN()
+        else:
+            N = np.linspace(0., nmax, neos)
+            E = self.m_pi**4*self.Eneutr(N)
+            P = self.P_N(N)/self.const
         N = N/self.n0
         e = []
         p = []
@@ -285,6 +292,13 @@ class Wrapper():
             plt.ylabel(r'$P \, [MeV^4] $', fontsize=18)
             plt.legend(lines, ['interpolated', 'crust', 'RMF'], loc=0)
             plt.show()
+            
+            lines = plt.plot(finalN, finalE*self.m_pi**4, n, e, N, E)
+            plt.xlabel(r'$n/n_0$', fontsize=18)
+            plt.xlim([0, 2])
+            plt.ylabel(r'$E \, [MeV^4] $', fontsize=18)
+            plt.legend(lines, ['interpolated', 'crust', 'RMF'], loc=0)
+            plt.show()
 
         if crustName is not None:
             tab = np.array([finalN, finalE, finalP]).transpose()
@@ -296,40 +310,79 @@ class Wrapper():
         self.dr.set(finalE, finalP, finalN*self.n0)
         nstar = np.linspace(nmin, nmax, npoints)
 
+        #interpolating hyperon fractions
+        if self.C.Hyper:
+            hyp_mult = np.array([0, 0, 1, 1, 1, 1, 2, 2])
+            inter_hyp = [interp1d(self.n, hyp_mult[i]*self.concentrations()[:, i]) for i in range(2,8)]
+        
+#         plt.plot(self.n, map(lambda z: [f(z) for f in inter_hyp], self.n))
+#         plt.show()
         MR = []
         Mgrav = []
+        str_fracs = []
         for _n in nstar:
             MR.append(eos.star_crust2(_n, 3, self.dr, 1e-11))
             lastN = self.dr.getLastN(self.dr.nSize)[:-1]
             lastR = self.dr.getLastR(self.dr.nSize)[:-1]
             lastM = self.dr.getLastM(self.dr.nSize)[:-1]
             dx = lastR[1] - lastR[0]
-
+        
             grav_mult = []
             for i, r in enumerate(lastR):
                 grav_mult.append( r**2 / sqrt(1 - 2 * 1.4677 * lastM[i] / r))
 
             grav_mult = np.array(grav_mult)
             res = np.multiply(lastN, grav_mult)
-            Mgrav.append((0.0004898007281478712)*np.trapz(res, dx=dx))
+            integral = np.trapz(res, dx=dx)
+            if self.C.Hyper and ret_str:
+                hyper_N = []
+                hyper_NR = []
+                for f in inter_hyp:
+                    hyper_N.append(lastN * map(f, lastN))
+                    hyper_NR.append(lastN * map(f, lastN) * grav_mult)
+                if lastM[-1] > 1.6:
+                    plt.plot(lastN/self.n0, np.array(hyper_N).transpose())
+                    plt.show()
+                res_str = 0
+                for _N in hyper_N:
+                    res_str += np.multiply(_N, grav_mult)
+                if lastM[-1] > 1.6:
+                    plt.plot(lastR, grav_mult)
+                    for f in inter_hyp:
+                        plt.plot(lastR, grav_mult * np.array(map(f, lastN)))
+                    plt.show() 
+                
+                str_frac = np.trapz(res_str, dx=dx) / (3 * integral) 
+                print str_frac
+                str_fracs.append(str_frac)
+            
+            Mgrav.append((0.0004898007281478712)*integral)
 
         MR = np.array(MR)
         Mgrav = np.array(Mgrav)
+        str_fracs = np.array(str_fracs)
         print MR
+
+            
         print Mgrav
-#         return nstar, MR[:, 0], MR[:,1], self.m_pi**4*self.C.M[0]*MR[:,2]
-        return (nstar, MR[:, 0], MR[:,1], 931.5/self.m_pi*MR[:,2],
+        
+        if ret_str:
+            return (nstar, MR[:, 0], MR[:,1], 931.5/self.m_pi*MR[:,2],
+                931.5/self.m_pi * Mgrav, str_fracs)
+        else:
+            return (nstar, MR[:, 0], MR[:,1], 931.5/self.m_pi*MR[:,2],
                 931.5/self.m_pi * Mgrav)
 
     def stars_crust_hyper(self, ncut_crust=0.6, ncut_eos = 0.8,
                          inter='linear', nmin = .4, nmax = 4.0,
-                         npoints=100, crust="crust.dat", show=False):
+                         npoints=100, crust="crust.dat", show=False, ret_str=False, fasthyp=False):
         hyp_old = self.C.Hyper
         self.C.Hyper=1
         res = self.stars_crust(ncut_crust=ncut_crust, ncut_eos = ncut_eos,
                          inter=inter, nmin = nmin, nmax = nmax,
-                         npoints=npoints, crust=crust, show=show)
+                         npoints=npoints, crust=crust, show=show, ret_str=ret_str, fasthyp=fasthyp)
         self.C.Hyper=hyp_old
+        
         return res
 
     def concentrations(self):
@@ -445,12 +498,12 @@ class Wrapper():
                 os.makedirs(folderName)
 
         if not self.set:
-            self.reset(nmin = 0., nmax = 8. * self.n0, npoints=800)
+            self.reset(nmin = 0., nmax = 10. * self.n0, npoints=800)
 
         if not self.driverSet:
             self.setDriver()
 
-        n, m, r, mb = self.stars(npoints = 100)
+        n, m, r, mb = self.stars(npoints = 100, nmax=10.*self.n0)
         if folderName is not None:
             table = np.array([n/self.n0, m, r, mb]).transpose()
             f = open(os.path.join(folderName, 'masses.dat'), 'w')
@@ -793,21 +846,55 @@ class Wrapper():
 
             with open(os.path.join(folderName, 'scalingsF.dat'), 'w') as f:
                 f.write(tableF)
+    
+        return np.array(tabNS)
+    
+    def dumpScalingsSym(self, folderName):
+        
+        n = np.linspace(0, 8*self.n0, 1000)
+        E, fs = self.Esymm(n, ret_f=1)
 
+        tabNS = []
+        for i, f in enumerate(fs):
+            C = self.C
+            tabNS.append([n[i]/self.n0,
+                          f,
+                          C.eta_s(f) + 2*C.Cs*C.U(f)/(C.M[0]**4 * f**2),
+                          C.eta_o(f),
+                          C.eta_r(f),
+                          C.phi_n(0, f),
+                          C.U(f)])
+
+        
+        tableNS = tabulate(tabNS, headers=['n/n_0',
+                                           'f(n)',
+                                           'eta_sigma',
+                                           'eta_omega',
+                                           'eta_rho',
+                                           'Phi_N',
+                                           'U'],tablefmt='plain', floatfmt='.10f')
+
+
+        if folderName is not None:
+            with open(os.path.join(folderName, 'scalingsSym.dat'), 'w') as f:
+                f.write(tableNS)
+    
         return np.array(tabNS)
 
 
-    def dumpMassesCrustHyper(self, folderName ,ncut_crust=.6, ncut_eos=.8):
+    def dumpMassesCrustHyper(self, folderName ,ncut_crust=.6, ncut_eos=.8, ret_str=False, fasthyp=0):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
         
         hyper_old = self.C.Hyper
         self.C.Hyper = 1
-        
-        n, m, r, mb1, mb2 = self.stars_crust_hyper(ncut_crust=ncut_crust,
-                                   ncut_eos=ncut_eos,npoints = 100, show=0)
-        print m
-        print mb1
+        if ret_str:
+            n, m, r, mb1, mb2, str = self.stars_crust_hyper(ncut_crust=ncut_crust,
+                                   ncut_eos=ncut_eos,npoints = 100, show=0, ret_str=ret_str, fasthyp=fasthyp)
+        else:
+            n, m, r, mb1, mb2 = self.stars_crust_hyper(ncut_crust=ncut_crust,
+                                   ncut_eos=ncut_eos,npoints = 100, show=0, ret_str=ret_str, fasthyp=fasthyp)
+            
         table = np.array([n/self.n0, m, r, mb1, mb2]).transpose()
         f = open(os.path.join(folderName, 'masses_crust_hyper.dat'), 'w')
         tab = tabulate(table, ['n/n_0','M [M_{sun}]',
@@ -816,11 +903,18 @@ class Wrapper():
                        tablefmt='plain')
         f.write(tab)
         f.close()
-        self.C.Hyper = hyper_old
         
-        return n, m, r, mb1, mb2
+        if ret_str:
+            with open(join(folderName, 'str_max.dat'),'w') as f:
+                f.write('max_str = %.3f, M_max = %.2f' % (str[np.argmax(m)], max(m)))
+            
+        self.C.Hyper = hyper_old
+        if ret_str:
+            return n, m, r, mb1, mb2, str
+        else:
+            return n, m, r, mb1, mb2
     
-    def dumpMassesCrust(self, folderName ,ncut_crust=.6, ncut_eos=.8, hyper=False, show=False, inter='linear'):
+    def dumpMassesCrust(self, folderName ,ncut_crust=.6, ncut_eos=.8, hyper=False, show=False, inter='linear', neutron=0):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
         
@@ -828,7 +922,7 @@ class Wrapper():
         
         crustName = join(folderName, 'crustEos.dat')
         n, m, r, mb1, mb2 = self.stars_crust(ncut_crust=ncut_crust,
-                                   ncut_eos=ncut_eos,npoints = 100, show=show, inter=inter, crustName=crustName)
+                                   ncut_eos=ncut_eos,npoints = 100, show=show, inter=inter, crustName=crustName, neutron=neutron)
         print m
         print mb1
         table = np.array([n/self.n0, m, r, mb1, mb2]).transpose()
@@ -857,6 +951,19 @@ class Wrapper():
         table_f1 = tabulate(tab_f1, ['n/n_0', 'F_1'], tablefmt='plain')
 
         with open(join(folderName, 'f1.dat'), 'w') as f:
+            f.write(table_f1)
+            
+        f0 = self.f0prime(n_f0)
+        tab_f0 = np.array([n_f0/self.n0, f0]).transpose()
+        table_f0 = tabulate(tab_f0, ['n/n_0', 'F_0prime'], tablefmt='plain')
+        with open(join(folderName, 'f0prime.dat'), 'w') as f:
+            f.write(table_f0)
+
+        f1 = self.f1prime(n_f0)
+        tab_f1 = np.array([n_f0/self.n0, f1]).transpose()
+        table_f1 = tabulate(tab_f1, ['n/n_0', 'F_1prime'], tablefmt='plain')
+
+        with open(join(folderName, 'f1prime.dat'), 'w') as f:
             f.write(table_f1)
 
         return n_f0, f0, f1
@@ -1095,6 +1202,30 @@ class Wrapper():
         return f, (res + res2)*mult
 
 
+    def _f0prime(self, n, f, multiply=True):
+        C = self.C
+        mn = C.M[0]
+        pf = eos.p_f(n/2)
+        f, = eos.f_eq(np.array([n/2, n/2]), np.array([f]), 1, C)
+
+        meff = mn * C.phi_n(0, f)
+        res = C.Cr/(4 * mn**2 * C.eta_r(f))
+        
+        mult = 1.
+        if multiply:
+            mult = 4 * pf * sqrt(pf**2 + meff**2) / (2 * pi**2)
+        
+        return f, mult*res
+    
+    def f0prime(self, n, multiply=True):
+        f = 0.
+        res = []
+        for _n in n:
+            f, _res = self._f0prime(_n, f,multiply=multiply)
+            res.append(_res)
+
+        return np.array(res)
+        
     def f0(self, n, multiply=True):
         f = 0.
         res = []
@@ -1200,6 +1331,31 @@ class Wrapper():
             f, f1 = self._f1(_n, f)
             res.append(f1)
         return np.array(res)
+    
+    def _f1prime(self,n, f):
+        f_f1 = f
+        C = self.C
+        pf = eos.p_f(n/2)
+        mn = C.M[0]
+
+        f_f1, = eos.f_eq(np.array([n/2, n/2]), np.array([f]), 1, C)
+        f = f_f1
+        meff = mn*C.phi_n(0,f)
+
+        res = - C.Cr * pf**2/(4 * mn**2 * C.eta_r(f) * (pf**2 + meff**2))
+        res /= (1. + 2 * C.Cr/(4 * mn**2 * C.eta_r(f)) * ( (2./3.) * I1num(n/2, meff) +
+                                                       meff**2 * I4num(n/2, meff)))
+
+        mult = 4 * pf * sqrt(pf**2 + meff**2) / (2 * pi**2)
+        return f, res*mult
+
+    def f1prime(self, n):
+        f = 0.
+        res = []
+        for _n in n:
+            f, f1 = self._f1(_n, f)
+            res.append(f1)
+        return np.array(res)
 
     def _f1_nm(self,n, f):
         f_f1 = f
@@ -1240,6 +1396,27 @@ class Wrapper():
 #         plt.plot(erange, self.m_pi*Uopt(erange))
 #         plt.show()
         return self.m_pi*erange, self.m_pi*Uopt(erange)
+    
+    def dumpUn(self, foldername, nmin=0., nmax=5., npoints=100):
+        nrange = np.linspace(nmin, nmax, npoints)
+        res = []
+        i = 0
+        for n in nrange:
+            n_in = np.array([n/2, n/2])
+            f = eos.f_eq(n_in, np.array([self.C.f0]), 1, self.C)
+            pots = eos.potentials(np.insert(n_in, 0, f), 5, self.C)
+            print pots
+            V = self.C.X_o[i] * pots[2]
+            S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*self.C.M[0]/self.C.M[i]*f[0]))
+            Uopt = self.m_pi*(V + S)
+            res.append(Uopt)
+#         plt.plot(nrange/self.n0, res)
+#         plt.show()
+        tab = np.array([nrange/self.n0, np.array(res)]).transpose()
+        table = tabulate(tab, ['n/n_0', 'U_N [MeV]'], tablefmt='plain')
+        with open(join(foldername, 'U_N.dat'), 'w') as f:
+            f.write(table)
+        return nrange, np.array(res)
 
     def dumpUofE(self, folderName, show=False):
         nU = np.array([self.n0/2, self.n0/2])
@@ -1428,7 +1605,7 @@ class Wrapper():
 
         return N, M, R, E, P
     
-    def dumpJ(self, folderName):
+    def dumpJ(self, folderName=None):
         n = np.linspace(0., 8*self.n0, 800, endpoint=0)
         f = 0.
         res = []
@@ -1438,8 +1615,9 @@ class Wrapper():
         res = np.array(res)
         tab = np.array([n/self.n0, res]).transpose()
         table = tabulate(tab, ['n/n_0', 'J'], tablefmt='plain')
-        with open(join(folderName, 'J.dat'), 'w') as f:
-            f.write(table)
+        if folderName is not None:
+            with open(join(folderName, 'J.dat'), 'w') as f:
+                f.write(table)
         return n, res
 
     def dumpVs(self, folderName=None):
@@ -1468,7 +1646,7 @@ class Wrapper():
             
                     
         else:
-            plt.plot(self.n[1:]/self.n0, vsNs)
+            plt.plot(self.n[:]/self.n0, vsNs)
             plt.ylim([0., 1])
             plt.show()  
             
@@ -1582,8 +1760,8 @@ class Wrapper():
         print res
         print x, x/self.n0
         print im(x)
-        plt.plot(self.n, inp(self.n), self.n, ix_du(self.n))
-        plt.show()
+#         plt.plot(self.n, inp(self.n), self.n, ix_du(self.n))
+#         plt.show()
         return [x/self.n0, im(x)]
     
     def dumpHyperScalings(self, folderName):
