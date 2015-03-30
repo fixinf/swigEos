@@ -23,6 +23,22 @@ public:
 	virtual double U(double);
 };
 
+class KVORphi: public KVOR{
+public:
+	KVORphi() : KVOR(){
+		this->phi_kind = 1;
+	}
+	int phi_kind;
+
+	double eta_p(double f){
+		if (phi_kind == 1){
+			return pow(1 - f, 2);
+		}
+		else return 1;
+	}
+};
+
+
 class KVOR_MD: public KVOR{
 public:
 	KVOR_MD(): KVOR(){

@@ -293,3 +293,18 @@ double KVOR_mod2::eta_p(double f){
 	else
 		return pow(1 - f, 2)/pow(1 + phi_a*f*f,2);
 }
+
+//class KVOR_cut : public KVOR_mod2{
+//public:
+//	KVOR_cut() : KVOR_mod2(){
+//
+//	}
+//
+//	double eta_s(double f){
+//		return 1;
+//	}
+//
+//	double U(double f){
+//		return pow(this->M[0], 4) * (b * pow(f, 3)/3 + c * pow(f, 4)/4);
+//	}
+//};

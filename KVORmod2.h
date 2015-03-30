@@ -82,7 +82,9 @@ public:
 class KVOR_cut: public KVOR_mod2{
 public:
 	KVOR_cut(): KVOR_mod2(){
-
+		f_sigma = 1;
+		a_sigma = 0;
+		b_sigma = 0;
 	}
 
 	double eta_r(double f){
@@ -109,10 +111,24 @@ public:
 	}
 
 	double U(double f){
-		return KVOR::U(f);
+		return KVOR::U(f) + a_sigma*0.5*(1 + tanh(b_sigma*(f - f_sigma)));
 	}
+	double f_sigma;
+	double a_sigma;
+	double b_sigma;
 };
 
+class KVOR_cut_sigma : public KVOR_cut{
+public:
+	KVOR_cut_sigma() : KVOR_cut(){
+		c_sigma = 0;
+	}
+	double c_sigma;
+	double U(double f){
+		double f_s = 1 - (1 - f0)*c_sigma;
+		return KVOR::U(f) + a_sigma*0.5*(1 + tanh(b_sigma*(f - f_s)));
+	}
+};
 //class Improved : KVOR_mod2{
 //public:
 //	double fRhoSat;

@@ -269,22 +269,22 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 		delete D->lastNstar;
 	}
 	if (D->lastRstar != 0){
-		printf("N... ");
+		printf("R... ");
 		delete D->lastRstar;
 	}
 
 	if (D->lastMstar != 0){
-		printf("N... ");
+		printf("M... ");
 		delete D->lastMstar;
 	}
 
 	if (D->lastEstar != 0){
-		printf("N... ");
+		printf("E... ");
 		delete D->lastEstar;
 	}
 
 	if (D->lastPstar != 0){
-		printf("N... ");
+		printf("P... ");
 		delete D->lastPstar;
 	}
 
