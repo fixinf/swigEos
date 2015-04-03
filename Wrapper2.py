@@ -1,7 +1,6 @@
 import eosWrap as eos
 import numpy as np
 from numpy import array as arr, pi, sqrt
-from copy import deepcopy
 import matplotlib.pyplot as plt
 import os
 from tabulate import tabulate
@@ -40,11 +39,15 @@ class Wrapper(object):
         self.n_baryon = 2
         self.verbose = False
         self.mpi4_2_mevfm3 = self.m_pi * (self.m_pi / 197.33) ** 3
-        self.nmax = 5.
+        self.nmin = 0.
+        self.nmax = 10*self.n0
         self.npoints = 1000
+        self.nrange = np.linspace(self.nmin, self.nmax, self.npoints,
+                                  endpoint=False)
 
-    def reset(self, nrange=None, nmin=0., nmax=4., npoints=400, iterations=30,
-              timeout=None):
+
+
+    def reset(self, iterations=30, timeout=None):
         """Calculates the EoS stored in the wrapper. Has to be overrided in
         Symm, Neutron. 
         
@@ -56,14 +59,11 @@ class Wrapper(object):
 
         """
         init = arr([0. for i in range(self.n_baryon - 1)])
-        if nrange is None:
-            self.n = np.linspace(nmin, nmax, npoints, endpoint=0)
-        else:
-            self.n = nrange
+
         rho = []
         mu_e = []
         f = arr([0.])  # sp omitted
-        for i, _n in enumerate(self.n):
+        for i, _n in enumerate(self.nrange):
             if timeout is None:
                 init = eos.stepE(_n, init, f, len(init), iterations, self.C)
             else:
@@ -88,35 +88,29 @@ class Wrapper(object):
 
     def EPN(self, nrange=None):
         if self.check(nrange=nrange):
-            return self._E, self._P, self.n
+            return self._E, self._P, self.nrange
         else:
             raise
 
-    def check(self, nrange=None, nmin=0., nmax=4., npoints=400):  # TODO Rewrite this hell
+    def check(self, nrange=None):  # TODO Rewrite this hell
         """Returns if the wrapper is set or not. If nrange is None and nmin, 
         nmax and npoints are all present, constructs nrange from nmin, nmax,
         npoints. Otherwise, nrange's priority is higher that other three 
         arguments' """
-        if nrange is None:
-            if hasattr(self, 'n'):
-                nrange = self.n
-            else:
-                nrange = np.linspace(nmin, nmax, npoints)
-
-        if not self.set:
-            if nrange is None:
-                self.reset()
-            else:
-                self.reset(nrange=nrange)
-        else:
-            if nrange is None:
-                pass
-            else:
-                if (nrange.shape != self.n.shape or nrange[0] != self.n[0] or
-                            nrange[-1] != self.n[-1]):
-                    self.reset(nrange=nrange)
+        if nrange is not None:
+            if nrange.shape == self.nrange.shape:
+                if np.allclose(nrange, self.nrange):
+                    return True
                 else:
-                    pass
+                    self.nrange = nrange
+                    self.reset()
+            else:
+                self.nrange = nrange
+                self.reset()
+        else:
+            if not self.set:
+                self.reset()
+
         return self.set
 
     def solve(self, f0=0.195, E0=-16., K0=275., J0=32., mu_scale=1.):
@@ -156,11 +150,11 @@ class Wrapper(object):
                     n_stars=None, nmin=.6, nmax=5.0, npoints=50,
                     crust="crust.dat", show=False, crustName=None,
                     ret_str=False, fasthyp=False, neutron=0):
-        neos = 1000
+        neos = self.npoints
         if n_stars is not None:
             nmax = n_stars[-1]  # TODO too dirty workaround
-        self.check(nrange=np.linspace(0, nmax, neos, endpoint=0))
-        E, P, N = self.EPN(self.n)
+        self.check(nrange=self.nrange)
+        E, P, N = self.EPN(self.nrange)
         E *= self.m_pi ** 4
         P *= self.m_pi ** 4
         N = N / self.n0
@@ -406,6 +400,40 @@ class Nucleon(Wrapper):
             return E
 
 
+    def lepton_concentrations(self, ret_du=False):
+        """Returns lepton concentrations for self.nrange. """
+        self.check()
+        ne_list = []
+        nmu_list = []
+        du_list=[]
+        for mu in self.mu_e:
+            n_e = 0
+            n_mu = 0
+            if mu > self.m_e:
+                n_e += (mu**2 - self.m_e**2)**(1.5)/(3*pi**2)
+            if mu > self.m_mu:
+                n_mu += (mu**2 - self.m_mu**2)**(1.5)/(3*pi**2)
+
+            ne_list.append(n_e)
+            nmu_list.append(n_mu)
+
+            if ret_du:
+                if n_e + n_mu > 0:
+                    du_list.append(1./(1 + (1 + (n_e/(n_e + n_mu))**(1./3))**3))
+                else:
+                    du_list.append(0.11)
+        ne_list = arr(ne_list)
+        nmu_list = arr(nmu_list)
+        du_list = arr(du_list)
+        if ret_du:
+            return [ne_list, nmu_list, du_list]
+        else:
+            return [ne_list, nmu_list]
+
+
+
+
+
 class Sym(Nucleon):
     def __init__(self, C):
         super(Sym, self).__init__(C)
@@ -483,7 +511,7 @@ class Model(Wrapper):
         if npoints is None:
             npoints = self.npoints
 
-        nrange = np.linspace(0., nmax, npoints, endpoint=0) #TODO nmax ~ n0
+        nrange = self.nrange
 
         Esym, fsym = self.sym.Ebind(nrange, ret_f=True)
         Psym = self.sym.P(nrange)
@@ -491,7 +519,30 @@ class Model(Wrapper):
         En, fn = self.neutr.Ebind(nrange, ret_f=True)
         Pn = self.neutr.P(nrange)
 
-        n_e, n_l = self.lepton_concentrations()
+        E, P, n = self.nucl.EPN()
+        conc = self.nucl.concentrations()
+        n_e, n_l, x_du = self.nucl.lepton_concentrations(ret_du=1)
+        table = arr([nrange/self.n0, Esym, Psym, fsym,
+                     E, P, conc[:,1], self.nucl.rho[:,0],
+                     En, Pn, fn, self.nucl.mu_e*self.m_pi, x_du]).transpose()
+
+        tab = tabulate(table, ['n/n_0', 'e_{symm} [MeV]',
+                               'P_{symm} [MeV / fm^3] ',
+                               'f(n){symm}' ,
+                               'E_NS [m_\pi^4]',
+                               'P_NS, [m_\pi^4]',
+                               'n_p/n', 'f(n){NS}',
+                               'E_N [MeV]','P_N [MeV/fm^3]',
+                               'f(n){Pure NM}',
+                               'mu_e [MeV]',
+                               'x_DU'],
+                       tablefmt='plain')
+
+        print tab
+
+
+
+
 
 
 
