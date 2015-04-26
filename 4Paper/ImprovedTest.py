@@ -28,6 +28,7 @@ def f(x):
     C2.rho_sat_val = x[1]
     C2.beta = x[2]
     C2.rho_a0 = x[3]
+#     C2.rho_a3 = x[4]
     res =[C2.eta_r(0.27)-1, derivative(C2.eta_r, 0.27, dx=1e-3) - 
             derivative(C1.eta_r, 0.27, dx=1e-3), C2.eta_r(C2.rho_f) - C1.eta_r(rho_f), C2.eta_r(1) - 1.5]
     res = np.array(res)
@@ -43,7 +44,7 @@ dlist = np.linspace(0, C2.rho_a0, 10)
 
 for d in dlist:
     C2.rho_a0 = d
-    res = optimize.minimize(f, [C2.rho_f, C2.rho_sat_val, C2.beta, C2.rho_a0]).x
+    res = optimize.minimize(f, [C2.rho_f, C2.rho_sat_val, C2.beta, C2.rho_a0, C2.rho_a3]).x
 
 fig, ax = plt.subplots()
 
@@ -53,7 +54,9 @@ ax.plot(frange, map(C2.eta_r, frange))
 
 # plt.show()
 n_full = 100
-
+C2.omega_a = 0.15669423
+C2.omega_b = 7.09984178
+C2.omega_f = 0.95
 wr2.reset(npoints=n_full, iter=200)
 print res
 # En1 = wr2.Eneutr(n_full)
@@ -80,8 +83,8 @@ C2.d2rho = derivative(C1.eta_r, f1, dx=1e-3, n=2)
 print C2.rho, C2.drho, C2.d2rho
 
 
-C2.rho_a_low = 0.04
-C2.rho_b_low = -0.03
+# C2.rho_a_low = 0.04
+# C2.rho_b_low = -0.03
 
 fsmall = np.linspace(0., 0.27, 20)
 
@@ -111,38 +114,15 @@ ax.set_xlabel(r'$f$', fontsize=18)
 ax.set_ylabel(r'$\eta_\rho(f)$', fontsize=18)
 #   
 
-# ax_a = plt.axes([0.25, 0.1, 0.65, 0.03])
-# sl_a = Slider(ax_a, 'A', -20, 20, valinit=C2.rho_tan_a)
-#   
-# ax_b = plt.axes([0.25, 0.15, 0.65, 0.03])
-# sl_b = Slider(ax_b, 'B', -20, 20, valinit=C2.rho_tan_b)
-#   
-# ax_c = plt.axes([0.25, 0.2, 0.65, 0.03])
-# sl_c = Slider(ax_c, 'C', -20, 20, valinit=C2.rho_tan_c)
-# 
-# ax_al = plt.axes([0.25, 0.25, 0.65, 0.03])
-# sl_al = Slider(ax_al, 'AL', -0.5, 0.5, valinit=0)
-# 
-# ax_bl = plt.axes([0.25, 0.3, 0.65, 0.03])
-# sl_bl = Slider(ax_bl, 'BL', -0.5, 0.5, valinit=0)
-# 
-#  
-# 
-# def update(val):
-#     C2.rho_tan_a = sl_a.val
-#     C2.rho_tan_b = sl_b.val
-#     C2.rho_tan_c = sl_c.val
-#     C2.rho_a_low = sl_al.val
-#     C2.rho_b_low = sl_bl.val
-#     line.set_ydata(map(C2.eta_r, frange))
-#     
-# sl_a.on_changed(update)
-# sl_b.on_changed(update)
-# sl_c.on_changed(update)
-# sl_al.on_changed(update)
-# sl_bl.on_changed(update)
+
   
 plt.show()
+
+n_f = np.linspace(0., 4., 100)
+f0_1 = wr1.f0prime(n_f)
+f0_2 = wr2.f0prime(n_f)
+plt.plot(n_f/wr1.n0, f0_1)
+plt.plot(n_f/wr1.n0, f0_1)
 
 C3 = Models.KVOR()
 
@@ -167,8 +147,12 @@ np2 = wr2.concentrations()[:,1]
 fns2 = wr2.rho[:,0]
 etar2 = map(C2.eta_r, fns2)
 
+
+
 wr2.solve(f0=C2.f0, K0=240., J0=30.)
 print wr2.J(), wr2.L()
+
+
 
 fig, ax = plt.subplots(2,2)
 ax[0,0].plot(wr2.n[1:]/wr2.n0, vs1, wr2.n[1:]/wr2.n0, vs2)
