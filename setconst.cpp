@@ -130,48 +130,50 @@ int set_const::SetHyperConstants(int type){
 	double sq2 = sqrt(2.0);
 	if (true){
 		switch (type) {
-			case 0://Quark counting
-				double _xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
-				double _xr[8] = { 1.0, 1.0, 0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0 };
+			case 0: {//Quark counting
+				double _xo[8] = {1.0, 1.0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0};
+				double _xr[8] = {1.0, 1.0, 0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0};
 				double _ebind[8] = {0, 0, -30, 30, 30, 30, -18, -18};
-				double _xp[8] = {0,0,0,0,0,0,0,0};
-				for (int i =0; i<8; i++){
+				double _xp[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+				for (int i = 0; i < 8; i++) {
 					xo[i] = _xo[i];
 					xr[i] = _xr[i];
 					xp[i] = _xp[i];
 					ebind[i] = _ebind[i];
 				}
 				break;
-			case 1://SU(3)
-				double _2xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
-				double _2xr[8] = { 1.0, 1.0, 0, 1.0, 1.0, 1.0, 1.0, 1.0};
-				double _2ebind[8]= {0, 0, -30, 30, 30, 30, -18, -18};
-				double _2xp[8] = {0,0,0,0,0,0,0,0};
-				for (int i =0; i<8; i++){
+			}
+			case 1: {//SU(3)
+				double _2xo[8] = {1.0, 1.0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0};
+				double _2xr[8] = {1.0, 1.0, 0, 1.0, 1.0, 1.0, 1.0, 1.0};
+				double _2ebind[8] = {0, 0, -30, 30, 30, 30, -18, -18};
+				double _2xp[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+				for (int i = 0; i < 8; i++) {
 					xo[i] = _2xo[i];
 					xr[i] = _2xr[i];
 					xp[i] = _2xp[i];
 					ebind[i] = _2ebind[i];
 				}
 				break;
-
-			case 2: //SU(6)
-				double _3xo[8] = { 1.0, 1.0, 2.0 / 3.0, 2.0/3.0, 2.0/3.0, 2.0/3.0, 1.0 / 3.0, 1.0 / 3.0 };
-				double _3xr[8] = { 1.0, 1.0, 0, 2.0, 2.0, 2.0, 1.0, 1.0};
+			}
+			case 2: { //SU(6)
+				double _3xo[8] = {1.0, 1.0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0};
+				double _3xr[8] = {1.0, 1.0, 0, 2.0, 2.0, 2.0, 1.0, 1.0};
 				double _3ebind[8] = {0, 0, -28, 30, 30, 30, -15, -15};
-				double _3xp[8] = {0.0, 0.0, -sq2/3,-sq2/3,-sq2/3,-sq2/3,-2*sq2/3,-2*sq2/3};
-				for (int i =0; i<8; i++){
+				double _3xp[8] = {0.0, 0.0, -sq2 / 3, -sq2 / 3, -sq2 / 3, -sq2 / 3, -2 * sq2 / 3, -2 * sq2 / 3};
+				for (int i = 0; i < 8; i++) {
 					xo[i] = _3xo[i];
 					xr[i] = _3xr[i];
 					xp[i] = _3xp[i];
 					ebind[i] = _3ebind[i];
 				}
 				break;
-
-			default:
+			}
+			default: {
 				printf("Something Wrong with hyper constants label!!!\n");
 				return -2;
 				break;
+			}
 		}
 //		double ebind[8] = {0, 0, -30, 50, 50, 50, -18, -18};
 //		double m[8] = { 938/135.0, 938/135.0, 1116/135.0, 1195/135.0,
@@ -262,10 +264,10 @@ void set_const::set_xs(double* x, int dimX) {
 }
 
 void set_const::set_hs_z(double* x, int dimX) {
-	printf("hey! \n");
+//	printf("hey! \n");
 	this->hs_z.clear();
 	for (int i = 0; i < dimX; i++){
-		printf("%f \n", x[i]);
+//		printf("%f \n", x[i]);
 		this->hs_z.push_back(x[i]);
 	}
 }

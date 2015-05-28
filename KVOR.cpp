@@ -19,7 +19,7 @@ KVOR::KVOR() : set_const() {
 }
 
 KVOR::~KVOR() {
-
+	this->phi_kind = 1;
 }
 
 double KVOR::eta_o(double f){
@@ -41,7 +41,10 @@ double KVOR::phi_n(int i, double f){
 }
 
 double KVOR::eta_p(double f) {
-	return 1.0;
+	if (phi_kind == 1){
+		return pow(1 - f, 2);
+	}
+	else return 1;
 }
 
 double KVOR::U(double f){

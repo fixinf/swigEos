@@ -224,11 +224,19 @@ namespace calc{
 
 /**\brief Energy density functional itself.
  * Provides the energy density functional evaluated at some point v = {n, f}
+ *
+ * Out consists of:
+ * 0: m_n^4 f^2/ ...
+ * 1: U(f)
+ * 2 -- (dimN-1): Kinetic integrals
+ * dimN -- dimN + 3:
+ *
  */
 
 
-double _E(double * n, int dimN, set_const * C){
+double _E(double * n, int dimN, set_const * C, double * out, int dim_Out){
 	bool debug = 0;
+	bool ret_parts = (out) && (dim_Out == 9);
 	if (debug){
 		printf("n = ");
 		for (int i = 0; i < dimN; i++){
@@ -242,12 +250,24 @@ double _E(double * n, int dimN, set_const * C){
 	if (C->sprime){
 		fp = n[1];
 	}
-	double res = pow(C->M[0], 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
+
+	double res = 0.;
+	double part_s = pow(C->M[0], 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
+
+	res += part_s;
+
 	if (debug){
-		printf("res_f : %f\n", res);
+		printf("res_f : %f\n", part_s);
+	}
+	if (ret_parts){
+		out[0] = part_s;
 	}
 
-	res += C->U(f);
+	double part_U = C->U(f);
+	res += part_U;
+	if (ret_parts){
+		out[1] = part_U;
+	}
 
 	res += pow(C->M[0], 4.0)*fp*fp/(2*C->Csp);
 
@@ -258,6 +278,7 @@ double _E(double * n, int dimN, set_const * C){
 	if (debug){
 		printf("res_Uf : %f \n", res);
 	}
+	double kin = 0.;
 	for (int i = sc; i < dimN; ++i){
 		double xs = 0.;
 		if (C->sigma_kind == 0){
@@ -268,7 +289,13 @@ double _E(double * n, int dimN, set_const * C){
 		}
 //		printf("xs = %f \n", xs);
 		meff_arg = xs * (C->M[0]/C->M[i-sc]) * f + C->X_sp[i-sc] * (C->M[0]/C->M[i-sc])*fp;
-		res += kineticInt(n[i], (C->M)[i-sc] * C->phi_n(i-sc,meff_arg), f);
+		kin = kineticInt(n[i], (C->M)[i-sc] * C->phi_n(i-sc,meff_arg), f);
+		res += kin;
+		if (i == 1 or i == 2){
+			if (ret_parts){
+				out[i+1] = kin;
+			}
+		}
 //		printf("i = %i, n[i] = %f, pf(n[i]) = %f \n", i, v.n[i], calc::p_f(v.n[i]));
 //		printf("K = %f \n", kineticInt(v.n[i], (C->M)[i] * C->phi_n(v.f), v.f));
 //		printf("M_PI = %f \n", M_PI);
@@ -280,28 +307,43 @@ double _E(double * n, int dimN, set_const * C){
 		}
 	}
 	//omega
-	res += C->Co * sum*sum/(2.0*C->M[0]*C->M[0]*C->eta_o(f));
+	double part_om = C->Co * sum*sum/(2.0*C->M[0]*C->M[0]*C->eta_o(f));
+	res += part_om;
 	if (debug){
-		printf("res_om : %f \n", res);
+		printf("res_om : %f \n", part_om);
 	}
-	//phi
-	res += pow(m_o/m_p ,2.0)*C->Co * sum_p*sum_p/(2.0*C->M[0]*C->M[0]*C->eta_p(f));
-	if (debug){
-		printf("res_phi : %f \n", res);
+	if (ret_parts){
+		out[4] = part_om;
 	}
 	//rho
-
-	res += C->Cr * pow(sum_t3/C->M[0], 2.0) / (2 * C->eta_r(f));
+	double part_rho = C->Cr * pow(sum_t3/C->M[0], 2.0) / (2 * C->eta_r(f));
+	res += part_rho;
 	if (debug){
 		printf("res_rho : %f \n", res);
 	}
+	if (ret_parts){
+		out[5] = part_rho;
+	}
+	//phi
+	double part_phi = pow(m_o/m_p ,2.0)*C->Co * sum_p*sum_p/(2.0*C->M[0]*C->M[0]*C->eta_p(f));
+	res += part_phi;
+	if (debug){
+		printf("res_phi : %f \n", part_phi);
+	}
+	if (ret_parts){
+		out[6] = part_phi;
+	}
+
 
 	return res;
 }
 
-double E(double* n, int dimN, set_const* C) {
+
+double E(double* n, int dimN, set_const* C,  double * out, int dim_Out) {
 	double f = n[0];
-	double res = _E(n, dimN, C);
+	bool ret_parts = (out) && (dim_Out == 9);
+	double res = _E(n, dimN, C, out, dim_Out);
+
 
 //	double f = n[0];
 //	double res = pow(C->M[0], 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
@@ -331,8 +373,14 @@ double E(double* n, int dimN, set_const* C) {
 	if (mu_e > m_mu){
 		n_mu += pow(mu_e*mu_e - m_mu*m_mu,1.5)/(3*M_PI*M_PI);
 	}
-	res += kineticInt(n_e, m_e, f);
-	res += kineticInt(n_mu, m_mu, f);
+	double kin_e = kineticInt(n_e, m_e, f);
+	res += kin_e;
+	double kin_mu = kineticInt(n_mu, m_mu, f);
+	res += kin_mu;
+	if (ret_parts){
+		out[7] = kin_e;
+		out[8] = kin_mu;
+	}
 	return res;
 }
 

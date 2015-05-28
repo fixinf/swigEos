@@ -87,6 +87,7 @@ double KVOR_mod2::eta_o(double f){
 
 	if (omega_kind ==2){
 		double s = 0.5*(1 + tanh(omega_b*(f - omega_f)));
+//        printf("s = %f \n", s);
 		return res +  omega_a * s;
 	}
 

@@ -18,5 +18,6 @@ void star2(double rho_init, double * result, int dimResult, DriverBase* D);
 //void star_crust(double rho_init, double * result, int dimResult, DriverBase* D);
 void star_crust(double rho_init, double * result, int dimResult, DriverBase* D, double nmin);
 void star_crust2(double rho_init, double * result, int dimResult, DriverBase* D, double nmin);
+void star_crust_i(double rho_init, double * result, int dimResult, DriverBase* D, double nmin);
 
 #endif /* TOV_H_ */

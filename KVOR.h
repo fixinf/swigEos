@@ -21,6 +21,7 @@ public:
 	virtual double phi_n(int, double);
 	virtual double eta_p(double);
 	virtual double U(double);
+	int phi_kind;
 };
 
 class KVORphi: public KVOR{

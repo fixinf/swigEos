@@ -85,6 +85,12 @@ public:
 		f_sigma = 1;
 		a_sigma = 0;
 		b_sigma = 0;
+		c_omega = 100500;
+		a_omega = 0;
+		b_omega = 0;
+		omega_kind = 2;
+		this->omega_a = 0;
+		this->umode = 1;
 	}
 
 	double eta_r(double f){
@@ -116,16 +122,21 @@ public:
 	double f_sigma;
 	double a_sigma;
 	double b_sigma;
+	double c_omega;
+	double a_omega;
+	double b_omega;
 };
 
 class KVOR_cut_sigma : public KVOR_cut{
 public:
 	KVOR_cut_sigma() : KVOR_cut(){
 		c_sigma = 0;
+		this->umode = 1;
+		this->omega_a = 0;
 	}
 	double c_sigma;
 	double U(double f){
-		double f_s = 1 - (1 - f0)*c_sigma;
+		double f_s = f0 + (1 - f0)*c_sigma;
 		return KVOR::U(f) + a_sigma*0.5*(1 + tanh(b_sigma*(f - f_s)));
 	}
 };
@@ -143,6 +154,22 @@ public:
 //	}
 //
 //};
+
+class KVOR_cut_rho : public KVOR_cut{
+public:
+	KVOR_cut_rho() : KVOR_cut(){
+		rho_a = 0.;
+		c_rho = 100500.;
+		b_rho = 0.;
+	}
+
+	double eta_r(double f){
+		double f_s = f0 + (1 - f0)*c_rho;
+		return 1 + rho_a/2 * (1 + tanh(b_rho*(f - rho_f)));
+	}
+
+	double c_rho, b_rho;
+};
 
 class ImprovedLDParam: public KVOR_mod2{
 public:
