@@ -22,12 +22,11 @@ public:
 	double * P;
 	double * n;
 	int count;
-	virtual double PofE(double E);
-	virtual double PofN(double n);
-	virtual double EofN(double n);
-	virtual double EofP(double P);
 	virtual double NofP(double N);
 	virtual double NofE(double N);
+	virtual double EofP(double N) = 0;
+	virtual double EofN(double N) = 0;
+	virtual double PofN(double N) = 0;
 	double * lastNstar;
 	double * lastRstar;
 	double * lastMstar;

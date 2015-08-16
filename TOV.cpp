@@ -278,6 +278,7 @@ void star2(double rho_init, double * result, int dimResult, DriverBase* D) {
 }
 
 void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, double nmin) {
+	printf("Hey\n");
 	gsl_odeiv2_system sys = { eq_volkov2, NULL, 3, NULL};
 	double delta = 0.;
 	gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(&sys,
@@ -286,6 +287,7 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 	double step = 0.0;
 	double r_init = 1e-6;
 	double t = r_init, t1 = 50.0 + r_init;
+
 	double P_init = D->PofN(rho_init);
 	double E_init = D->EofN(rho_init);
 	double y[3] = { D->PofN(rho_init), 1.333 * M_PI * pow(r_init, 3.0) * 1.4766,
@@ -359,7 +361,12 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 			D->nSize = i;
 			return;
 		}
-		y[2] = D->EofP(y[0]);
+		if (y[0] > 0) {
+			y[2] = D->EofP(y[0]);
+		}
+		else{
+			y[2] = 1e-26;
+		}
 		bMass += (0.0004898007281478712)*D->NofE(y[2])*pow((1.0 - (2.0*y[1]*1.4766)/t),-0.5)*t*t*(t1/n_points);
 		D->lastNstar[i-1] = D->NofE(y[2]);
 //		printf("%f \n", D->lastNstar[i-1]);

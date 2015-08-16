@@ -10,6 +10,8 @@
 #include <cmath>
 #include <cstdio>
 //#include <fstream>
+#include <gsl/gsl_interp.h>
+#include <iostream>
 
 
 using namespace std;
@@ -18,89 +20,31 @@ KVDriver::KVDriver() {
 }
 
 KVDriver::KVDriver(double * E, int dimE, double * P, int dimP, double * n, int dimN){
-	for (int i = 0; i < dimE; i++){
-		this->E[i] = E[i];
-		this->P[i] = P[i];
-		this->n[i] = n[i];
+	if (dimE != dimP or dimE!=dimN or dimP != dimN){
+		throw 20;
 	}
-	this->count = dimN;
+	this->isSet = 0;
+	this->set(E, dimE, P, dimP, n, dimN);
 }
 
-KVDriver::KVDriver(set_const* C, string fname) {
-	this->C = C;
-	this->fname = fname;
+double KVDriver::NofP(double P){
+	return gsl_spline_eval(iNofP, P, accNofP);
 }
 
-double KVDriver::PofE(double _E){
-	double min = 1e45;
-	int iMin;
-	for (int i = 0; i < count; i++){
-		if (abs(E[i] - _E) < min){
-			min = abs(E[i] - _E);
-			iMin = i;
-		}
-	}
-	return P[iMin];
+double KVDriver::NofE(double E){
+	return gsl_spline_eval(iNofE, E, accNofE);
 }
 
-double KVDriver::EofN(double _n) {
-	double min = 1e45;
-	int iMin;
-	for (int i = 0; i < count; i++){
-		if (abs(n[i] - _n) < min){
-			min = abs(n[i] - _n);
-			iMin = i;
-		}
-	}
-	return E[iMin];
+double KVDriver::EofP(double P){
+	return gsl_spline_eval(iEofP, P, accEofP);
 }
 
-double KVDriver::PofN(double _n) {
-	double min = 1e45;
-	int iMin;
-	for (int i = 0; i < count; i++){
-		if (abs(n[i] - _n) < min){
-			min = abs(n[i] - _n);
-			iMin = i;
-		}
-	}
-	return P[iMin];
+double KVDriver::EofN(double N){
+	return gsl_spline_eval(iEofN, N, accEofN);
 }
 
-double KVDriver::EofP(double _P) {
-	double min = 1e45;
-	int iMin;
-	for (int i = 0; i < count; i++){
-		if (abs(P[i] - _P) < min){
-			min = abs(P[i] - _P);
-			iMin = i;
-		}
-	}
-	return E[iMin];
-}
-
-double KVDriver::NofP(double _P){
-	double min = 1e45;
-	int iMin;
-	for (int i = 0; i < count; i++){
-		if (abs(P[i] - _P) < min){
-			min = abs(P[i] - _P);
-			iMin = i;
-		}
-	}
-	return n[iMin];
-}
-
-double KVDriver::NofE(double _E){
-	double min = 1e45;
-	int iMin;
-	for (int i = 0; i < count; i++){
-		if (abs(E[i] - _E) < min){
-			min = abs(E[i] - _E);
-			iMin = i;
-		}
-	}
-	return n[iMin];
+double KVDriver::PofN(double N){
+	return gsl_spline_eval(iPofN, N, accPofN);
 }
 
 int KVDriver::lookFor(double* src, int dim_src, double what) {
@@ -126,16 +70,43 @@ int KVDriver::lookFor(double* src, int dim_src, double what) {
 }
 
 void KVDriver::set(double * E, int dimE, double * P, int dimP, double * n, int dimN){
-	this->E = new double[dimE];
-	this->P = new double[dimP];
-	this->n = new double[dimN];
-	for (int i = 0; i < dimE; i++){
-//		printf("%f %f %f \n", E[i], P[i], n[i]);
-		this->E[i] = E[i];
-		this->P[i] = P[i];
-		this->n[i] = n[i];
+	cout << "KVDriver::set" << endl;
+	if (this->isSet) {
+		delete iEofN;
+		delete accEofN;
+		delete iNofE;
+		delete accNofE;
+		delete iNofP;
+		delete accNofP;
+		delete iEofP;
+		delete accEofP;
+		delete iPofN;
+		delete accPofN;
 	}
-	this->count = dimN;
+	accEofN = gsl_interp_accel_alloc();
+	iEofN = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iEofN, n, E, dimN);
+	cout << "E spline init" << endl;
+	accNofE = gsl_interp_accel_alloc();
+	iNofE = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iNofE, E, n, dimN);
+
+
+	accNofP = gsl_interp_accel_alloc();
+	iNofP = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iNofP, P, n, dimN);
+
+
+	accEofP = gsl_interp_accel_alloc();
+	iEofP = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iEofP, P, E, dimN);
+
+
+	accPofN = gsl_interp_accel_alloc();
+	iPofN = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iPofN, n, P, dimN);
+	this->isSet = 1;
+	cout << "Set!" << endl;
 }
 
 KVDriver::~KVDriver() {

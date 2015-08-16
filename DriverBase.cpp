@@ -29,22 +29,6 @@ void DriverBase::readEos(){
 
 }
 
-double DriverBase::PofE(double E){
-	return 0.0;
-}
-
-double DriverBase::PofN(double n) {
-	return 0;
-}
-
-double DriverBase::EofN(double n) {
-	return 0.0;
-}
-
-double DriverBase::EofP(double P){
-	return 0.0;
-}
-
 double DriverBase::NofE(double E){
 	return 0.;
 }
