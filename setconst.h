@@ -67,12 +67,16 @@ public:
 
 	//			Cs		Co		Cr		b		c		z
 	set_const(){
-		init(179.56,87.6,100.64,7.7346e-3,3.4462e-4, 0.65);
+		init(164.462, 54.6041, 121.69, 0.0202832, 0.0471633, 0.65);
 		this->n0 = pow(197.33/135.0, 3) * 0.16;
 		this->phi_meson = 0;
 		this->sprime = 0;
 		this->Csp = 1.0;
 		this->sigma_kind = 0;
+		this->f0 = 0.16;
+		double alpha[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+		this->set_hs_alpha(alpha, 8);
+		this->set_hs_z(alpha, 8);
 	}
 	set_const(double, double, double, double, double, double);
 	//			Cs		Co		Cr		b		c		z
@@ -108,6 +112,7 @@ public:
 	vec X_sp;
 	std::vector<double> Q;
 	std::vector<double> T;
+	std::vector<double> S;
 	vec M;
 	bool Hyper;
 	int SetHyperConstants(int);

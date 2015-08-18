@@ -18,12 +18,12 @@
 
 //#include "constants.h"
 //#include "setconst.h"
-double p_f(double n) {
-	return pow(3.0 * M_PI * M_PI * D * n, 1.0 / 3.0);
+double p_f(double n, double gamma) {
+	return pow(6. * M_PI * M_PI * D * n / gamma, 1.0 / 3.0);
 }
 
-double kineticInt(double n, double m, double f){
-	double pf = p_f(n);
+double kineticInt(double n, double m, double gamma){
+	double pf = p_f(n, 0);
 	double result2 = pf*sqrt(m*m + pf*pf)*(m*m + 2*pf*pf);
 	if (m > 0.0){
 		result2 -= pow(m,4)*asinh(pf/m);
@@ -119,7 +119,7 @@ namespace calc{
 		double m_eff_arg = xs*(C->M[0]/C->M[i])*f + C->X_sp[i]*(C->M[0]/C->M[i])*fp;
 //		printf("f = %f, m_eff_arg = %f \n", f, m_eff_arg);
 		double m_eff = C->M[i] * C->phi_n(i,m_eff_arg);
-		double res = sqrt(pow(p_f(n[i+sp]), 2.0) + pow(m_eff, 2.0));
+		double res = sqrt(pow(p_f(n[i + sp], 0), 2.0) + pow(m_eff, 2.0));
 //		double res = 0.0;
 		res += C->X_o[i]*out[2];
 		res += C->X_r[i]*C->T[i]*out[3];
@@ -194,7 +194,7 @@ namespace calc{
 		}
 
 		for (int i = 1; i < m; i++){
-			hx[i] = p_f(p[i]);
+			hx[i] = p_f(p[i], 0);
 			double xs = 0.;
 			if (C->sigma_kind == 0){
 				xs = C->X_s[i+1];
@@ -487,12 +487,12 @@ void fun_n_eq(double * p, double * hx, int m, int n, void * adata){
 	hx[0] = (params->E + params->P -
 			 params->Co * pow(params->n/mn, 2) -
 			 params->Cr * pow((np - nn)/mn, 2)/4);
-	hx[0] -= nn*pow(pow(p_f(nn),2) + pow(mn*(1-f),2), 0.5) +
-			 np*pow(pow(p_f(np),2) + pow(mn*(1-f),2), 0.5);
+	hx[0] -= nn*pow(pow(p_f(nn, 0),2) + pow(mn*(1-f),2), 0.5) +
+			 np*pow(pow(p_f(np, 0),2) + pow(mn*(1-f),2), 0.5);
 	double ne = 0.;
 	double nmu = 0.;
-	double mu_e = pow(pow(p_f(nn),2) + pow(mn*(1-f),2), 0.5) -
-				  pow(pow(p_f(np),2) + pow(mn*(1-f),2), 0.5) +
+	double mu_e = pow(pow(p_f(nn, 0),2) + pow(mn*(1-f),2), 0.5) -
+				  pow(pow(p_f(np, 0),2) + pow(mn*(1-f),2), 0.5) +
 				  params->Cr * (nn - np)/(2*mn*mn);
 	printf("mu_e = %f \n", mu_e);
 	if (mu_e > m_e){

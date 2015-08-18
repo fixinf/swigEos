@@ -213,9 +213,9 @@ int set_const::SetHyperConstants(int type){
 				this->T.push_back(t[i]);
 				this->Q.push_back(q[i]);
 				this->M.push_back(m[i]);
+				this->S.push_back(.5);
 		}
 	}
-
 	return 0;
 }
 

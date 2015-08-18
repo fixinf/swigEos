@@ -10,7 +10,7 @@
 
 #include "setconst.h"
 
-class KVOR: public set_const {
+class KVOR: virtual public set_const {
 public:
 	KVOR();
 	virtual ~KVOR();
