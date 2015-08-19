@@ -8,6 +8,8 @@
 
 #include "setconst.h"
 #include "KVOR.h"
+#include "Walecka.h"
+#include "KVORmod2.h"
 
 class SCDelta: virtual public set_const {
 public:
@@ -27,5 +29,24 @@ public:
     }
 };
 
+class Walecka_d: public SCDelta, public Walecka{
+public:
+    Walecka_d() : Walecka(), SCDelta(){
+        double mn = 938 / 197.33;
+        Cs = 9.927 * mn * mn;
+        Co = 4.82 * mn * mn;
+        Cr = 4.791 * mn * mn;
+        b = 0.008659;
+        c = -0.002421;
+        f0 = .22;
+    }
+};
+
+class MKVOR_d: public SCDelta, public KVOR_mod2{
+public:
+    MKVOR_d() : KVOR_mod2(), SCDelta(){
+
+    }
+};
 
 #endif //EOSWRAP_SCDELTA_H

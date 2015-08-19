@@ -10,7 +10,7 @@
 
 #include "setconst.h"
 
-class Walecka: public set_const {
+class Walecka: virtual public set_const {
 public:
 	Walecka();
 	virtual ~Walecka();

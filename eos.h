@@ -24,7 +24,7 @@ extern double _E(double * n, int dimN, set_const *, double * inplace = NULL, int
 extern double E(double * n, int dimN, set_const *, double * inplace = NULL, int dim_inplace = 0);
 extern double sum(std::vector<double> x);
 extern double kineticInt(double n, double m, double f);
-extern double p_f(double n, int i);
+extern double p_f(double n, double gamma);
 namespace calc{
 extern double mu(double * n, int dimN, int i, set_const * C);
 }
