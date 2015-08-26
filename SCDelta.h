@@ -15,9 +15,9 @@ class SCDelta: virtual public set_const {
 public:
     SCDelta(){
         this->setDeltaConstants(2, 0);
-        double alpha[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-        this->set_hs_alpha(alpha, 8);
-        this->set_hs_z(alpha, 8);
+        double alpha[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        this->set_hs_alpha(alpha, 9);
+        this->set_hs_z(alpha, 9);
     }
 
     int setDeltaConstants(int, int);
@@ -25,7 +25,7 @@ public:
 
 class KVOR_d : public SCDelta, public KVOR{
 public:
-    KVOR_d() : KVOR(), SCDelta(){
+    KVOR_d() : SCDelta(), KVOR(){
     }
 };
 

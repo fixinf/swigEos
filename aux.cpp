@@ -8,12 +8,6 @@
 #include "aux.h"
 #include "levmar.h"
 
-struct func_f_eq_params{
-	double * n;
-	int dimN;
-	double df;
-	set_const * C;
-};
 
 double K_f(double n, double m){
 	return 0.;
