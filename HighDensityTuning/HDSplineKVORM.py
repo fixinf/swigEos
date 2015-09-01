@@ -66,27 +66,27 @@ mix = 0.9
 a_s = -0.0
 
 frange = np.linspace(-1e-2, 1+1e-3, npoints)
-etar = np.array(map(C1.eta_r, frange))
-etao = np.array(map(C1.eta_o, frange))
-u = np.array(map(C1.U, frange))
-etas = np.array(map(C1.eta_s, frange))
+etar = np.array(list(map(C1.eta_r, frange)))
+etao = np.array(list(map(C1.eta_o, frange)))
+u = np.array(list(map(C1.U, frange)))
+etas = np.array(list(map(C1.eta_s, frange)))
 
 
 n_sparse = 30
 f_sparse = np.linspace(-1e-2, 1+1e-3, n_sparse)
 
-etar_sparse = np.array(map(C1.eta_r, f_sparse)) 
+etar_sparse = np.array(list(map(C1.eta_r, f_sparse))) 
 
 start = n_sparse*0.56
 stop = n_sparse
 
-print  [C1.eta_r(f_sparse[start]) for i in f_sparse[start:stop]]
+print([C1.eta_r(f_sparse[start]) for i in f_sparse[start:stop]])
 etar_sparse[start:stop] = [C1.eta_r(f_sparse[start]) - sqrt(i) for i in f_sparse[start:stop]]
 
 plt.plot(f_sparse, etar_sparse)
 plt.show()
 
-print f_sparse.shape, etar_sparse.shape
+print(f_sparse.shape, etar_sparse.shape)
 
 # i_etar = interp1d(f_sparse, etar_sparse, kind='quadratic')
 i_etar = interpolate.UnivariateSpline(f_sparse, etar_sparse, s=1)
@@ -102,18 +102,18 @@ C.set_eta_r(frange, etar_dense)
 C.set_eta_s(frange, etas)
 C.set_U(frange, u)
 
-plt.plot(frange, map(C.eta_r, frange), frange, map(C1.eta_r, frange))
-plt.plot(frange, map(C.eta_o, frange), frange, map(C1.eta_o, frange))
-plt.plot(frange, map(C.eta_s, frange), frange, map(C1.eta_s, frange))
+plt.plot(frange, list(map(C.eta_r, frange)), frange, list(map(C1.eta_r, frange)))
+plt.plot(frange, list(map(C.eta_o, frange)), frange, list(map(C1.eta_o, frange)))
+plt.plot(frange, list(map(C.eta_s, frange)), frange, list(map(C1.eta_s, frange)))
 plt.ylim([0, 5])
-print C.eta_r(0.23)
+print(C.eta_r(0.23))
 plt.show()
 
 wr.dumpVs()
 # wr.set=1
 wr.setDriver()
 n, m, r, mg = wr.stars()
-print 'M_NS_MAX =', max(m)
+print('M_NS_MAX =', max(m))
 sleep(3)
 
 wr1.C.phi_meson=0

@@ -40,17 +40,17 @@ C.Csp = 380.0
 f0 = 0.26
 
 
-print C.X_s[7]
+print(C.X_s[7])
 
-print C.X_s[7]
+print(C.X_s[7])
 
 
 wr = Wrapper(C)
 C.Csp = 1.0
 n0 = wr.n0
 K0 = 275.0
-print eos.EBind(np.array([0.195, wr.n0/2, wr.n0/2]), C)
-print eos.f_eq(np.array([n0/2, n0/2]), np.array([0.0]), 1, C)
+print(eos.EBind(np.array([0.195, wr.n0/2, wr.n0/2]), C))
+print(eos.f_eq(np.array([n0/2, n0/2]), np.array([0.0]), 1, C))
 wr.solve()
 wr.solve(f0=0.26)
 pause(10)

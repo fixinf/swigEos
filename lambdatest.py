@@ -37,13 +37,13 @@ C.sprime = 1
 sp = 1 + C.sprime
 init = np.array([0.0 for i in range(sp)])
 
-print C.X_s[0], C.X_s[2], C.X_s[3]
+print(C.X_s[0], C.X_s[2], C.X_s[3])
 # pause(2)
 C.phi_meson = 1
-print C.f0
+print(C.f0)
 
-print eos.f_eq(np.array([wr.n0/2.0, wr.n0/2.0]), init, sp, C)
-print eos.f_eq(np.array([0.25, 0.25]),np.array([0.0]), 1, C)
+print(eos.f_eq(np.array([wr.n0/2.0, wr.n0/2.0]), init, sp, C))
+print(eos.f_eq(np.array([0.25, 0.25]),np.array([0.0]), 1, C))
 # pause(10)
 dx = 1e-4
 n_l = np.linspace(0.00001, 5.0, 500)
@@ -58,18 +58,18 @@ def U_lambda(x, Y, gamma=None):
         f_eq_arg = array([(1- x)*n*(1-Y), x*n*(1-Y), Y*n])
 #         print 'f_eq_arg=',
         f = eos.f_eq(f_eq_arg, f, sp, C)
-        print f
+        print(f)
         mu_arg = np.array([(1- x)*n*(1-Y), x*n*(1-Y), Y*n])
         mu_arg = np.insert(mu_arg, 0, f)
         feq.append(f)
-        print mu_arg
+        print(mu_arg)
         qqq = eos._E(mu_arg, C)/n - C.M[2]
 #         qqq = eos.mu(mu_arg, 3, C) - C.M[2]
         res.append(qqq)
     return np.array(res)*135.0
 
 arrr=  U_lambda(0.0, 1.0)
-print arrr
+print(arrr)
 plot(n_l, arrr)
 show()
 
@@ -81,14 +81,14 @@ def U_sigma_m():
 #         print 'f_eq_arg=',
 #         f_eq_arg = array([n/2, n/2, 0.0, 0.0])
         f = eos.f_eq(f_eq_arg, C, f)
-        print f
+        print(f)
         mu_arg = np.array([f, 0/2, 0/2, 0,0, 0.0, 0.0, 0.0, n/2, n/2])
 #         mu_arg = np.array([f, n/2, n/2, 0,0, 0.0])
         feq.append(f)
         qqq = eos.E(mu_arg, C)/n - C.M[7]
 #         qqq = eos.mu(mu_arg, 7, C) - C.M[7]
         res.append(qqq)
-    print res
+    print(res)
     return np.array(res)*135.0
 
 def U_sigma_p():
@@ -110,7 +110,7 @@ balb1 = open('balb_lambda_1.dat', 'r')
 x_balb = []
 y_balb = []
 for line in balb1:
-    print line
+    print(line)
     a,b = line.split()
     x_balb.append(a)
     y_balb.append(b)
@@ -137,7 +137,7 @@ for line in stoks_S:
 
 x_S_stoks = np.array(x_S_stoks, dtype=float64)*wr.n0/0.16
 
-print x_balb.dtype
+print(x_balb.dtype)
 res = U_lambda(0.0, 0.0)
 
 
@@ -176,7 +176,7 @@ slZ = Slider(axZ, 'z', 0.0, 10.0, valinit=0.65)
 
 
 def Update(val):
-    print slX.val, slY.val, slGamma.val
+    print(slX.val, slY.val, slGamma.val)
     C.phi_z = slZ.val
     C.phi_gamma = slGamma.val
     n_l, res = U_lambda(slX.val, slY.val, slGamma.val)

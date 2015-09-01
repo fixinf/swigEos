@@ -111,9 +111,9 @@ def Cr(n):
     return exp(- a_r * (x - 1))
 
 n = np.linspace(0., 8*n0, 80, endpoint=False)
-print Cs(n0), Co(n0)
-print derivative(Cs, 0., dx=1e-3, n=2), derivative(Co, 0., dx=1e-3, n=2)
-print derivative(Cs, n0, dx=1e-3, n=2), derivative(Co, n0, dx=1e-3, n=2)
+print(Cs(n0), Co(n0))
+print(derivative(Cs, 0., dx=1e-3, n=2), derivative(Co, 0., dx=1e-3, n=2))
+print(derivative(Cs, n0, dx=1e-3, n=2), derivative(Co, n0, dx=1e-3, n=2))
 
 scaling = wr.dumpScalings(None)
 

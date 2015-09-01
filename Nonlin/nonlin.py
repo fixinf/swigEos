@@ -1,7 +1,9 @@
+from scipy.interpolate.interpolate import interp1d
 from scipy.misc.common import derivative
 from scipy.optimize.optimize import fmin, fmin_cg, fmin_powell, fmin_bfgs
 from scipy.optimize.zeros import brentq
 from veusz.utils.utilfuncs import isiternostr
+import eosWrap as eos
 
 __author__ = 'const'
 import numpy as N
@@ -159,7 +161,7 @@ class NLVector():
     def EPN_NS(self, npoints, ret_np=0):
         res = []
         nplist = []
-        nrange = N.linspace(0, 8*self.n0, npoints, endpoint=1)
+        nrange = N.linspace(0, 10*self.n0, npoints, endpoint=1)
         for n in nrange:
             np, ne, nmu = self.np_eq(n)
             print(np, ne, nmu)
@@ -173,3 +175,83 @@ class NLVector():
         else:
             return E, P, nrange, N.nan_to_num(N.array(nplist))
 
+    def tabEos(self, name='test', npoints=80):
+        E, P, n, np = self.EPN_NS(npoints, ret_np=1)
+        nsym = N.array([[z/2, z/2] for z in n])
+        Esym = N.nan_to_num(N.array([self.E(*z) for z in nsym]))
+        Ebind = self.mpi * (Esym/n - self.mn)
+        E *= self.mpi4_2_mevfm3
+        P *= self.mpi4_2_mevfm3
+        n /= self.n0
+
+        N.savetxt(name+'_eos.dat', N.array([n, E, P, np, Ebind]).transpose(), fmt='%.6e')
+        return [E, P, n]
+
+
+    def tabMass(self, name='test', nstars=40):
+        dr = eos.KVDriver()
+        E, P, n = self.tabEos(name=name)
+        n_dense = N.linspace(0, 10*self.n0, 800)
+        kind = 'cubic'
+        E_dense = interp1d(n*self.n0, E, kind=kind)(n_dense)
+        P_dense = interp1d(n*self.n0, P, kind=kind)(n_dense)
+        dr.set(E_dense/self.mpi4_2_mevfm3, P_dense/self.mpi4_2_mevfm3, n_dense)
+        stars = N.linspace(0, 10*self.n0, nstars)
+        MR = []
+        for n in stars:
+            MR.append(eos.star_crust2(n, 3, dr, 1e-11))
+        MR = N.array(MR)
+        N.savetxt(name+'_mass.dat', N.insert(MR, 0, stars/self.n0, axis=1), fmt='%.4f')
+        return MR
+
+
+    def tabMassCrust(self, name='test', nstars=100, ncut_crust=.45, ncut_eos=.6):
+        dr = eos.KVDriver()
+        E, P, n = self.tabEos(name=name)
+        n_dense = N.linspace(0, 10*self.n0, 10000)
+        kind = 'linear'
+
+        e = []
+        p = []
+        ncrust = []
+        with open("/home/const/workspace/swigEosWrapper/crust.dat", 'r') as f:
+            for line in f:
+                # print line
+                _e, _p, _n = line.split()
+                if float(_n) < ncut_crust:
+                    e.append(float(_e)/self.mpi**4 * self.mpi4_2_mevfm3)
+                    p.append(float(_p)/self.mpi**4 * self.mpi4_2_mevfm3)
+                    ncrust.append(float(_n)*self.n0)
+        e = N.array(e)
+        p = N.array(p)
+        ncrust = N.array(ncrust)
+        print(ncrust)
+
+        # gamma = 1. / 4.
+        # n_dense = N.linspace(0., (10*self.n0) ** gamma, 1000)
+        # n_dense = n_dense ** (1. / gamma)
+
+        k_eos = N.where(n > ncut_eos)[0][0]
+
+        Enew = N.concatenate((e, E[k_eos:]))
+        Pnew = N.concatenate((p, P[k_eos:]))
+        Nnew = N.concatenate((ncrust, n[k_eos:]*self.n0))
+
+        # plt.plot(n, P, label='eos')
+        # plt.plot(ncrust/self.n0, p, label='crust')
+        # plt.plot(Nnew/self.n0, Pnew, label='tot')
+        # plt.legend()
+        # plt.show()
+
+        E_dense = interp1d(Nnew, Enew, kind=kind)(n_dense)
+        P_dense = interp1d(Nnew, Pnew, kind=kind)(n_dense)
+
+        # plt.plot(n_dense/self.n0, P_dense)
+        # plt.show()
+        dr.set(E_dense/self.mpi4_2_mevfm3, P_dense/self.mpi4_2_mevfm3, n_dense)
+        stars = N.linspace(.4*self.n0, 10*self.n0, nstars)
+        MR = []
+        for n in stars:
+            MR.append(eos.star_crust2(n, 3, dr, 1e-11))
+        MR = N.array(MR)
+        N.savetxt(name+'_mass_crust.dat', N.insert(MR, 0, stars/self.n0, axis=1), fmt='%.4f')

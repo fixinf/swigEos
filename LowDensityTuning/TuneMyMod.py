@@ -47,8 +47,8 @@ ax[0].set_ylim([0., 20])
 
 ax[1].set_ylim([-2, 5])
 
-lom, = ax[1].plot(frange, map(C.eta_o, frange))
-lr, = ax[1].plot(frange, map(C.eta_r, frange))
+lom, = ax[1].plot(frange, list(map(C.eta_o, frange)))
+lr, = ax[1].plot(frange, list(map(C.eta_r, frange)))
 
 lsymm, = ax[2].plot(n/wr.n0, (wr.Esymm(n)/n - C.M[0])*wr.m_pi)
 ax[2].set_xlim([0., 1.])
@@ -77,8 +77,8 @@ def update(val):
     C.omega_f_low = slOmegaF.val
     E = (wr.Eneutr(n)/n - C.M[0])*135.
     l.set_ydata(E)
-    lr.set_ydata(map(C.eta_r, frange))
-    lom.set_ydata(map(C.eta_o, frange))
+    lr.set_ydata(list(map(C.eta_r, frange)))
+    lom.set_ydata(list(map(C.eta_o, frange)))
     lsymm.set_ydata((wr.Esymm(n)/n - C.M[0])*wr.m_pi)
     EN = wr.Eneutr(n)
     PN = wr.P_N(n)

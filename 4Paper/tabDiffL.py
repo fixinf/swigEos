@@ -51,7 +51,7 @@ for J in Jlist:
             wr = Wrapper(C)
             for j in np.linspace(wr.J(), J, 5):
                 wr.solve(f0=C.f0, J0=j, K0=wr.K())
-            print wr.L()
+            print(wr.L())
     #         exit()
         #     wr.testHyperBind()
             
@@ -70,14 +70,14 @@ for J in Jlist:
             plt.plot(wr.n/wr.n0, wr.concentrations())
             plt.plot(wr.n/wr.n0, wr.rho[:,0])
             plt.show()
-            plt.plot(frange, map(C.eta_r, frange))
+            plt.plot(frange, list(map(C.eta_r, frange)))
             plt.show()
             folderName = join('/home/const/Dropbox/Documents/For DN/Very final/data',
                               model.__name__+
                               'J=%.0f_L=%.2f'%(J, wr.L()))
         #     wr.dumpEos(folderName)
         #     exit()
-            print folderName
+            print(folderName)
             
         #     wr.dumpMasses(folderName)
 #             wr.dumpEos(folderName)
@@ -85,6 +85,6 @@ for J in Jlist:
         #     wr.dumpScalings(folderName)
 #             wr.dumpMassesCrust(ncut_crust=0.6, ncut_eos=0.8, folderName=folderName)
         #     wr.dumpLandauParams(folderName)
-            print wr.L()
+            print(wr.L())
             wr.dumpLandauParamsNM(folderName)
 #             wr.dumpJ(folderName)

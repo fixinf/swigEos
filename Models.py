@@ -21,6 +21,19 @@ def KVOR():
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
 
+def KVORphi():
+    C = eos.KVORphi()
+    C.Csp = 1.
+    C.Cs = 179.56233875171566
+    C.Co =87.5996397368707
+    C.Cr = 100.63642242798424
+    C.b = 0.00773460805148428
+    C.c = 0.00034461786646922604
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
 def waleckaMatsui():
     C= eos.Walecka()
     C.Csp = 1.
@@ -221,7 +234,7 @@ def KVOR_tan_03(C1, solve=1):
     
     res = optimize.minimize(lambda z: f_cut(z, C, C1), [C.omega_b, C.omega_f])
     
-    print res.x
+    print(res.x)
     
     C.phi_gamma = 3.
     C.phi_z = 3.5
@@ -274,7 +287,7 @@ def KVOR_cut_smooth():
     C.Cr = 100.6364207940
     C.b = 0.0073248882
     C.c = 0.0028050590
-    print C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2)
+    print(C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2))
     C.d = 0.
     C.SetHyperConstants(2)
     C.omega_kind = 1
@@ -370,7 +383,7 @@ def KVOR_tan_02(C1, solve=True):
     
     res = optimize.minimize(lambda z: f_cut(z, C, C1), [C.omega_b, C.omega_f])
     
-    print res.x
+    print(res.x)
     
     C.phi_gamma = 3.
     C.phi_z = 3.5
@@ -391,7 +404,7 @@ def KVOR_cut_0196():
     C.Cr = 100.6364207940
     C.b = 0.0073248882
     C.c = 0.0028050590
-    print C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2)
+    print(C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2))
     C.d = 0.
     C.SetHyperConstants(2)
     C.omega_kind = 1
@@ -425,7 +438,7 @@ def KVOR_cut_0196_narrow():
     C.Cr = 100.6364207940
     C.b = 0.0073248882
     C.c = 0.0028050590
-    print C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2)
+    print(C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2))
     C.d = 0.
     C.SetHyperConstants(2)
     C.omega_kind = 1
@@ -477,11 +490,11 @@ def KVOR_tan_0196(C1):
     
     res = optimize.minimize(lambda z: f_cut(z, C, C1), [C.omega_b, C.omega_f])
     
-    print res
+    print(res)
     
     frange = np.linspace(0, 1, 1000)
-    plt.plot(frange, map(C.eta_o, frange))
-    plt.plot(frange, map(C1.eta_o, frange))
+    plt.plot(frange, list(map(C.eta_o, frange)))
+    plt.plot(frange, list(map(C1.eta_o, frange)))
     plt.show()
     
     C.phi_gamma = 3.
@@ -801,7 +814,7 @@ def KVORLowerK(f0, K):
     C.Cr = 100.6364207940
     C.b = 0.0073248882
     C.c = 0.0028050590
-    print C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2)
+    print(C.eta_o(0.2), C.eta_p(0.2), C.eta_r(0.2), C.eta_s(0.2))
     C.d = 0.
     C.SetHyperConstants(2)
     C.omega_kind = 1
@@ -920,7 +933,7 @@ def myMod240():
     return C
 
 def myMod240_L(beta=0.8, gamma=7.5):
-    C = eos.KVOR_mod2()
+    C = eos.MKVOR_d()
     
     
     C.Cs = 234.1580555799
@@ -1063,7 +1076,7 @@ def myMod240J28():
     return C
 
 def myMod():
-    return myModFinal()
+    # return myModFinal()
     return myModR()
     C = myMod240_L(1.2, 7.5)
     C.Cs = 234.1580555929
@@ -1075,7 +1088,7 @@ def myMod():
 #     for j in np.linspace(wr.J(), 30., 4):
 #         wr.solve(f0=C.f0, K0=wr.K(), J0=j)
     wr.solve(f0=C.f0, J0=30., K0=240.)
-    print wr.L(), wr.J()
+    print(wr.L(), wr.J())
 #     exit()
     return C
     
@@ -1137,42 +1150,31 @@ def myModSat():
 
 
 def myModR2():
-    C = myMod240_L(1.2, 7.5)
-    C.Cs = 234.1580555929
-    C.Co = 134.8826104259
-    C.Cr = 81.7485393895
-    C.b=  0.0046776700
-    C.c = -0.0029781609
-    C.rho_kind = 6
-    C.rho_a = 0.6
-    C.rho_sat_a = 20
-    C.rho_sat_f1 = 0.35
-    C.beta = 3.4
-    C.gamma = 0
-    C.rho_sat_val = 14.58227877
-    C.rho_f = 0.65309008
+    C = myMod()
+    C.beta = 3.11
+    C.rho_sat_val = 28.4
+    C.rho_a = 0.448
+    C.rho_a0 = -0.614
     wr = Wrapper(C)
-#     for j in np.linspace(wr.J(), 30., 4):
-#         wr.solve(f0=C.f0, K0=wr.K(), J0=j)
-    wr.solve(f0=C.f0, J0=30., K0=240.)
-    print wr.L(), wr.J()
-#     exit()
+    wr.solve(f0 = C.f0, K0=240, J0=30.)
     return C
+    
+    
 
 def myModR():
     C = myMod240_L(1.2, 7.5)
-    C.Cs = 234.1580555929
-    C.Co = 134.8826104259
-    C.Cr = 81.7485393895
-    C.b=  0.0046776700
-    C.c = -0.0029781609
+    C.Cs = 234.1528829441
+    C.Co = 134.8835340674
+    C.Cr = 81.7504997322
+    C.b=  0.0046763733
+    C.c = -0.0029762759
     C.rho_f = 0.45
     C.rho_a = 100.
     wr = Wrapper(C)
 #     for j in np.linspace(wr.J(), 30., 4):
 #         wr.solve(f0=C.f0, K0=wr.K(), J0=j)
-    wr.solve(f0=C.f0, J0=30., K0=240.)
-    print wr.L(), wr.J()
+#     wr.solve(f0=C.f0, J0=30., K0=240.)
+#     print wr.L(), wr.J()
 #     exit()
     return C
     
@@ -1249,20 +1251,27 @@ def myModFinal():
     C.rho_sat_f2 = 1
     C.gamma = 0.
     
-    C.beta = 3.80530423
-    C.rho_sat_val = 23.53502497
+#     C.beta = 3.80530423
+    C.beta = 3.11396997 
+#     C.rho_sat_val = 23.53502497
+    C.rho_sat_val = 28.44390566
+     
     C.rho_f = 0.522
     rho_f = 0.522
+
     C.rho_d = -4
     C.rho_width_f = C.f0
-    C.rho_a = 0.479673
+#     C.rho_a = 0.479673
+    C.rho_a = 0.44772735
     C.rho_width_power = 1.
-    C.rho_a0 = -2
+#     C.rho_a0 = -2
+    C.rho_a0 = -0.61439063
     C.rho_a1 = 3
     C.rho_a2 = 0.8
     C.rho_a3 = -0
     C.rho_a4 = 0
-    
+    frange = np.linspace(0, 1, 100)
+
     C.rho_e = 6
     
     C.beta1 = 0*1.8
@@ -1271,10 +1280,16 @@ def myModFinal():
     C.omega_c = 0
 
     C.omega_kind = 2
-    C.omega_a = 0.10669423
+    C.omega_a = 0.11
     C.omega_b = 7.09984178
-    C.omega_f = 0.95
+    C.omega_f = 0.9
+#     C.omega_a = 0.15669423
+#     C.omega_b = 7.09984178
+#     C.omega_f = 0.95
+#     plt.plot(frange, map(C.eta_r, frange))
+#     plt.show()
     wr = Wrapper(C)
+    C.f0 = 0.27
     wr.solve(f0=C.f0, K0=240., J0=30.)
     return C
 
@@ -1355,6 +1370,32 @@ def Cubero():
     C.n0 = 0.15/0.16 * C.n0
     C.f0 = 0.15
     return C
+
+def Cubero2():
+    C = eos.KVOR_cut_sigma()
+    C.M[0] = 939./135.
+    C.M[1] = 939./135.
+    C.z = 0
+    C.Cs = 183.683
+    C.Co = 64.545
+    C.Cr = 1e-16
+    C.Cr = 100.
+#     C.b = 0.017788
+#     C.c = 0.039674
+    C.b = 0.017788
+    C.c = 0.039674
+    C.n0 = 0.15/0.16 * C.n0
+    C.f0 = 0.15
+    return C
+
+def Cubero2_cut(c):
+    C = eos.KVOR_cut_sigma()
+    C.b_sigma = 50.
+    C.a_sigma = +1.
+    C.c_sigma = c
+    return C
+
+
 
 def Cubero_cut03():
     C = Cubero()

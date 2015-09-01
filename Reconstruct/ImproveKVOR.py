@@ -62,7 +62,7 @@ Ulist = np.array(Ulist)
 
 # Ulist.insert(0, 0.)
 
-lines=plt.plot(Fs, Ulist, fs0, map(C.U, fs0))
+lines=plt.plot(Fs, Ulist, fs0, list(map(C.U, fs0)))
 plt.legend(lines, ['Reconstructed', 'KVOR'])
 plt.show()
 
@@ -72,7 +72,7 @@ IC.Co = EC.Co
 iE, iF = iwr.Esymm(n[1:-1], ret_f=1)
 plt.plot(n[1:-1], iF, n, Fs)
 plt.show()
-plt.plot(Fs, Ulist, iF, map(IC.U, iF))
+plt.plot(Fs, Ulist, iF, list(map(IC.U, iF)))
 plt.show()
 plt.plot(n[1:-1], iE, n, E)
 plt.show()

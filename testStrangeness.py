@@ -13,9 +13,9 @@ folderName = join('/home/const/Dropbox/Documents/For DN/Very final/data',
 # C = Models.KVOR_cut_03()
 
 wr = Wrapper(C)
-n, m, r, mg1, mg2, frac = wr.dumpMassesCrustHyper(folderName, ret_str=1, fasthyp=1)
+n, m, r, mg1, mg2, frac = wr.dumpMassesCrustHyper(folderName, ret_frac=1, fasthyp=1)
 i = np.argmax(m)
-print 'hyp_frac(max) = ', frac[i],'m_max = ', m[i]
+print('hyp_frac(max) = ', frac[i],'m_max = ', m[i])
 plt.plot(n/wr.n0, frac)
 plt.show()
 plt.plot(frac, m)

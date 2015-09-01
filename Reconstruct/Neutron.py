@@ -107,15 +107,15 @@ def f_eq_N(n):
 nrange = linspace(0.0, 4.0, 100)
 n_inter = linspace(0.01, 4.5, 100)
 
-flist = map(lambda z: f_eq(z), nrange)
+flist = [f_eq(z) for z in nrange]
 
-pflistN = map(lambda z: pf(z), nrange)
-pflistS = map(lambda z: pf(z), nrange/2)
+pflistN = [pf(z) for z in nrange]
+pflistS = [pf(z) for z in nrange/2]
 
 my_fpS = interp1d(pflistS, flist, kind='cubic')
 my_fpN = interp1d(pflistN, flist, kind='cubic')
 
-print my_fpS(3.5)
+print(my_fpS(3.5))
 
 def func_integr(z, f):
 #     print 'z=', z
@@ -188,7 +188,7 @@ nrange2 = np.linspace(1e-11, 4.5, 100)
 nrange = np.linspace(1e-10, 4., 100)
 F0 = wr.f0_nm(nrange2, multiply=False)
 
-print F0
+print(F0)
 
 iF0 = interp1d(nrange2, F0)
 
@@ -199,7 +199,7 @@ Co = C2.Co
 Cr = C2.Cr
 def func_f_solve(f, n):
     f = float(f)
-    print f, n
+    print(f, n)
     pf = eos.p_f(n)
     mn = C.M[0]
     meff = mn * C.phi_n(0, f)
@@ -222,7 +222,7 @@ def func_f_solve(f, n):
     
 
 flist = odeint(func_f_solve, 0., nrange)
-print flist
+print(flist)
 # exit()
 f2 = []
 f= 0.
@@ -239,9 +239,9 @@ for i, n in enumerate(nrange):
     func.append(func_f_solve(f2[i], n))
     ebind.append(eos.EBind(np.array([f2[i], n, 0.]), C2))
 
-pflistS = np.array(map(lambda z: pf(z), nrange/2))
-print pflistS.shape, flist.shape
-print pflistS[0], pflistS[-1]
+pflistS = np.array([pf(z) for z in nrange/2])
+print(pflistS.shape, flist.shape)
+print(pflistS[0], pflistS[-1])
 #my_fpS = interp1d(pflistS, flist[:,0], kind='cubic')
 my_fpS = interp1d(pflistS, flist[:,0], kind='cubic', bounds_error=False, fill_value=pflistS[0])
 # my_fpS = interp1d(pflistS, f2, kind='cubic', bounds_error=False, fill_value=pflistS[0])
@@ -254,7 +254,7 @@ def _E(n, fp):
     res += int
     return res*135
 
-ebind_new = map(lambda z: _E(z, my_fpS)/z - m_N*135, nrange)
+ebind_new = [_E(z, my_fpS)/z - m_N*135 for z in nrange]
 
 fig, ax = plt.subplots(1, 3)
 lines_f = ax[0].plot(nrange, flist, nrange, f2)

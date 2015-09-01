@@ -30,7 +30,7 @@ for model in models:
     folderName = join('/home/const/Dropbox/Documents/For DN/Very final/data',
                       model.__name__)
 
-    print folderName
+    print(folderName)
     C.Hyper=0
 #     wr.dumpMasses(folderName)
 
@@ -38,4 +38,4 @@ for model in models:
     wr.dumpAll(folderName, nmax=9.)
 #     wr.dumpMassesCrust(folderName, show=0, neutron=0, ncut_crust = .6, ncut_eos = .9, inter='cubic')
 
-print DUs
+print(DUs)

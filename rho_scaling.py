@@ -70,12 +70,12 @@ def eval_rho_a(f_max, f_rho, f0, beta, gamma):
     return ((1 + beta*f_max**2)/(1 + beta*f0**2))**gamma / (f_max-f_rho)**3
 
 # C.rho_a =  -eval_rho_a(1.1, C.rho_f, C.f0, C.beta, C.gamma)
-print C.rho_a 
+print(C.rho_a) 
 pause(1)
 C.SetHyperConstants(2)
-print [i for i in C.X_s]
+print([i for i in C.X_s])
 C.set_xs(np.array([0.0, 0.0, -30.0, 30.0, 30., 30., -18., -18.]))
-print [i for i in C.X_s]
+print([i for i in C.X_s])
 
 wr.solve(f0=C.f0,iter=3000)
 C.SetHyperConstants(2)
@@ -257,12 +257,12 @@ ax[0,3].plot(wr.n/ wr.n0, dJ)
 ax[0,3].plot(wr.n/wr.n0, nJ)
 ax[0,3].plot(wr.n/wr.n0, aJ)
 ax[0,3].set_ylim([0.0, 300.0])
-ax[1,0].plot(wr.n/wr.n0, map(lambda z: C.eta_r(z), wr.rho[:,0]))
+ax[1,0].plot(wr.n/wr.n0, [C.eta_r(z) for z in wr.rho[:,0]])
 ax[1,0].plot(wr.n/wr.n0, eta_r)
 ax[1,1].plot(wr.n/wr.n0, f_s_list)
 ax[1,1].plot(wr.n/ wr.n0, wr.rho[:, 0])
 wr.setDriver()
 N, M, R = wr.stars(npoints=200)
-print max(M)
+print(max(M))
 ax[1,2].plot(N/wr.n0, M)
 plt.show()

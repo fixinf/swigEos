@@ -14,7 +14,7 @@ models = [Models.myModR2]
 DUs = []
 
 for model in models:
-    print np.array(inspect.getmembers(model())).transpose().tolist()
+    print(np.array(inspect.getmembers(model())).transpose().tolist())
 
 exit()
 xss = []
@@ -23,7 +23,7 @@ for model in models:
     xss.append([model.__name__, [C.X_s[i] for i in range(8)]])
     
 for i in xss:
-    print i
+    print(i)
 # exit()
 
 for model in models:
@@ -40,7 +40,7 @@ for model in models:
     folderName = join('/home/const/Dropbox/Documents/For DN/Very final/data',
                       model.__name__)
 
-    print folderName
+    print(folderName)
     C.Hyper=0
 #     wr.showVsSymLow()
 #     wr.dumpMasses(folderName)
@@ -126,7 +126,7 @@ for model in models:
         C.phi_z = 1
         C.phi_meson = 1
         C.phi_kind = 1 
-        C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
+        C.set_hs_alpha(np.array([0., 0.] + [alpha for i in range(6)]))
 #         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
         C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zx, zx]))
         wr.dumpHyper(folderName+'SigmaPhi'+app, npoints=400, verbose=1)
@@ -134,4 +134,4 @@ for model in models:
         wr.dumpHyperScalings(folderName+'SigmaPhi'+app)
         wr.dumpVsHyper(folderName+'SigmaPhi'+app)
     
-print DUs
+print(DUs)

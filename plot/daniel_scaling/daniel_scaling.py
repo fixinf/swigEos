@@ -64,11 +64,11 @@ with open('../klahnLower', 'r') as f:
         LKlahnX.append(float(_n)/0.16)
 ax.semilogy(LKlahnX, LKlahnY, c = 'grey')
 
-print C.f0
+print(C.f0)
 # wr.solve()
 C.f0 = f0
 wr.solve(f0 = C.f0, iter = 3000)
-print C.f0
+print(C.f0)
 # exit()
 # set(params)
 C.SetHyperConstants(2)
@@ -84,12 +84,12 @@ for f in flist:
     global n_star
 #     for _f in np.linspace(C.f0, f):
     wr.solve(f0=f, iter=3000)
-    print C.Cs, C.Co, C.Cr, C.b, C.c    
-    print 'J = ', eos.K(wr.n0, C)
-    print 'K = ',eos.J(wr.n0, C)
-    print 'K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
-                   2*eos.K(wr.n0,C)/wr.n0)
-    print 'L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3)
+    print(C.Cs, C.Co, C.Cr, C.b, C.c)    
+    print('J = ', eos.K(wr.n0, C))
+    print('K = ',eos.J(wr.n0, C))
+    print('K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
+                   2*eos.K(wr.n0,C)/wr.n0))
+    print('L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3))
 #     pause()
     C.omega_c = -1000.0
     l1, = ax.plot(n[:]/wr.n0, wr.Psymm(n), c='r', ls='--')
@@ -147,8 +147,8 @@ with open(suffix+'pressure_scaling%.2f.dat'%flist[0], 'w') as f:
 for j,m in enumerate(mlist):
     with open(suffix+'mass_scaling_%.2f.dat'%flist[j],'w') as f:
         for i, _n in enumerate(n_star):
-            print m[i]
-            print max(m)
+            print(m[i])
+            print(max(m))
             if i > np.argmax(m):
                 break
             f.write('%f  %f\n'%(_n/wr.n0, m[i]))
@@ -187,7 +187,7 @@ i_DU = np.argmin(np.abs(rho[:,1] - np.array([0.14 for r in rho])))
 n_DU = wr.n[i_DU]
 M_DU = MofN(n_DU)
 
-print n_DU/wr.n0, M_DU
+print(n_DU/wr.n0, M_DU)
 
 
 

@@ -51,7 +51,7 @@ for model in models:
         folderName += '%.0f'%(K)        
 #     wr.dumpEos(folderName)
 #     exit()
-    print folderName
+    print(folderName)
     C.Hyper=0
 #     wr.showVsSymLow()
 #     wr.dumpMasses(folderName)
@@ -103,4 +103,4 @@ for model in models:
 #         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
 #         wr.dumpHyper(folderName+'SigmaPhi', npoints=400, verbose=1)
     
-print DUs
+print(DUs)

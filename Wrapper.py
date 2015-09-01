@@ -1,7 +1,7 @@
 import eosWrap as eos
 import numpy as np
 import multiprocessing as mp
-import multi_progress as prog
+#import multi_progress as prog
 from numpy import dtype, argmin
 from scipy import interpolate, optimize
 import matplotlib.pyplot as plt
@@ -22,6 +22,7 @@ from scipy.optimize import bisect
 import inspect
 from multiprocessing import Queue, Process
 import time
+from matplotlib import patches
 
 
 class Wrapper():
@@ -47,16 +48,16 @@ class Wrapper():
             init = np.array([0.0], dtype=dtype('float'))
 
         self.n = np.linspace(nmin, nmax, npoints, retstep=1, endpoint=0)
-        print self.n[1]/self.n0
+        print(self.n[1]/self.n0)
         self.n = self.n[0]
         last = init
         self.rho=[]
 
 
 #         p = mp.Pool()
-        writer = prog.Writer((0,0))
-        pb = prog.ProgressBar(fd=writer)
-        pb.start()
+#         writer = prog.Writer((0,0))
+#         pb = prog.ProgressBar(fd=writer)
+#         pb.start()
         self.mu_e = []
 
         sp = 1 + self.C.sprime
@@ -65,7 +66,7 @@ class Wrapper():
             if abs(i - 3.53) < 1e-2:
                 pass
 
-            pb.update(100 * _i / len(self.n))
+            # pb.update(100 * _i / len(self.n))
             if timeout is None:
                 rho = eos.stepE(i, last, f, len(last), iter, self.C)
             else:
@@ -76,25 +77,25 @@ class Wrapper():
                 p.join(timeout)
                 if p.is_alive():
                     p.terminate()
-                    print "timeout reached"
+                    print("timeout reached")
                     self.rho = np.ascontiguousarray(self.rho[:])
                     self.n = self.n[: self.rho.shape[0]]
-                    _E = map(lambda z: eos.E(z, self.C), self.rho)
+                    _E = [eos.E(z, self.C) for z in self.rho]
                     self.E = np.ascontiguousarray(np.array(_E[:]))
                     self.P = np.ascontiguousarray(self.P_chem(self.rho))
                     self.set=1
                     return
 #                     p.join() #Needed???
                 rho = queue.get(timeout=1)
-                print rho
+                print(rho)
 #                 exit()
     
             self.rho.append(rho.copy())
             self.rho[_i]=np.insert(self.rho[_i],0, i - np.sum(rho))
             f = eos.f_eq(self.rho[_i], f, sp, self.C)
             if verbose:
-                print f, rho
-                print self.C.eta_r(f[0]), self.C.Cr/self.C.eta_r(f[0])
+                print(f, rho)
+                print(self.C.eta_r(f[0]), self.C.Cr/self.C.eta_r(f[0]))
             for j in range(sp):
                 self.rho[_i]=np.insert(self.rho[_i], j, f[j])
 
@@ -105,7 +106,7 @@ class Wrapper():
 #             print eos.mu(self.rho[_i], 1, self.C), eos.mu(temp, 3, self.C)
 
         self.rho=np.array(self.rho)
-        _E = map(lambda z: eos.E(z, self.C), self.rho)
+        _E = [eos.E(z, self.C) for z in self.rho]
         dn = self.n[1] - self.n[0]
 #         self.P = self.n[1:]*np.diff(_E)/dn - _E[1:]
 #         self.P = np.insert(self.P, 0, 0.)
@@ -124,11 +125,11 @@ class Wrapper():
         if self.set:
             return self.E*self.m_pi**4, self.P*self.m_pi**4, self.n
         else:
-            print 'Wrapper is not set!'
+            print('Wrapper is not set!')
 
     def setDriver(self):
         if not self.set:
-            print 'Wrapper is not set!'
+            print('Wrapper is not set!')
             return
 
         self.dr = eos.KVDriver()
@@ -140,18 +141,18 @@ class Wrapper():
         sprime_old = self.C.sprime
         self.C.sprime = 0
         res = eos.solve(self.n0, E0, f0, K0, J0, self.C, iter, mu_scale)
-        print res
+        print(res)
         if mu_scale < 50000 and res == 5:
             self.solve(f0, E0, K0, J0, iter, 5*mu_scale)
         self.C.sprime = sprime_old
 
     def stars(self, nmin = 0.5, nmax = 4.0, npoints=20):
         if not self.set:
-            print 'Wrapper is not set!'
+            print('Wrapper is not set!')
             return
 
         if not self.driverSet:
-            print 'Driver is not set!'
+            print('Driver is not set!')
             return
 
         dimRes = 3
@@ -160,9 +161,8 @@ class Wrapper():
         self.dr.set(self.E, self.P, self.n)
 
         self.n_star = np.linspace(nmin, nmax, npoints)
-        res = np.array(map(lambda z: eos.star_crust2(z, dimRes, self.dr,
-                                                      0.8*self.n0),
-                            self.n_star))
+        res = np.array([eos.star_crust2(z, dimRes, self.dr,
+                                                      0.8*self.n0) for z in self.n_star])
         if dimRes == 3:
             return (self.n_star, res[:,0], res[:,1],
                     self.m_pi**4 * self.C.M[0] * res[:,2])
@@ -231,7 +231,7 @@ class Wrapper():
 
     def stars_crust(self, ncut_crust=0.6, ncut_eos = 0.9, inter='linear', nmin = .6, nmax = 5.0,
                      npoints=50, crust="crust.dat", show=False, crustName=None, ret_str=False, fasthyp=False, neutron=0):
-        neos= 100
+        neos= 1000
         if self.C.Hyper:
             neos = 1000
             if fasthyp:
@@ -263,9 +263,9 @@ class Wrapper():
         nlist = np.append(n[:],N[i_n_eos:(i_n_eos+n_eos)])
 
 
-        print i_n_eos
-        print P[i_n_eos:(i_n_eos+n_eos)]
-        print N[i_n_eos:(i_n_eos+n_eos)]
+        print(i_n_eos)
+        print(P[i_n_eos:(i_n_eos+n_eos)])
+        print(N[i_n_eos:(i_n_eos+n_eos)])
 #         exit()
         iP = interpolate.interp1d(nlist, plist, kind=inter)
         iE = interpolate.interp1d(nlist, elist, kind=inter)
@@ -274,8 +274,8 @@ class Wrapper():
         iN = np.linspace(1e-10**gamma, ncut_eos**gamma, 10000)
         iN = iN**(1./gamma)
 
-        crust_p = np.array(map(iP, iN))
-        crust_e = np.array(map(iE, iN))
+        crust_p = np.array(list(map(iP, iN)))
+        crust_e = np.array(list(map(iE, iN)))
 
 #         finalE = np.append(crust_e, E[i_n_eos+n_eos:])
 #         finalP = np.append(crust_p, P[i_n_eos + n_eos:])
@@ -338,22 +338,22 @@ class Wrapper():
                 hyper_N = []
                 hyper_NR = []
                 for f in inter_hyp:
-                    hyper_N.append(lastN * map(f, lastN))
-                    hyper_NR.append(lastN * map(f, lastN) * grav_mult)
-                if lastM[-1] > 1.6:
-                    plt.plot(lastN/self.n0, np.array(hyper_N).transpose())
-                    plt.show()
+                    hyper_N.append(lastN * list(map(f, lastN)))
+                    hyper_NR.append(lastN * list(map(f, lastN)) * grav_mult)
+#                 if lastM[-1] > 1.6:
+#                     plt.plot(lastN/self.n0, np.array(hyper_N).transpose())
+#                     plt.show()
                 res_str = 0
                 for _N in hyper_N:
                     res_str += np.multiply(_N, grav_mult)
-                if lastM[-1] > 1.6:
-                    plt.plot(lastR, grav_mult)
-                    for f in inter_hyp:
-                        plt.plot(lastR, grav_mult * np.array(map(f, lastN)))
-                    plt.show() 
+#                 if lastM[-1] > 1.6:
+#                     plt.plot(lastR, grav_mult)
+#                     for f in inter_hyp:
+#                         plt.plot(lastR, grav_mult * np.array(map(f, lastN)))
+#                     plt.show() 
                 
                 str_frac = np.trapz(res_str, dx=dx) / (3 * integral) 
-                print str_frac
+                print(str_frac)
                 str_fracs.append(str_frac)
             
             Mgrav.append((0.0004898007281478712)*integral)
@@ -361,10 +361,10 @@ class Wrapper():
         MR = np.array(MR)
         Mgrav = np.array(Mgrav)
         str_fracs = np.array(str_fracs)
-        print MR
+        print(MR)
 
             
-        print Mgrav
+        print(Mgrav)
         
         if ret_str:
             return (nstar, MR[:, 0], MR[:,1], 931.5/self.m_pi*MR[:,2],
@@ -373,21 +373,21 @@ class Wrapper():
             return (nstar, MR[:, 0], MR[:,1], 931.5/self.m_pi*MR[:,2],
                 931.5/self.m_pi * Mgrav)
 
-    def stars_crust_hyper(self, ncut_crust=0.6, ncut_eos = 0.8,
+    def stars_crust_hyper(self, ncut_crust=0.45, ncut_eos = 0.6,
                          inter='linear', nmin = .4, nmax = 4.0,
-                         npoints=100, crust="crust.dat", show=False, ret_str=False, fasthyp=False):
+                         npoints=100, crust="crust.dat", show=False, ret_frac=False, fasthyp=False):
         hyp_old = self.C.Hyper
         self.C.Hyper=1
         res = self.stars_crust(ncut_crust=ncut_crust, ncut_eos = ncut_eos,
                          inter=inter, nmin = nmin, nmax = nmax,
-                         npoints=npoints, crust=crust, show=show, ret_str=ret_str, fasthyp=fasthyp)
+                         npoints=npoints, crust=crust, show=show, ret_str=ret_frac, fasthyp=fasthyp)
         self.C.Hyper=hyp_old
         
         return res
 
     def concentrations(self):
         if not self.set:
-            print 'Concentrations: wrapper is not set! Pass.'
+            print('Concentrations: wrapper is not set! Pass.')
             return
 
         rho = []
@@ -400,12 +400,12 @@ class Wrapper():
 
         return np.array(rho)
 
-    def dumpEos(self, folderName):
+    def dumpEos(self, folderName, nmax=8.):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
 
 #         if not self.set:
-        self.reset(nmin = 0., nmax = 8. * self.n0, npoints=800)
+        self.reset(nmin = 0., nmax = nmax * self.n0, npoints=800)
 
         Esymm = []
         f = 1e-6
@@ -522,7 +522,7 @@ class Wrapper():
     
         #SCALINGS(f) no phi 
         frange = np.linspace(0, 1, 100)
-        phi_sc = map(self.C.eta_p, frange)
+        phi_sc = list(map(self.C.eta_p, frange))
         etap_tab = np.array([frange, phi_sc]).transpose()
         etap_table = tabulate(etap_tab, ['f', 'eta_p'], tablefmt='plain')
         with open(join(folderName, 'etap.dat'), 'w') as f:
@@ -532,7 +532,7 @@ class Wrapper():
         for _f in frange:
             _tab = []
             _tab.append(_f)
-            for i in xrange(2, 8):
+            for i in range(2, 8):
                 _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
             tab.append(_tab)
         etap_tab = np.array(tab)#.transpose()
@@ -558,7 +558,7 @@ class Wrapper():
             
         #CONCENTRATIONS no phi
         rho = self.concentrations()
-        print rho
+        print(rho)
         table = []
         for i, _n in enumerate(self.n):
             table.append(np.concatenate(([_n/self.n0, self.E[i],
@@ -606,7 +606,7 @@ class Wrapper():
         
         #SCALINGS 2 no phi
         frange = np.linspace(0, 1, 100)
-        phi_sc = map(self.C.eta_p, frange)
+        phi_sc = list(map(self.C.eta_p, frange))
         chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
         etap_tab = np.array([frange, phi_sc]).transpose()
         etap_table = tabulate(etap_tab, ['f', 'eta_p'], tablefmt='plain')
@@ -623,7 +623,7 @@ class Wrapper():
         for _f in frange:
             _tab = []
             _tab.append(_f)
-            for i in xrange(2, 8):
+            for i in range(2, 8):
                 _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
             tab.append(_tab)
         etap_tab = np.array(tab)#.transpose()
@@ -632,7 +632,7 @@ class Wrapper():
             f.write(etap_table)
             
         frange = self.rho[:, 0]
-        phi_sc = map(self.C.eta_p, frange)
+        phi_sc = list(map(self.C.eta_p, frange))
         etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
         etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
         with open(join(folderName, 'etap_N.dat'), 'w') as f:
@@ -648,7 +648,7 @@ class Wrapper():
         for j, _f in enumerate(frange):
             _tab = []
             _tab.append(self.n[j]/self.n0)
-            for i in xrange(2, 8):
+            for i in range(2, 8):
                 _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
             tab.append(_tab)
         etap_tab = np.array(tab)#.transpose()
@@ -719,7 +719,7 @@ class Wrapper():
 
         #SCALINGS 2 phi
         frange = self.rho[:, 0]
-        phi_sc = map(self.C.eta_p, frange)
+        phi_sc = list(map(self.C.eta_p, frange))
         etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
         etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
         with open(join(folderName, 'etap_N_phi.dat'), 'w') as f:
@@ -735,7 +735,7 @@ class Wrapper():
         for j, _f in enumerate(frange):
             _tab = []
             _tab.append(self.n[j]/self.n0)
-            for i in xrange(2, 8):
+            for i in range(2, 8):
                 _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
             tab.append(_tab)
         etap_tab = np.array(tab)#.transpose()
@@ -746,14 +746,14 @@ class Wrapper():
         self.C.phi_meson = 0
         
 
-    def dumpAll(self, folderName,filename='data.zip'):
-        self.dumpEos(folderName)
+    def dumpAll(self, folderName,filename='data.zip', nmax=8.):
+        self.dumpEos(folderName, nmax=nmax)
         n, m ,r = self.dumpMasses(folderName)
         mmax = max(m)
         rho = self.concentrations()
-        print rho[:, 1]
-        print abs(rho[:,1] - [0.14 for i in rho[:,1]])
-        print np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]]))
+        print(rho[:, 1])
+        print(abs(rho[:,1] - [0.14 for i in rho[:,1]]))
+        print(np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]])))
         ndu = self.n[np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]]))]
         mdu = m[np.argmin(abs(n - [ndu for i in n]))]
         tabParams= [['Cs', self.C.Cs],
@@ -882,18 +882,19 @@ class Wrapper():
         return np.array(tabNS)
 
 
-    def dumpMassesCrustHyper(self, folderName ,ncut_crust=.6, ncut_eos=.8, ret_str=False, fasthyp=0):
+    def dumpMassesCrustHyper(self, folderName ,ncut_crust=.6, ncut_eos=.8, 
+                             ret_frac=False, fasthyp=0):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
         
         hyper_old = self.C.Hyper
         self.C.Hyper = 1
-        if ret_str:
+        if ret_frac:
             n, m, r, mb1, mb2, str = self.stars_crust_hyper(ncut_crust=ncut_crust,
-                                   ncut_eos=ncut_eos,npoints = 100, show=0, ret_str=ret_str, fasthyp=fasthyp)
+                                   ncut_eos=ncut_eos,npoints = 100, show=0, ret_frac=ret_frac, fasthyp=fasthyp)
         else:
             n, m, r, mb1, mb2 = self.stars_crust_hyper(ncut_crust=ncut_crust,
-                                   ncut_eos=ncut_eos,npoints = 100, show=0, ret_str=ret_str, fasthyp=fasthyp)
+                                   ncut_eos=ncut_eos,npoints = 100, show=0, ret_frac=ret_frac, fasthyp=fasthyp)
             
         table = np.array([n/self.n0, m, r, mb1, mb2]).transpose()
         f = open(os.path.join(folderName, 'masses_crust_hyper.dat'), 'w')
@@ -903,36 +904,44 @@ class Wrapper():
                        tablefmt='plain')
         f.write(tab)
         f.close()
-        
-        if ret_str:
-            with open(join(folderName, 'str_max.dat'),'w') as f:
+        if self.C.phi_meson:
+            fname = 'str_max_phi.dat'
+        else:
+            fname = 'str_max.dat'
+        if ret_frac:
+            with open(join(folderName, fname),'w') as f:
                 f.write('max_str = %.3f, M_max = %.2f' % (str[np.argmax(m)], max(m)))
             
         self.C.Hyper = hyper_old
-        if ret_str:
+        if ret_frac:
             return n, m, r, mb1, mb2, str
         else:
             return n, m, r, mb1, mb2
     
-    def dumpMassesCrust(self, folderName ,ncut_crust=.6, ncut_eos=.8, hyper=False, show=False, inter='linear', neutron=0):
+    def dumpMassesCrust(self, folderName , nmin = .4, ncut_crust=.6, ncut_eos=.8,
+                         hyper=False, show=False, inter='linear', neutron=0, nmax=5.,
+                         npoints=100, write=True, filename='masses_crust.dat'):
         if not os.path.exists(folderName):
             os.makedirs(folderName)
         
         self.C.hyper = hyper
         
         crustName = join(folderName, 'crustEos.dat')
-        n, m, r, mb1, mb2 = self.stars_crust(ncut_crust=ncut_crust,
-                                   ncut_eos=ncut_eos,npoints = 100, show=show, inter=inter, crustName=crustName, neutron=neutron)
-        print m
-        print mb1
+        n, m, r, mb1, mb2 = self.stars_crust(ncut_crust=ncut_crust, nmin=nmin,
+                                   ncut_eos=ncut_eos,npoints = npoints, show=show, 
+                                   inter=inter, crustName=crustName, 
+                                   neutron=neutron, nmax=nmax)
+        print(m)
+        print(mb1)
         table = np.array([n/self.n0, m, r, mb1, mb2]).transpose()
-        f = open(os.path.join(folderName, 'masses_crust.dat'), 'w')
-        tab = tabulate(table, ['n/n_0','M [M_{sun}]',
-                                'R [km]','M_B_rect [M_{sun}]',
-                                'M_B_trap [M_{sun}]'],
-                       tablefmt='plain')
-        f.write(tab)
-        f.close()
+        if write:
+            f = open(os.path.join(folderName, filename), 'w')
+            tab = tabulate(table, ['n/n_0','M [M_{sun}]',
+                                    'R [km]','M_B_rect [M_{sun}]',
+                                    'M_B_trap [M_{sun}]'],
+                           tablefmt='plain')
+            f.write(tab)
+            f.close()
         return n, m, r, mb1, mb2
 
     def dumpLandauParams(self, folderName):
@@ -999,7 +1008,7 @@ class Wrapper():
         for i, _r in enumerate(self.rho):
             pots.append(self.n[i] + eos.potentials(_r, 5, self.C))
 
-        print pots
+        print(pots)
 
         if show:
             plt.plot(self.n/self.n0, pots)
@@ -1028,16 +1037,16 @@ class Wrapper():
                 n_f = np.array([0.0 for i in range(8)])
                 n_f[k] = _n
                 f = eos.f_eq(n_f, f, sp, self.C)
-                print 'f=', f
-                print 'n_f=', n_f
+                print('f=', f)
+                print('n_f=', n_f)
                 n_mu = np.insert(n_f, 0, f)
-                print 'insert=', n_mu
+                print('insert=', n_mu)
                 pot.append(eos.mu(n_mu, k+sp, self.C)-self.C.M[k])
-            print pot
+            print(pot)
             pots.append(pot)
-        print pots
+        print(pots)
         pots=np.array(pots)
-        print pots.shape, n.shape
+        print(pots.shape, n.shape)
         plt.plot(n/self.n0, pots.transpose())
         plt.show()
 
@@ -1082,26 +1091,33 @@ class Wrapper():
         plt.show()
 
     def testDanielewicz(self):
-        UKlahnY = []
-        UKlahnX = []
-        with open('/home/const/workspace2/swigEosWrapper/klahnUpper', 'r') as f:
-            for line in f:
-                _n, p = line.strip().split()
-                UKlahnY.append(float(p))
-                UKlahnX.append(float(_n)/0.16)
-        plt.semilogy(UKlahnX, UKlahnY, c = 'grey')
+#         UKlahnY = []
+#         UKlahnX = []
+#         with open('/home/const/workspace2/swigEosWrapper/klahnUpper', 'r') as f:
+#             for line in f:
+#                 _n, p = line.strip().split()
+#                 UKlahnY.append(float(p))
+#                 UKlahnX.append(float(_n)/0.16)
+#         plt.semilogy(UKlahnX, UKlahnY, c = 'grey')
+# 
+#         LKlahnX = []
+#         LKlahnY = []
+#         with open('/home/const/workspace2/swigEosWrapper/klahnLower', 'r') as f:
+#             for line in f:
+#                 _n, p = line.strip().split()
+#                 LKlahnY.append(float(p))
+#                 LKlahnX.append(float(_n)/0.16)
+#         plt.semilogy(LKlahnX, LKlahnY, c = 'grey')
+        fname = '/home/const/GrabbedFigures/DanielSymmFlow/DanielSymmRes.dat'
+        vertices = np.loadtxt(fname, skiprows=1)
 
-        LKlahnX = []
-        LKlahnY = []
-        with open('/home/const/workspace2/swigEosWrapper/klahnLower', 'r') as f:
-            for line in f:
-                _n, p = line.strip().split()
-                LKlahnY.append(float(p))
-                LKlahnX.append(float(_n)/0.16)
-        plt.semilogy(LKlahnX, LKlahnY, c = 'grey')
-
+#         vertices[:, 1] = np.log10(vertices[:, 1]) 
+        vertices[:, 0] /= 0.16 
+        polygon = patches.Polygon(vertices, color='r', fill=0) 
+        plt.gca().add_patch(polygon)
+        
         n_p = np.linspace(0.0, 4.0, 800)
-        plt.plot(n_p[:]/self.n0, self.Psymm(n_p))
+        plt.semilogy(n_p[:]/self.n0, self.Psymm(n_p))
         plt.show()
 
     def testDU(self, folderName=None):
@@ -1111,7 +1127,7 @@ class Wrapper():
         n, m, r = self.dumpMasses(folderName)
         ndu = self.n[np.argmin(abs(rho[:,1] - [0.14 for i in rho[:,1]]))]
         mdu = m[np.argmin(abs(n - [ndu for i in n]))]
-        print 'n_DU = %.2f n_0, M_DU = %.2f M_sun'%(ndu/self.n0, mdu)
+        print('n_DU = %.2f n_0, M_DU = %.2f M_sun'%(ndu/self.n0, mdu))
         return 'n_DU = %.2f n_0, M_DU = %.2f M_sun'%(ndu/self.n0, mdu)
 
     def testHyperBind(self, show=True):
@@ -1124,15 +1140,15 @@ class Wrapper():
         for _n in n:
             n_f = np.array([_n/2, _n/2]+[0.0 for i in range(6)])
             f, = eos.f_eq(n_f, np.array([f]), 1, self.C)
-            print np.array([f]), n_f
+            print(np.array([f]), n_f)
             n_mu = np.insert(n_f, 0, f)
             EL.append(eos.mu(n_mu, 2+1, self.C) - self.C.M[2])
             ES.append(eos.mu(n_mu, 3+1, self.C) - self.C.M[3])
             EX.append(eos.mu(n_mu, 6+1, self.C) - self.C.M[6])
 
-        print EL
-        print ES
-        print EX
+        print(EL)
+        print(ES)
+        print(EX)
 
         EL = self.m_pi*np.array(EL)
         ES = self.m_pi*np.array(ES)
@@ -1243,7 +1259,7 @@ class Wrapper():
 
         meff = mn*C.phi_n(0, f)
 
-        print f
+        print(f)
         mu = lambda z, f: derivative(lambda x: eos._E(np.array([f, x, 0.]), C), z, dx=1e-3)
 
         dmu_df = derivative(lambda x: mu(n, x), f, dx=1e-3)
@@ -1264,7 +1280,7 @@ class Wrapper():
         pf = eos.p_f(n)
         
         f, = eos.f_eq(np.array([n, 0.]), np.array([f]), 1, C)
-        print 'f=',f
+        print('f=',f)
         
         meff = mn * C.phi_n(0, f)
         
@@ -1388,7 +1404,7 @@ class Wrapper():
     def UofE(self, i, n):
         f = eos.f_eq(n, np.array([self.C.f0]), 1, self.C)
         pots = eos.potentials(np.insert(n, 0, f), 5, self.C)
-        print pots
+        print(pots)
         V = self.C.X_o[i] * pots[2]
         S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*self.C.M[0]/self.C.M[i]*f[0]))
         Uopt = lambda z: z + self.C.M[0] - sqrt((z + self.C.M[0] - V)**2 - S*(2 * self.C.M[i] + S))
@@ -1405,7 +1421,7 @@ class Wrapper():
             n_in = np.array([n/2, n/2])
             f = eos.f_eq(n_in, np.array([self.C.f0]), 1, self.C)
             pots = eos.potentials(np.insert(n_in, 0, f), 5, self.C)
-            print pots
+            print(pots)
             V = self.C.X_o[i] * pots[2]
             S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*self.C.M[0]/self.C.M[i]*f[0]))
             Uopt = self.m_pi*(V + S)
@@ -1469,7 +1485,7 @@ class Wrapper():
     def UofE_anti(self, i, n):
         f = eos.f_eq(n, np.array([self.C.f0]), 1, self.C)
         pots = eos.potentials(np.insert(n, 0, f), 5, self.C)
-        print pots
+        print(pots)
         V = -self.C.X_o[i] * pots[2]
         S =  (-self.C.M[i]) * (1 - self.C.phi_n(i, self.C.X_s[i]*self.C.M[0]/self.C.M[i]*f[0]))
         Uopt = lambda z: z + self.C.M[0] - sqrt((z + self.C.M[0] - V)**2 - S*(2 * self.C.M[i] + S))
@@ -1480,7 +1496,7 @@ class Wrapper():
 
     def testHyper(self, z_l = 1., a_l = 1.):
         self.reset(hyper=1, nmin = 0., nmax = 8*self.n0, npoints=200)
-        print self.E
+        print(self.E)
         rho = self.concentrations()
         fig, ax = plt.subplots(1, 3)
         ax[0].plot(self.n/self.n0, rho)
@@ -1491,8 +1507,7 @@ class Wrapper():
         l, = ax[2].plot(self.n/self.n0, self.rho[:, 0])
         ax2lines.append(l)
         if self.C.sigma_kind == 1:
-            l2, = ax[2].plot(self.n/self.n0, map(lambda z: self.C.Xs(2, z),
-                                           self.rho[:,0]))
+            l2, = ax[2].plot(self.n/self.n0, [self.C.Xs(2, z) for z in self.rho[:,0]])
             ax2lines.append(l2)
             ax[2].legend(ax2lines, ['f(n)', 'x_sigma'], loc=0)
 
@@ -1636,18 +1651,22 @@ class Wrapper():
             with open(join(folderName, 'vsNs.dat'), 'w') as f:
                 f.write(table)
 #             print self.n, type(self.n)
-            es = self.Esymm(self.n)
-            ps = self.Psymm(self.n)/self.const/self.m_pi**4
-            vs = np.gradient(ps)/np.gradient(es)
-            tab = np.array([self.n[:]/self.n0, vs]).transpose()
-            table = tabulate(tab, ['n/n0', 'vs_sym'], tablefmt='plain')
+        es = self.Esymm(self.n)
+        ps = self.Psymm(self.n)/self.const/self.m_pi**4
+        vs = np.gradient(ps)/np.gradient(es)
+        
+        tabS = np.array([self.n[:]/self.n0, vs]).transpose()
+        tableS = tabulate(tabS, ['n/n0', 'vs_sym'], tablefmt='plain')
+        
+        if folderName is not None:
             with open(join(folderName, 'vs_sym.dat'), 'w') as f:
-                f.write(table)
+                f.write(tableS)
             
                     
-        else:
+        if not folderName:
             plt.plot(self.n[:]/self.n0, vsNs)
             plt.ylim([0., 1])
+            plt.plot(self.n[:]/self.n0, vs)
             plt.show()  
             
     def dumpVsHyper(self, folderName=None, show=0, npoints=1000):
@@ -1757,9 +1776,9 @@ class Wrapper():
         res = optimize.minimize(lambda z: (inp(z) - ix_du(z))**2, [2.5*self.n0])
         x = res.x[0]
 
-        print res
-        print x, x/self.n0
-        print im(x)
+        print(res)
+        print(x, x/self.n0)
+        print(im(x))
 #         plt.plot(self.n, inp(self.n), self.n, ix_du(self.n))
 #         plt.show()
         return [x/self.n0, im(x)]
@@ -1769,7 +1788,7 @@ class Wrapper():
             os.makedirs(folderName)
             
         frange = np.linspace(0, 1, 100)
-        phi_sc = map(self.C.eta_p, frange)
+        phi_sc = list(map(self.C.eta_p, frange))
         chi_p = sqrt((1 - frange)**2/np.array(phi_sc))
         etap_tab = np.array([frange, phi_sc]).transpose()
         etap_table = tabulate(etap_tab, ['f', 'eta_p'], tablefmt='plain')
@@ -1786,7 +1805,7 @@ class Wrapper():
         for _f in frange:
             _tab = []
             _tab.append(_f)
-            for i in xrange(2, 8):
+            for i in range(2, 8):
                 _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
             tab.append(_tab)
         etap_tab = np.array(tab)#.transpose()
@@ -1796,7 +1815,7 @@ class Wrapper():
             
         self.reset(hyper=1, npoints=200, timeout=6)
         frange = self.rho[:, 0]
-        phi_sc = map(self.C.eta_p, frange)
+        phi_sc = list(map(self.C.eta_p, frange))
         etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
         etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
         with open(join(folderName, 'etap_N.dat'), 'w') as f:
@@ -1812,7 +1831,7 @@ class Wrapper():
         for j, _f in enumerate(frange):
             _tab = []
             _tab.append(self.n[j]/self.n0)
-            for i in xrange(2, 8):
+            for i in range(2, 8):
                 _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
             tab.append(_tab)
         etap_tab = np.array(tab)#.transpose()
@@ -1825,7 +1844,7 @@ class Wrapper():
         
         self.reset(hyper=1, npoints=400, timeout=6)
         frange = self.rho[:, 0]
-        phi_sc = map(self.C.eta_p, frange)
+        phi_sc = list(map(self.C.eta_p, frange))
         etap_tab = np.array([self.n/self.n0, phi_sc]).transpose()
         etap_table = tabulate(etap_tab, ['n/n0', 'eta_p'], tablefmt='plain')
         with open(join(folderName, 'etap_N_phi.dat'), 'w') as f:
@@ -1841,13 +1860,16 @@ class Wrapper():
         for j, _f in enumerate(frange):
             _tab = []
             _tab.append(self.n[j]/self.n0)
-            for i in xrange(2, 8):
+            for i in range(2, 8):
                 _tab.append(self.C.Xs(i, _f)/self.C.X_s[i])
             tab.append(_tab)
         etap_tab = np.array(tab)#.transpose()
         etap_table = tabulate(etap_tab, ['n/n0', 'L','S-','S0','S+','X-','X0'], tablefmt='plain')
         with open(join(folderName, 'xi_s_N_phi.dat'), 'w') as f:
-            f.write(etap_table)   
+            f.write(etap_table)
+            
+#         def dumpParams(foldename):
+            
         
     
 class EosConstructor(object):
@@ -1946,7 +1968,7 @@ class FromEos(EosConstructor):
              * _n**2 / self.mn**2)**2 / (_n**2) - self.pf(_n/2)**2)/self.mn), [fEs], tol=1e-35).x
             res.append(fEs)
         res = np.array(res)[:,0]
-        print res
+        print(res)
         assert res.shape == N.shape
         self.Fs = interp1d(N, res, kind='cubic')
         return res

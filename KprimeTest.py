@@ -62,4 +62,4 @@ C.SetHyperConstants(2)
 npoints = 1000
 dn = 1e-3
 
-print -3*wr.n0*((eos.K(wr.n0+dn, C) - eos.K(wr.n0-dn, C))/(2*dn) - 2*eos.K(wr.n0, C)/wr.n0) 
+print(-3*wr.n0*((eos.K(wr.n0+dn, C) - eos.K(wr.n0-dn, C))/(2*dn) - 2*eos.K(wr.n0, C)/wr.n0)) 

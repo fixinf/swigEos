@@ -21,9 +21,9 @@ uY = []
 
 def set(params):
     global C
-    for par, val in params.iteritems():
+    for par, val in params.items():
         execstring = 'C.'+par+'='+str(val)
-        print execstring
+        print(execstring)
         exec(execstring)
 
 # params = dict(

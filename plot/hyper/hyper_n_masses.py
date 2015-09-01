@@ -90,12 +90,12 @@ f0 = 0.27
 
 npoints = 200
 
-print C.f0
+print(C.f0)
 
 C.f0 = f0
 wr.solve(f0 = C.f0, iter = 3000)
 
-print C.f0
+print(C.f0)
 nmax = 5.0
 C.SetHyperConstants(2)
 C.set_xs(np.array([1.0, 1., -28., 30. , 30., 30., -15., -15.]))
@@ -116,12 +116,12 @@ for f in flist:
 #     for _f in np.linspace(C.f0, f):
     wr.solve(f0=f, iter=3000)
 #     exit()
-    print C.Cs, C.Co, C.Cr, C.b, C.c    
-    print 'J = ', eos.K(wr.n0, C)
-    print 'K = ',eos.J(wr.n0, C)
-    print 'K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
-                   2*eos.K(wr.n0,C)/wr.n0)
-    print 'L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3)
+    print(C.Cs, C.Co, C.Cr, C.b, C.c)    
+    print('J = ', eos.K(wr.n0, C))
+    print('K = ',eos.J(wr.n0, C))
+    print('K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
+                   2*eos.K(wr.n0,C)/wr.n0))
+    print('L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3))
 
     lines.append(wr.Psymm(n))
     labels.append(str(C.phi_n(0, f)))
@@ -133,14 +133,14 @@ for f in flist:
 
 rho = []
 for i in wr.rho:
-    print i
+    print(i)
     rho.append(i[sc:]/np.sum(i[sc:]))
 
 rho = np.array(rho)
-print rho
+print(rho)
 plt.plot(wr.n/wr.n0, rho)
 plt.show()
-print sc
+print(sc)
 with open(suffix+'hyper_n_%.2f_%i_%i.dat' % (C.f0, C.phi_meson, C.sprime), 'w') as f:
     for i, r in enumerate(rho):
         f.write('%f   ' % (wr.n[i]/wr.n0))
@@ -153,8 +153,8 @@ mlist = np.array(mlist)
 for j,m in enumerate(mlist):
     with open(suffix+'mass_scaling_%.2f_%i_%i.dat'%(flist[j], C.phi_meson, C.sprime),'w') as f:
         for i, _n in enumerate(n_star):
-            print m[i]
-            print max(m)
+            print(m[i])
+            print(max(m))
             if i > np.argmax(m):
                 break
             f.write('%f  %f\n'%(_n/wr.n0, m[i]))

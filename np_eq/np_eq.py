@@ -19,16 +19,16 @@ wr = Wrapper(C)
 J = wr.J()/wr.m_pi
 L = wr.L()/wr.m_pi
 
-print J*wr.m_pi, wr.Jdiff(wr.n0)
-print wr.L(), wr.Ldiff()
-print wr.Ksymm(), wr.Ksymm_diff()
+print(J*wr.m_pi, wr.Jdiff(wr.n0))
+print(wr.L(), wr.Ldiff())
+print(wr.Ksymm(), wr.Ksymm_diff())
 exit()
 
 wr.reset()
 
 rho = wr.concentrations()
 
-np_eq = map(lambda z: np_eq(z, J, L, wr.n0), wr.n)
+np_eq = [np_eq(z, J, L, wr.n0) for z in wr.n]
 
 plt.plot(wr.n/wr.n0, rho[:, 1], wr.n/wr.n0, np_eq)
 plt.show()

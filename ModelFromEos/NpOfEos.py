@@ -31,7 +31,7 @@ nAPR_N = cAPR* np.array([0., 0.02, 0.04, 0.08, 0.12, 0.16, 0.2, 0.24,  0.32,  0.
 
 aprEps = nAPR*wr.n0*APR/wr.m_pi + C.M[0]*nAPR*wr.n0
 i_apr_eps = interp1d(nAPR*wr.n0, aprEps, kind='cubic')
-print nAPR*wr.n0
+print(nAPR*wr.n0)
 i_apr_P = lambda z: z*derivative(i_apr_eps, z, dx=1e-3) - i_apr_eps(z)
 # nrange = np.linspace(1e-2, (0.95/0.16)*wr.n0, 100, endpoint=False)
 # tab = np.array([nrange/wr.n0, map(i_apr_eps, nrange), map(i_apr_P, nrange)]).transpose()
@@ -40,7 +40,7 @@ i_apr_P = lambda z: z*derivative(i_apr_eps, z, dx=1e-3) - i_apr_eps(z)
 # with open('APR_N.dat', 'w') as f:
 #     f.write(table)
 
-print  i_apr_eps(wr.n0), i_apr_P(wr.n0)
+print(i_apr_eps(wr.n0), i_apr_P(wr.n0))
 
 # E = float(i_apr_eps(wr.n0))
 # P = float(i_apr_P(wr.n0))
@@ -48,8 +48,8 @@ print  i_apr_eps(wr.n0), i_apr_P(wr.n0)
 
 C.Co = C.Co
 C.Cr = C.Cr
-print 'C_o^2 = ', C.Co
-print eos.solveF(n, E, P, np.array([0.1, 0.1,]), 2, C)
-print n, E, P
-print wr.rho[3]
+print('C_o^2 = ', C.Co)
+print(eos.solveF(n, E, P, np.array([0.1, 0.1,]), 2, C))
+print(n, E, P)
+print(wr.rho[3])
 

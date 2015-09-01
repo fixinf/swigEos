@@ -38,14 +38,14 @@ iP = interpolate.interp1d(nlist, plist, kind='quadratic')
 iE = interpolate.interp1d(nlist, elist, kind='quadratic')
 
 nmax = 7.0
-print nlist[0]
-print iP(0.5)
+print(nlist[0])
+print(iP(0.5))
 gamma = 1./4.
 iN = np.linspace(1e-10**gamma, n_cut_eos**gamma, 2000)
 iN = iN**(1./gamma)
 
-crust_p = np.array(map(iP, iN))
-crust_e = np.array(map(iE, iN))
+crust_p = np.array(list(map(iP, iN)))
+crust_e = np.array(list(map(iE, iN)))
 
 finalE = np.append(crust_e, E)
 finalP = np.append(crust_p, P)
@@ -58,17 +58,17 @@ dr = eos.KVDriver()
 dr.set(finalE, finalP, finalN*wr.n0)
 nstar = np.linspace(2e-1, 4.0, 100)
 res = eos.star_crust(1.2905, 3, dr)
-print res
-print res[2]*wr.m_pi**4 * C.M[0]
+print(res)
+print(res[2]*wr.m_pi**4 * C.M[0])
 exit()
 k = 0
 def star_print(z):
 	global k
-	print k
+	print(k)
 	k+=1
 	return eos.star_crust(z, 2, dr)
 
-MR = np.array(map(star_print, nstar))
+MR = np.array(list(map(star_print, nstar)))
 plot(MR[:,1], MR[:,0])
-print max(MR[:, 0])
+print(max(MR[:, 0]))
 show()

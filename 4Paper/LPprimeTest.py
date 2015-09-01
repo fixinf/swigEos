@@ -14,9 +14,9 @@ for model in models:
     n, res = wr.dumpJ()
     
     f0prime = wr.f0prime(n)
-    pf = np.array(map(eos.p_f, n/2))
+    pf = np.array(list(map(eos.p_f, n/2)))
     Es, fs = wr.Esymm(n, ret_f=1)
-    Ef = np.sqrt(pf**2 + C.M[0]**2 * np.array(map(lambda z: C.phi_n(0, z)**2, fs)))
+    Ef = np.sqrt(pf**2 + C.M[0]**2 * np.array([C.phi_n(0, z)**2 for z in fs]))
     a4 = wr.m_pi * pf**2 / (6 * Ef) * (1 + f0prime)
     
     plt.plot(n/wr.n0, a4)

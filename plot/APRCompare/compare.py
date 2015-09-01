@@ -87,10 +87,10 @@ with open('../klahnUpper2', 'r') as f:
 
 fig, ax = plt.subplots()
 
-print C.f0
+print(C.f0)
 C.f0 = f0
 wr.solve(f0 = C.f0, iter = 3000)
-print C.f0
+print(C.f0)
 
 C.SetHyperConstants(2)
 
@@ -102,6 +102,6 @@ Es = wr.Esymm(n)
 Es /= n
 Es -= C.M[0]
 Es *= wr.m_pi
-print Es
+print(Es)
 ax.plot(n/wr.n0, Es)
 plt.show()

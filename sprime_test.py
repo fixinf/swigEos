@@ -41,7 +41,7 @@ masses = []
 for f in flist:
     masses = []
     for i in range(8):
-        print i
+        print(i)
         marg = C.X_s[i]*C.M[0]/C.M[i]*f[0] #+ C.X_sp[i]*C.M[0]/C.M[i]*f[1]
         if C.sprime:
             marg += C.X_sp[i]*C.M[0]/C.M[i]*f[1]
@@ -49,7 +49,7 @@ for f in flist:
     mlist.append(array(masses))
 
 mlist = array(mlist)
-print mlist.shape
+print(mlist.shape)
 lines = plot(wr.n/wr.n0, mlist)
 legend(lines, ['n','p',r'$\Lambda$',r'$\Sigma^-$',r'$\Sigma^0$',
                                          r'$\Sigma^+$', r'$\Xi^-$', r'$\Xi^0$'])
@@ -62,7 +62,7 @@ show()
 
 
 
-print eos.stepE(0.5, array([0.5]), array([1e-5]), 1, 300, C)
+print(eos.stepE(0.5, array([0.5]), array([1e-5]), 1, 300, C))
 #
 dx = 1e-4
 n_l = np.linspace(0.00001, 3.5, 1000)
@@ -79,11 +79,11 @@ def U_lambda(x, Y, gamma=None):
         f_eq_arg = array([(1- x)*n*(1-Y), x*n*(1-Y), Y*n])
 #         print 'f_eq_arg=',
         f = eos.f_eq(f_eq_arg, f, sp, C)
-        print f
+        print(f)
         mu_arg = np.array([(1- x)*n*(1-Y), x*n*(1-Y), Y*n])
         mu_arg = np.insert(mu_arg, 0, f)
         feq.append(f)
-        print mu_arg
+        print(mu_arg)
         qqq = eos._E(mu_arg, C)/n - C.M[2]
 #         qqq = eos.mu(mu_arg, 3, C) - C.M[2]
         res.append(qqq)
@@ -96,11 +96,11 @@ def U_XX():
         f_eq_arg = array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, n, 0.0])
 #         print 'f_eq_arg=',
         f = eos.f_eq(f_eq_arg, f, sp, C)
-        print f
+        print(f)
         mu_arg = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, n, 0.0])
         mu_arg = np.insert(mu_arg, 0, f)
 #         feq.append(f)
-        print mu_arg
+        print(mu_arg)
         qqq = eos._E(mu_arg, C)/n - C.M[6]
 #         qqq = eos.mu(mu_arg, 3, C) - C.M[2]
         res.append(qqq)
@@ -113,11 +113,11 @@ def U_SmSm():
         f_eq_arg = array([0.0, 0.0, 0.0, 0.0, 0.0, n])
 #         print 'f_eq_arg=',
         f = eos.f_eq(f_eq_arg, f, sp, C)
-        print f
+        print(f)
         mu_arg = np.array([0.0, 0.0, 0.0, 0.0, 0.0, n])
         mu_arg = np.insert(mu_arg, 0, f)
 #         feq.append(f)
-        print mu_arg
+        print(mu_arg)
         qqq = eos._E(mu_arg, C)/n - C.M[4]
 #         qqq = eos.mu(mu_arg, 3, C) - C.M[2]
         res.append(qqq)
@@ -152,4 +152,4 @@ ax[2].plot(n_l/wr.n0, U_LN())
 show()
 wr.setDriver()
 n_star, m_star, r_star = wr.stars()
-print max(m_star)
+print(max(m_star))

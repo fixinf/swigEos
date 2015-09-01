@@ -11,7 +11,7 @@ model = Models.myMod
 C = model()
 C.set_xs(np.array([0., 0., -28., 30., 30., 30., -15., -15.]))
 wr = Wrapper(C)
-print C.X_s[2], C.X_s[3], C.X_s[6]
+print(C.X_s[2], C.X_s[3], C.X_s[6])
 exit()
 # wr.testHyperBind()
 # J = wr.J()
@@ -43,7 +43,7 @@ exit()
 # exit()
 folderName = join('/home/const/Dropbox/Documents/For DN/Very final/data',
                   model.__name__)
-print folderName
+print(folderName)
 
 wr.testPodsiedlowski(0.6, 0.8, folderName)
 

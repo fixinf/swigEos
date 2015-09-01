@@ -79,11 +79,11 @@ with open('../klahnLower', 'r') as f:
         LKlahnX.append(float(_n)/0.16)
 ax.semilogy(LKlahnX, LKlahnY, c = 'grey')
 
-print C.f0
+print(C.f0)
 # wr.solve()
 C.f0 = f0
 wr.solve(f0 = C.f0, E0=-15.8, K0 = 250, J0=28.0, iter = 3000)
-print C.f0
+print(C.f0)
 # exit()
 # set(params)
 C.SetHyperConstants(2)
@@ -102,12 +102,12 @@ for rho_a in rho_a_list:
     for omega_a in omega_a_list:
         global n_star
     #     for _f in np.linspace(C.f0, f):
-        print C.Cs, C.Co, C.Cr, C.b, C.c    
-        print 'J = ', eos.K(wr.n0, C)
-        print 'K = ',eos.J(wr.n0, C)
-        print 'K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
-                       2*eos.K(wr.n0,C)/wr.n0)
-        print 'L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3)
+        print(C.Cs, C.Co, C.Cr, C.b, C.c)    
+        print('J = ', eos.K(wr.n0, C))
+        print('K = ',eos.J(wr.n0, C))
+        print('K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
+                       2*eos.K(wr.n0,C)/wr.n0))
+        print('L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3))
     #     pause()
         C.omega_a = omega_a
         C.rho_a = rho_a

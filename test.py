@@ -17,7 +17,7 @@ C.rho_a = 10
 C.rho_val = 3.5
 C.SetHyperConstants(2)
 frange = np.linspace(0., 1., 1000)
-plt.plot(frange, map(C.eta_r, frange))
+plt.plot(frange, list(map(C.eta_r, frange)))
 plt.show()
 # C.omega_a = 300.
 # C.omega_f = 0.3
@@ -49,9 +49,9 @@ C.omega_kind = 1
 # C.beta = 20.8
 # f0 = 0.24
 f0 = 0.195
-print C.X_s[7]
+print(C.X_s[7])
 
-print C.X_s[7]
+print(C.X_s[7])
 # print C.phi_f, C.omega_f, C.rho_f
 
 
@@ -78,7 +78,7 @@ mline, = ax[0][1].plot(_n/wr.n0, _M)
 legend([mline],[max(_M)])
 
 wr.C.SetHyperConstants(2)
-print C.X_s[7]
+print(C.X_s[7])
 # pause(2)
 maxes = []
 rho = []
@@ -115,8 +115,8 @@ for hyper in [0]:
                 wr.setDriver()
                 E, P, N = wr.EPN()
                 frange = np.linspace(0, 1., 100)
-                print E.shape, N.shape
-                ax[1][1].plot(frange, map(C.eta_r, frange), linestyle=styles[iter])
+                print(E.shape, N.shape)
+                ax[1][1].plot(frange, list(map(C.eta_r, frange)), linestyle=styles[iter])
                 ax[1][1].set_xlabel(r'$f$', fontsize=14)
                 ax[1][1].set_ylabel(r'$\eta_\rho$', fontsize=14)
                 _n, _M, _R, mg = wr.stars(0.5, 4.0, 100)
@@ -124,17 +124,17 @@ for hyper in [0]:
                 mlines.append(mline)
                 ax[0][1].set_xlabel(r'$n/n_0$', fontsize=14)
                 ax[0][1].set_ylabel(r'$M$', fontsize=14)
-                print max(_M)
+                print(max(_M))
                 maxes.append(max(_M)) 
                 rho = []
              
         iter += 1
              
-print maxes
+print(maxes)
 labels = []
 for i, m in enumerate(maxes):
-    print m
-    print ener[i]
+    print(m)
+    print(ener[i])
     labels.append(r'$M_{max}=%.2f$' % (m))
 ax[0][1].legend(mlines, labels, loc=0, fontsize=10)
 

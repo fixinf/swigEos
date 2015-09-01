@@ -38,15 +38,15 @@ for f in linspace(C.f0, f0, 20):
     C.f0 = f
     wr.solve(f0=C.f0)
 
-print C.eta_o(f0)
+print(C.eta_o(f0))
 
 C.SetHyperConstants(2)
 
 C.sprime = 1
 C.Csp = 400.0
-print eos.f_eq(np.array([wr.n0/2.0, wr.n0/2.0]), np.array([0.0, 0.0]), 2, C)
+print(eos.f_eq(np.array([wr.n0/2.0, wr.n0/2.0]), np.array([0.0, 0.0]), 2, C))
 pot =  eos.potentials(np.array([0.26, wr.n0/2, wr.n0/2]), 5, C)
-print pot, (C.X_s[2]*pot[0] + C.X_o[2]*pot[2])*135.0
+print(pot, (C.X_s[2]*pot[0] + C.X_o[2]*pot[2])*135.0)
 pause(2)
 
 sp = 1 + C.sprime
@@ -54,7 +54,7 @@ C.phi_meson = 1
 
 
 
-print eos.stepE(0.5, array([0.5]), array([1e-5]), 1, 300, C)
+print(eos.stepE(0.5, array([0.5]), array([1e-5]), 1, 300, C))
 #
 dx = 1e-4
 n_l = np.linspace(0.00001, 4.0, 1000)
@@ -78,15 +78,15 @@ def U_lambda(n):
     res.append(qqq)
     return np.array(res)*135.0
 
-print eos.f_eq(np.array([0.0, 0.0, 0.5]), np.array([0.0, 0.0]), 2, C)
+print(eos.f_eq(np.array([0.0, 0.0, 0.5]), np.array([0.0, 0.0]), 2, C))
 
-l1,=plot(n_l/wr.n0, map(U_lambda, n_l))
+l1,=plot(n_l/wr.n0, list(map(U_lambda, n_l)))
 plot(n_l/wr.n0, flist)
 C.sprime = 0
 sp = 1
 flist=[]
 f = np.array([0.0])
-l2,=plot(n_l/wr.n0, map(U_lambda, n_l))
+l2,=plot(n_l/wr.n0, list(map(U_lambda, n_l)))
 plot(n_l/wr.n0, flist)
 # ylim([-6.0, 15.0])
 # xlim([0.0, 2.0])
@@ -99,7 +99,7 @@ show()
 C.sprime = 1
 sp=2
 wr.reset(hyper=1)
-print U_lambda(0.5)
+print(U_lambda(0.5))
 
 # def func_solve(x):
 #     C.Csp = x

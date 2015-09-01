@@ -42,8 +42,8 @@ C2.rho_sat_a = 10.
 
 
 frange = np.linspace(0., 1., 1000)
-plt.plot(frange, map(C1.eta_o, frange))
-plt.plot(frange, map(C2.eta_o, frange))
+plt.plot(frange, list(map(C1.eta_o, frange)))
+plt.plot(frange, list(map(C2.eta_o, frange)))
 plt.show()
 
 wr1.reset(npoints=100, timeout=2)
@@ -52,13 +52,13 @@ wr2.reset(npoints=100)
 f1 = wr1.rho[:, 0]
 f2 = wr2.rho[:, 0]
 n = wr1.n/wr1.n0
-print f1-f2
+print(f1-f2)
 
 lines = plt.plot(n, f1, n, f2)
 plt.legend(lines, ['old','new'], loc=0)
 plt.show()
 
-lines=plt.plot(f1, map(C1.eta_o, f1), f2, map(C2.eta_o, f2))
+lines=plt.plot(f1, list(map(C1.eta_o, f1)), f2, list(map(C2.eta_o, f2)))
 plt.legend(lines, ['old','new'], loc=0)
 plt.show()
 
@@ -71,6 +71,6 @@ plt.show()
 
 fig, ax = plt.subplots(3, 1)
 ax[0].plot(wr2.n/wr2.n0, wr2.rho[:, 0])
-ax[1].plot(wr2.n/wr2.n0, map(wr2.C.eta_r, wr2.rho[:, 0]))
-ax[2].plot(wr2.n/wr2.n0, map(wr2.C.eta_o, wr2.rho[:, 0]))
+ax[1].plot(wr2.n/wr2.n0, list(map(wr2.C.eta_r, wr2.rho[:, 0])))
+ax[2].plot(wr2.n/wr2.n0, list(map(wr2.C.eta_o, wr2.rho[:, 0])))
 plt.show()

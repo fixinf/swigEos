@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 import sys
 import time
@@ -89,7 +89,7 @@ def main():
     if len(sys.argv) == 4 and sys.argv[1] == 'single':
         x = int(sys.argv[2])
         y = int(sys.argv[3])
-        print("Printing at ({x}, {y})".format(x=x, y=y))
+        print(("Printing at ({x}, {y})".format(x=x, y=y)))
         location = (x, y)
         test(location)
     elif len(sys.argv) == 4 and sys.argv[1] == 'multi':

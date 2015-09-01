@@ -18,8 +18,8 @@ wr2 = Wrapper(C2)
 # C1.rho_f = 1.
 # C1.gamma = 0.
 
-print C2.eta_r(0.59)
-print derivative(lambda z: C1.eta_r(z), 0.27, dx=1e-3)
+print(C2.eta_r(0.59))
+print(derivative(lambda z: C1.eta_r(z), 0.27, dx=1e-3))
 # exit()
 
 rho_f = C2.rho_f
@@ -48,7 +48,7 @@ for d in dlist:
 
 fig, ax = plt.subplots()
 
-ax.plot(frange, map(C2.eta_r, frange))
+ax.plot(frange, list(map(C2.eta_r, frange)))
 
 # wr2.testPodsiedlowski()
 
@@ -58,13 +58,13 @@ C2.omega_a = 0.15669423
 C2.omega_b = 7.09984178
 C2.omega_f = 0.95
 wr2.reset(npoints=n_full, iter=200)
-print res
+print(res)
 # En1 = wr2.Eneutr(n_full)
 # Pn1 = wr2.P_N(n_full)/wr2.const/wr2.m_pi**4
 vs1 = np.diff(wr2.P)/np.diff(wr2.E)
 np1 = wr2.concentrations()[:,1]
 fns1 = wr2.rho[:,0]
-etar1 = map(C2.eta_r, fns1)
+etar1 = list(map(C2.eta_r, fns1))
  
 # 
 # C2.rho = 0
@@ -80,7 +80,7 @@ C2.drho = derivative(C1.eta_r, f1, dx=1e-3)
 C2.d2rho = derivative(C1.eta_r, f1, dx=1e-3, n=2)
 
 
-print C2.rho, C2.drho, C2.d2rho
+print(C2.rho, C2.drho, C2.d2rho)
 
 
 # C2.rho_a_low = 0.04
@@ -91,7 +91,7 @@ fsmall = np.linspace(0., 0.27, 20)
 def fun_low(x):
     C2.rho_a_low = x[0]
     C2.rho_b_low = x[1]
-    res = np.array(map(lambda z: C2.eta_r(z) - C1.eta_r(z), fsmall))
+    res = np.array([C2.eta_r(z) - C1.eta_r(z) for z in fsmall])
     return np.sum(res**2)
 
 C2.rho_sat_f2 = f1
@@ -100,15 +100,15 @@ C2.rho_sat_f2 = f1
 
 C2.rho_tan_c = 0
 
-print wr2.L(), wr2.J()
+print(wr2.L(), wr2.J())
 
 
 
-line, = ax.plot(frange, map(C2.eta_r, frange))
+line, = ax.plot(frange, list(map(C2.eta_r, frange)))
 lines.append(line)
 # labels.append('%.2f'%d)
 # ax.legend(lines, labels, loc=0)
-ax.plot(frange, map(C1.eta_r, frange))
+ax.plot(frange, list(map(C1.eta_r, frange)))
 ax.set_ylim([0,5])
 ax.set_xlabel(r'$f$', fontsize=18)
 ax.set_ylabel(r'$\eta_\rho(f)$', fontsize=18)
@@ -126,8 +126,8 @@ plt.plot(n_f/wr1.n0, f0_1)
 
 C3 = Models.KVOR()
 
-l1, = plt.plot(frange, map(lambda z: (1-z)**2/sqrt(C2.eta_r(z)), frange))
-lKV, = plt.plot(frange, map(lambda z: (1-z)**2/sqrt(C3.eta_r(z)), frange))
+l1, = plt.plot(frange, [(1-z)**2/sqrt(C2.eta_r(z)) for z in frange])
+lKV, = plt.plot(frange, [(1-z)**2/sqrt(C3.eta_r(z)) for z in frange])
 plt.legend([l1, lKV], ['Current scaling', 'KVOR'], loc=0)
 plt.xlabel(r'$f$', fontsize=18)
 plt.ylabel(r'$\chi_\rho(f)$', fontsize=18)
@@ -145,12 +145,12 @@ wr2.reset(npoints=n_full)
 vs2 = np.diff(wr2.P)/np.diff(wr2.E)
 np2 = wr2.concentrations()[:,1]
 fns2 = wr2.rho[:,0]
-etar2 = map(C2.eta_r, fns2)
+etar2 = list(map(C2.eta_r, fns2))
 
 
 
 wr2.solve(f0=C2.f0, K0=240., J0=30.)
-print wr2.J(), wr2.L()
+print(wr2.J(), wr2.L())
 
 
 
@@ -159,12 +159,12 @@ ax[0,0].plot(wr2.n[1:]/wr2.n0, vs1, wr2.n[1:]/wr2.n0, vs2)
 ax[1,0].plot(wr2.n/wr2.n0, np1, wr2.n/wr2.n0, np2)
 ax[0,1].plot(wr2.n/wr2.n0, fns1, wr2.n/wr2.n0, fns2)
 ax[1,1].plot(wr2.n/wr2.n0, etar1, wr2.n/wr2.n0, etar2)
-print C2.rho_tan_a, C2.rho_tan_b, C2.rho_tan_c
+print(C2.rho_tan_a, C2.rho_tan_b, C2.rho_tan_c)
 plt.show()
 
 Es, fs = wr2.Esymm(wr2.n,ret_f=1)
-plt.plot(wr2.n/wr2.n0, map(lambda z: 1./C2.eta_r(z),fs))
-plt.plot(wr2.n/wr2.n0, map(lambda z: 1./C1.eta_r(z),fs))
+plt.plot(wr2.n/wr2.n0, [1./C2.eta_r(z) for z in fs])
+plt.plot(wr2.n/wr2.n0, [1./C1.eta_r(z) for z in fs])
 plt.show()
 
 n, J2 = wr2.dumpJ()
@@ -195,23 +195,23 @@ n = np.linspace(0, wr1.n0, 100)
 # wr1.reset()
 wr1.setDriver()
 n, m, r, mg = wr1.stars()
-print 'M_NS_MAX =', max(m)
+print('M_NS_MAX =', max(m))
 sleep(3)
 fNS = wr1.rho[:,0]
 contribNS = wr1.getContrib()
 nNS = wr1.n
-print max(fNS)
+print(max(fNS))
 # exit()
 wr1.C.phi_meson=1
 wr1.reset(npoints=npoints, timeout=2, hyper=1)
 wr1.setDriver()
 n, m, r, mg = wr1.stars()
-print max(m)
+print(max(m))
 # exit()
 fig, ax = plt.subplots(2, 2)
 ax[0,0].plot(wr1.n/wr1.n0, wr1.getContrib(), nNS/wr1.n0, contribNS)
 ax[1,0].plot(wr1.n/wr1.n0, wr1.concentrations(), wr1.n/wr1.n0, wr1.rho[:,0], nNS/wr1.n0, fNS)
-ax[0,1].plot(wr1.rho[:,0], map(wr1.C.eta_r, wr1.rho[:,0]))
+ax[0,1].plot(wr1.rho[:,0], list(map(wr1.C.eta_r, wr1.rho[:,0])))
 
 plt.show()
 

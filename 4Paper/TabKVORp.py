@@ -19,7 +19,7 @@ for model in models:
     xss.append([model.__name__, [C.X_s[i] for i in range(8)]])
     
 for i in xss:
-    print i
+    print(i)
 # exit()
 
 for model in models:
@@ -48,7 +48,7 @@ for model in models:
 #     f0 = wr.f0(n)
 #     plt.plot(n/wr.n0, f0)
 #     plt.show()
-    print folderName
+    print(folderName)
     C.Hyper=0
 #     wr.showVsSymLow()
 #     wr.dumpMasses(folderName)
@@ -98,12 +98,12 @@ for model in models:
         ):
         Hyper = 1
         C.sigma_kind = 1
-        print '!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!')
         zl = 3.
         zx = 3.
         alpha = 2.5
         C.phi_meson = 0
-        C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
+        C.set_hs_alpha(np.array([0., 0.] + [alpha for i in range(6)]))
         C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zx, zx]))
 #         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
 #         wr.dumpHyper(folderName+'Sigma', npoints=400, verbose=1)
@@ -121,7 +121,7 @@ for model in models:
         C.phi_z = 1
         C.phi_meson = 1
         C.phi_kind = 1 
-        C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
+        C.set_hs_alpha(np.array([0., 0.] + [alpha for i in range(6)]))
 #         C.set_hs_z(np.array([0., 0., zl, 0., 0., 0., zx, zx]))
         C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zx, zx]))
 #         wr.dumpHyper(folderName+'SigmaPhi'+app, npoints=400, verbose=1)
@@ -129,4 +129,4 @@ for model in models:
 #         wr.dumpHyperScalings(folderName+'SigmaPhi'+app)
 #         wr.dumpVsHyper(folderName+'SigmaPhi'+app)
 #     
-print DUs
+print(DUs)

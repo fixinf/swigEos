@@ -107,26 +107,26 @@ for hyper in [1]:
                 
                 wr.setDriver()
                 E, P, N = wr.EPN()
-                print wr.rho
-                print wr.rho.shape
-                print E
-                print E.shape, N.shape
+                print(wr.rho)
+                print(wr.rho.shape)
+                print(E)
+                print(E.shape, N.shape)
                 _n, _M, _R = wr.stars(0.5, 3.5, 100)
                 mline, = ax[1].plot(_n/wr.n0, _M, linestyle=styles[iter])
                 mlines.append(mline)
                 ax[1].set_xlabel(r'$n/n_0$', fontsize=14)
                 ax[1].set_ylabel(r'$M$', fontsize=14)
-                print max(_M)
+                print(max(_M))
                 maxes.append(max(_M)) 
                 rho = []
              
         iter += 1
              
-print maxes
+print(maxes)
 labels = []
 for i, m in enumerate(maxes):
-    print m
-    print ener[i]
+    print(m)
+    print(ener[i])
     labels.append(r'$M_{max}=%.2f$' % (m))
 ax[1].legend(mlines, labels, loc=0, fontsize=10)
 
@@ -138,8 +138,8 @@ ax[1].legend(mlines, labels, loc=0, fontsize=10)
 # print eos.K(wr.n0*0.17/0.16, C)
 show()
 flist = array(flist)
-print flist.shape
-print n_p.shape
+print(flist.shape)
+print(n_p.shape)
 plot(wr.n/wr.n0, flist)
 show()
 
@@ -148,7 +148,7 @@ masses = []
 for f in flist:
     masses = []
     for i in range(8):
-        print i
+        print(i)
         marg = C.X_s[i]*C.M[0]/C.M[i]*f[0] #+ C.X_sp[i]*C.M[0]/C.M[i]*f[1]
         if C.sprime:
             marg += C.X_sp[i]*C.M[0]/C.M[i]*f[1]
@@ -156,7 +156,7 @@ for f in flist:
     mlist.append(array(masses))
 
 mlist = array(mlist)
-print mlist.shape
+print(mlist.shape)
 lines = plot(wr.n/wr.n0, mlist)
 legend(lines, ['n','p',r'$\Lambda$',r'$\Sigma^-$',r'$\Sigma^0$',
                                          r'$\Sigma^+$', r'$\Xi^-$', r'$\Xi^0$'])

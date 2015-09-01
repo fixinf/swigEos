@@ -64,7 +64,7 @@ for i, _f in enumerate(Fs):
     Ulist.append(res)
 Ulist = np.array(Ulist)
 
-lines=plt.plot(Fs, Ulist, fs0, map(C.U, fs0))
+lines=plt.plot(Fs, Ulist, fs0, list(map(C.U, fs0)))
 plt.ylabel('U', fontsize=24)
 plt.xlabel('f', fontsize=24)
 plt.legend(lines, ['Reconstructed', 'KVOR'], fontsize=24, loc=0)
@@ -87,12 +87,12 @@ IC.Co = EC.Co
 iE, iF = iwr.Esymm(n[1:-1], ret_f=1)
 plt.plot(n[1:-1], iF, n, Fs)
 plt.show()
-plt.plot(Fs, Ulist, iF, map(IC.U, iF))
+plt.plot(Fs, Ulist, iF, list(map(IC.U, iF)))
 plt.show()
 plt.plot(n[1:-1], iE, n, E)
 plt.show()
 IC.f0 = 0.2
-print iwr.K()
+print(iwr.K())
 Ebind = (iE/n[1:-1] - C.M[0])*wr.m_pi
 EbindOrig=(E / n - C.M[0])*wr.m_pi
 plt.plot(n[1:-1]/wr.n0, Ebind, n/wr.n0, EbindOrig)

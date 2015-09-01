@@ -46,7 +46,7 @@ i_apr_P2 = lambda z: z*derivative(i_apr_eps2, z, dx=1e-5, order=7) - i_apr_eps2(
 
 n = np.linspace(0, 1.*wr.n0, 100)
 
-print i_apr_P(wr.n0), i_apr_P2(wr.n0)
+print(i_apr_P(wr.n0), i_apr_P2(wr.n0))
 
 # plt.plot(n, i_apr_eps(n), n, i_apr_eps2(n))
 plt.plot(n[1:], i_apr_P(n[1:]), n[1:], i_apr_P2(n[1:]))
@@ -55,7 +55,7 @@ plt.show()
 i_apr_eps = i_apr_eps2
 i_apr_P = i_apr_P2
 
-plt.plot(n, map(lambda z: 135*(i_apr_eps(z)/z - C.M[0]), n), n, 135*(wr.Esymm(n)/n - C.M[0]))
+plt.plot(n, [135*(i_apr_eps(z)/z - C.M[0]) for z in n], n, 135*(wr.Esymm(n)/n - C.M[0]))
 plt.show()
 
 E, fs0 = wr.Esymm(n, ret_f=1)
@@ -85,8 +85,8 @@ for i, _f in enumerate(Fs):
     Ulist.append(res)
     
 Ulist = np.array(Ulist)
-UKV = np.array(map(C.U, fs0))
-lines=plt.plot(Fs, Ulist, fs0, map(C.U, fs0))
+UKV = np.array(list(map(C.U, fs0)))
+lines=plt.plot(Fs, Ulist, fs0, list(map(C.U, fs0)))
 plt.ylabel('U', fontsize=24)
 plt.xlabel('f', fontsize=24)
 plt.legend(lines, ['Reconstructed', 'KVOR'], fontsize=24, loc=0)
@@ -112,14 +112,14 @@ plt.show()
 # eta_o = np.ones(Fs.shape)
 
 # eta_o = map(C.eta_o, Fs)
-print max(Fs)
+print(max(Fs))
 fig, ax = plt.subplots(2,1)
-ax[0].plot(n, eta_o, n, map(C.eta_o, fs0))
-ax[1].plot(n, map(lambda z: 135*(i_apr_eps(z)/z - C.M[0]), n), n, 135*(wr.Esymm(n)/n - C.M[0]))
+ax[0].plot(n, eta_o, n, list(map(C.eta_o, fs0)))
+ax[1].plot(n, [135*(i_apr_eps(z)/z - C.M[0]) for z in n], n, 135*(wr.Esymm(n)/n - C.M[0]))
 plt.show()
 
 # eta_o[10] += 0.01
-print eta_o
+print(eta_o)
 # exit()
 eta_o[0] = 0.55
 IC.set_eta_s(np.insert(Fs, 0, -1e-3), np.insert(UKV, 0, 0.))
@@ -132,15 +132,15 @@ IC.Co = EC.Co
 n_i = n[5:-1]
 
 iE, iF = iwr.Esymm(n_i, ret_f=1)
-print iF
+print(iF)
 plt.plot(n_i, iF, n, Fs)
 plt.show()
-plt.plot(Fs, Ulist, iF, map(IC.U, iF), iF, map(C.U, iF))
+plt.plot(Fs, Ulist, iF, list(map(IC.U, iF)), iF, list(map(C.U, iF)))
 plt.show()
-plt.plot(iF, map(IC.eta_o, iF), iF, map(C.eta_o, iF))
+plt.plot(iF, list(map(IC.eta_o, iF)), iF, list(map(C.eta_o, iF)))
 plt.show()
 
-eta_tab = np.array([iF, map(IC.eta_o, iF), map(C.eta_o, iF)]).transpose()
+eta_tab = np.array([iF, list(map(IC.eta_o, iF)), list(map(C.eta_o, iF))]).transpose()
 f_tab = np.array([n_i, iF, n, Fs]).transpose()
 
 plt.plot(n_i, iE, n, E)

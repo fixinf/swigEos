@@ -84,16 +84,16 @@ C.omega_c = 0*-1000
 C.f0 = 0.27
 
 C.SetHyperConstants(2)
-print [i for i in C.X_s]
+print([i for i in C.X_s])
 C.set_xs(np.array([0.0, 0.0, -30.0, 30.0, 30., 30., -18., -18.]))
-print [i for i in C.X_s]
+print([i for i in C.X_s])
 wr.solve(f0=C.f0, iter=3000)
 
 wr.reset(hyper=0, npoints=2000)
 C.SetHyperConstants(2)
 
-print C.f0
-print C.eta_r(C.f0), C.eta_o(C.f0), C.eta_p(C.f0)
+print(C.f0)
+print(C.eta_r(C.f0), C.eta_o(C.f0), C.eta_p(C.f0))
 
 fig, ax = plt.subplots(1,2)
 
@@ -114,14 +114,14 @@ for i in wr.n:
     Jlist.append(eos.J(i, C, f_eq[0]))
     
 plt.plot(wr.n/wr.n0, Jlist)
-plt.plot(wr.n/wr.n0, map(lambda z: C.eta_r(z), wr.rho[:,0]))
+plt.plot(wr.n/wr.n0, [C.eta_r(z) for z in wr.rho[:,0]])
 # plt.ylim([0.0, 100.0])
 plt.show()
 
 wr.setDriver()
 
 N, M, R = wr.stars(npoints=100)
-print 'Mmax = ', np.max(M)
+print('Mmax = ', np.max(M))
 
 frange = np.linspace(0.0, 1.0, 1000)
 eta_o = []
@@ -149,7 +149,7 @@ eta_r = []
 eta_s = []
 phi_n = []
 eta_p = []
-print C.f0
+print(C.f0)
 pause(5)
 fi = open('scalings_NSf%.2f.dat'%C.f0, 'w')
 for i, f in enumerate(wr.rho[:,0]):

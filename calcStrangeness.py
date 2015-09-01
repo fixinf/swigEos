@@ -14,11 +14,11 @@ for dir, dirs, files in os.walk(rootdir):
         arr = np.loadtxt(fname, skiprows=1)
         sum = 0
         for i in arr[:,4:-1]:
-            print mult.shape, i.shape
+            print(mult.shape, i.shape)
             sum += np.dot(mult, i)
             
-        print fname
-        print sum
+        print(fname)
+        print(sum)
             
             
             

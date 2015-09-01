@@ -32,7 +32,7 @@ s = EnthalpySolver(E=eps, P=porig, nhpoints=100)
 _m, _r, _p, _e = s.integrateOut(porig[-1])
 mmax = _m[-1]
 rmax = _r[-1]
-print '###########################################'
+print('###########################################')
 # print s.integrateIn(mmax, rmax, s.iHofP(porig[-2]))
 
 # m_new = 1.92946
@@ -47,7 +47,7 @@ r_new = rmax
 
 
 
-print 'M = ', mmax, 'R = ', rmax
+print('M = ', mmax, 'R = ', rmax)
 _mcore, _rcore = s.integrateIn(m_new, r_new, s.iHofP(porig[-1]))
 mcore = _mcore[-1]
 rcore = _rcore[-1]
@@ -59,12 +59,12 @@ plt.show()
 mcore2 = _m[1]
 rcore2 = _r[1]
 
-print 'M_core = ', mcore, 'R_core =' , rcore
-print 'E_int = ' , mcore/(rcore**3 / 3 * s.E_const)
-print 'M_core2 = ' , mcore2, 'R_core2 =' , rcore2
-print 'E_int2 = ' , mcore2/(rcore2**3 / 3 * s.E_const)
-print 'P = ', porig[-1], 'E = ', eps[-1]
-print s.predictPE(mcore, rcore, eps[-1], porig[-1])
+print('M_core = ', mcore, 'R_core =' , rcore)
+print('E_int = ' , mcore/(rcore**3 / 3 * s.E_const))
+print('M_core2 = ' , mcore2, 'R_core2 =' , rcore2)
+print('E_int2 = ' , mcore2/(rcore2**3 / 3 * s.E_const))
+print('P = ', porig[-1], 'E = ', eps[-1])
+print(s.predictPE(mcore, rcore, eps[-1], porig[-1]))
 
 exit()
 

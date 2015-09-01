@@ -41,7 +41,7 @@ for model in models:
         folderName += '%.0f'%(K)        
 #     wr.dumpEos(folderName)
 #     exit()
-    print folderName
+    print(folderName)
     
 #     wr.dumpMasses(folderName)
 #     wr.dumpEos(folderName)

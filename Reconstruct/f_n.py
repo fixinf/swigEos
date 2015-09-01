@@ -117,15 +117,15 @@ def f_eq_N(n):
 nrange = linspace(0.0, 4.0, 100)
 n_inter = linspace(0.01, 4.5, 100)
 
-flist = map(lambda z: f_eq(z), nrange)
+flist = [f_eq(z) for z in nrange]
 
-pflistN = map(lambda z: pf(z), nrange)
-pflistS = map(lambda z: pf(z), nrange/2)
+pflistN = [pf(z) for z in nrange]
+pflistS = [pf(z) for z in nrange/2]
 
 my_fpS = interp1d(pflistS, flist, kind='cubic')
 my_fpN = interp1d(pflistN, flist, kind='cubic')
 
-print my_fpS(3.5)
+print(my_fpS(3.5))
 
 def func_integr(z, f):
 #     print 'z=', z
@@ -203,7 +203,7 @@ Co = C2.Co*0.7
 
 def func_f_solve(f, n):
     f = float(f)
-    print f, n
+    print(f, n)
     pf = eos.p_f(n/2)
     mn = C.M[0]
     meff = mn * C.phi_n(0, f)
@@ -230,9 +230,9 @@ for i, n in enumerate(nrange):
     func.append(func_f_solve(f2[i], n))
     ebind.append(eos.EBind(np.array([f2[i], n/2, n/2]), C2))
 
-pflistS = np.array(map(lambda z: pf(z), nrange/2))
-print pflistS.shape, flist.shape
-print pflistS[0], pflistS[-1]
+pflistS = np.array([pf(z) for z in nrange/2])
+print(pflistS.shape, flist.shape)
+print(pflistS[0], pflistS[-1])
 #my_fpS = interp1d(pflistS, flist[:,0], kind='cubic')
 my_fpS = interp1d(pflistS, flist[:,0], kind='cubic', bounds_error=False, fill_value=pflistS[0])
 # my_fpS = interp1d(pflistS, f2, kind='cubic', bounds_error=False, fill_value=pflistS[0])
@@ -254,10 +254,10 @@ APR = np.array([0.0, -6.48, -12.13, -15.04, -16.00, -15.09, -12.88, -5.03, 2.13,
 
 aprEps = nAPR*wr.n0*APR/wr.m_pi + C.M[0]*nAPR*wr.n0
 i_apr_eps = interp1d(nAPR*wr.n0, aprEps, kind='cubic')
-print nAPR*wr.n0
+print(nAPR*wr.n0)
 i_apr_P = lambda z: z*derivative(i_apr_eps, z, dx=1e-3) - i_apr_eps(z)
 
-print  i_apr_eps(wr.n0), i_apr_P(wr.n0)
+print(i_apr_eps(wr.n0), i_apr_P(wr.n0))
 
 wrEs, wrF= wr.Esymm(nrange, ret_f=1)
 pEs = wr.Psymm(nrange) / wr.const / wr.m_pi**4
@@ -273,23 +273,23 @@ pEs = i_apr_P(nrange)
 fEs = 1 - sqrt((wrEs + pEs - Co * nrange**2 / C.M[0]**2)**2 / (nrange**2) - pflistS**2)/C.M[0]
 fEs = np.nan_to_num(fEs)
 fEs[0] = 0.
-print fEs
-print wrF
+print(fEs)
+print(wrF)
 lines = plot(nrange, fEs, nrange, wrF)
 legend(lines, ['my', 'orig'])
 show()
 ifEs = interp1d(pflistS, fEs, kind='cubic', bounds_error=False, fill_value=pflistS[0])
-print fEs
-eInt = map(lambda z: _E(z, ifEs), nrange)
-print wrEs
-print eInt
+print(fEs)
+eInt = [_E(z, ifEs) for z in nrange]
+print(wrEs)
+print(eInt)
 lines = plot(nrange, eInt, nrange, wrEs)
 legend(lines, ['my', 'orig'])
 show()
 
 
 
-ebind_new = map(lambda z: _E(z, my_fpS)/z - m_N*135, nrange)
+ebind_new = [_E(z, my_fpS)/z - m_N*135 for z in nrange]
 
 fig, ax = plt.subplots(1, 3)
 lines_f = ax[0].plot(nrange, flist, nrange, f2)

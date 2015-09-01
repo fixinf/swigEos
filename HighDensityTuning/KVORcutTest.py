@@ -36,7 +36,7 @@ wr1 = Wrapper(C1)
 # print res.x
 
 frange = np.linspace(0, 1, 100)
-plt.plot(frange, map(C.eta_o, frange), frange, map(C1.eta_o, frange))
+plt.plot(frange, list(map(C.eta_o, frange)), frange, list(map(C1.eta_o, frange)))
 plt.show()
 
 C.phi_meson = 0

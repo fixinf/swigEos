@@ -78,11 +78,11 @@ C.a_sigma = -0.0
 C.power_0 = 0
 C.power_1 = 3
 
-plt.plot(frange, map(C.eta_r, frange), frange, map(C1.eta_r, frange))
-plt.plot(frange, map(C.eta_o, frange), frange, map(C1.eta_o, frange))
-plt.plot(frange, map(C.eta_s, frange), frange, map(C1.eta_s, frange))
+plt.plot(frange, list(map(C.eta_r, frange)), frange, list(map(C1.eta_r, frange)))
+plt.plot(frange, list(map(C.eta_o, frange)), frange, list(map(C1.eta_o, frange)))
+plt.plot(frange, list(map(C.eta_s, frange)), frange, list(map(C1.eta_s, frange)))
 plt.ylim([0, 5])
-print C.eta_r(0.23)
+print(C.eta_r(0.23))
 plt.show()
 
 plt.plot(data[:,0], data[:, 1:],c='black',lw='1')

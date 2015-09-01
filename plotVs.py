@@ -58,11 +58,11 @@ for wr in wrlist:
         wr.C.f0 = f
         wr.solve(f0=f) 
         
-    print 'Done!'
+    print('Done!')
     pause(1)
 
-print eos.J(wr.n0, C2)
-print 3*derivative(lambda z: eos.J(z, C2), wr.n0, dx=1e-3)
+print(eos.J(wr.n0, C2))
+print(3*derivative(lambda z: eos.J(z, C2), wr.n0, dx=1e-3))
 pause(5)
 
 fig, ax = plt.subplots(1,2)

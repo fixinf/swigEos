@@ -21,7 +21,7 @@ for _n in n:
     mn = C.M[0]
     _mu = C.Co * _n / (mn**2 * C.eta_o(f)) + sqrt(eos.p_f(_n/2)**2 + mn**2 * 
                                                       C.phi_n(0, f)**2)
-    print _mu, eos.mu(np.array([f, _n/2, _n/2]), 2, C)
+    print(_mu, eos.mu(np.array([f, _n/2, _n/2]), 2, C))
 #     _mu = eos.mu(np.array([f, _n/2, _n/2]), 2, C)
     mu.append(_mu)
     
@@ -40,15 +40,15 @@ with open('Matsui_f1.csv', 'r') as f:
         matsui_k.append(float(_k))
 
                 
-print f1
-print 1+f1/3
+print(f1)
+print(1+f1/3)
 
-kf_plot = (0.16 / wr.n0)**(1./3) * np.array(map(eos.p_f, n/2))
+kf_plot = (0.16 / wr.n0)**(1./3) * np.array(list(map(eos.p_f, n/2)))
 # plt.plot(matsui_k, matsui_f1, kf_plot, f1)
 # plt.show() 
 
 ef = mu * (np.ones(f1.shape) + f1/3.)
-kf = np.array(map(lambda z: eos.p_f(z/2), n))
+kf = np.array([eos.p_f(z/2) for z in n])
 meff = np.sqrt(ef**2 - kf**2)
 
 plt.plot(kf_plot, 3 * (efRMF/mu - 1))
@@ -58,14 +58,14 @@ plt.show()
 
 plt.plot(n/wr.n0, meff/C.M[0])
 # plt.plot(n/wr.n0, ef/C.M[0])
-plt.plot(n/wr.n0, map(lambda z: C.phi_n(0, z), fs))
+plt.plot(n/wr.n0, [C.phi_n(0, z) for z in fs])
 plt.show()
 
 
 E = wr.Esymm(n)
 P = wr.Psymm(n)/wr.const/wr.m_pi**4
 vs = np.gradient(P)/np.gradient(E)
-print vs.shape
+print(vs.shape)
 vs_lp = []
 for i, _n in enumerate(n):
     vs_lp.append(kf[i]**2 / (3 * efRMF[i] * mu[i]) * (1 + f0[i]))

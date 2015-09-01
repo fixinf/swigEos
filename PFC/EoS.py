@@ -22,7 +22,7 @@ def zeta(xi, a):
     res += a[17]/(1 + (a[18]*(xi - a[19]))**2)
     res += a[20]/(1 + (a[21]*(xi - a[22]))**2)
     return res
-print size(a)
+print(size(a))
 xilist = np.linspace(0., 10., 100)
-plt.plot(exp(xilist), exp(map(lambda z: zeta(z, a), xilist)))
+plt.plot(exp(xilist), exp([zeta(z, a) for z in xilist]))
 plt.show()

@@ -30,7 +30,7 @@ res2 = []
 for i, _n in enumerate(n):
     Emean = m[i] * 1.4766/ (4 * pi * r[i]**3 / 3) # km^{-2}
     Emean /= 2.6115e-4 # fm^{-4}www.win2.n/
-    print Ec[i], Emean 
+    print(Ec[i], Emean) 
     res.append(2 * m[i] * 1.4766/r[i])
     res2.append(1 - ((Pc[i] + Emean)/(3 * Pc[i] + Emean))**2)
 

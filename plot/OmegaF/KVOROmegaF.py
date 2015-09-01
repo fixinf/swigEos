@@ -79,11 +79,11 @@ with open('../klahnLower', 'r') as f:
         LKlahnX.append(float(_n)/0.16)
 ax.semilogy(LKlahnX, LKlahnY, c = 'grey')
 
-print C.f0
+print(C.f0)
 # wr.solve()
 C.f0 = f0
 wr.solve(f0 = C.f0, iter = 3000)
-print C.f0
+print(C.f0)
 def KP(n, m):
     p_f = eos.p_f(n)
     res = -(3./8.)*m**4 * log(sqrt(m**2))
@@ -105,12 +105,12 @@ for f in flist:
     global n_star
 #     for _f in np.linspace(C.f0, f):
     wr.solve(f0=f, iter=3000)
-    print C.Cs, C.Co, C.Cr, C.b, C.c    
-    print 'J = ', eos.K(wr.n0, C)
-    print 'K = ',eos.J(wr.n0, C)
-    print 'K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
-                   2*eos.K(wr.n0,C)/wr.n0)
-    print 'L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3)
+    print(C.Cs, C.Co, C.Cr, C.b, C.c)    
+    print('J = ', eos.K(wr.n0, C))
+    print('K = ',eos.J(wr.n0, C))
+    print('K\' = ',-3*wr.n0*(derivative(lambda z: eos.K(z, C), wr.n0, dx=1e-3, order=3) - 
+                   2*eos.K(wr.n0,C)/wr.n0))
+    print('L = ', 3*wr.n0*derivative(lambda z: eos.J(z, C), wr.n0, dx=1e-3))
 #     pause()
     l1, = ax.plot(n[1:]/wr.n0, wr.Psymm(n), c='r', ls='--')
     l2, = ax.plot(n[1:]/wr.n0, wr.Psymm(n), c='r')
@@ -137,7 +137,7 @@ def E_N(n):
     f_eq_n = f_eq
     return eos._E(np.array([f_eq, n, 0.]), C)
 
-EN = map(E_N, wr.n)
+EN = list(map(E_N, wr.n))
 dn = wr.n[1]-wr.n[0]
 PN = wr.n[1:]*np.diff(EN)/dn - EN[1:]
 
@@ -160,7 +160,7 @@ with open(suffix+"terms_%.2f.dat"%flist[0], 'w') as f:
         K += eos.kineticInt(n_p, C.M[0]*C.phi_n(0, f_eq), f_eq)
         K1 = KP(n_n, M[0]*C.phi_n(0, f_eq))
 #         K1 += KP(n_p, M[0]*C.phi_n(0, f_eq))
-        print n_n*dK - K, K1
+        print(n_n*dK - K, K1)
 #         print f_eq, n_n, n_p, PN[i], (n_n*dK - K + omega - sigma + _rho), EN[i], (K + omega + sigma + _rho)
         f.write('%f %f %f %f %f %f \n'%(_n/wr.n0, sigma, omega, _rho, K, n_n*dK - K))
         terms.append([sigma, omega, _rho, K, n_n*dK - K])
@@ -213,12 +213,12 @@ with open(suffix+'pressure_scaling%.2f.dat'%flist[0], 'w') as f:
 for j,m in enumerate(mlist):
     with open(suffix+'mass_scaling_%.2f.dat'%flist[j],'w') as f:
         for i, _n in enumerate(n_star):
-            print _n, m[i]
-            print max(m)
+            print(_n, m[i])
+            print(max(m))
             if i > np.argmax(m):
-                print _n
-                print wr.n[np.argmin(abs(wr.n - [_n for i in wr.n]))]
-                print '%e'%(wr.E[np.argmin(abs(wr.n - [_n for i in wr.n]))]*wr.m_pi**4)
+                print(_n)
+                print(wr.n[np.argmin(abs(wr.n - [_n for i in wr.n]))])
+                print('%e'%(wr.E[np.argmin(abs(wr.n - [_n for i in wr.n]))]*wr.m_pi**4))
                 break
             f.write('%f  %f\n'%(_n/wr.n0, m[i]))
     MofN = interpolate.interp1d(n_star, m)
@@ -258,7 +258,7 @@ M_DU = MofN(n_DU)
 
 nmax = np.argmax(m)
 
-print n_DU/wr.n0, M_DU
+print(n_DU/wr.n0, M_DU)
 
 
 

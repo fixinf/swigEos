@@ -24,7 +24,7 @@ C1.rho_sat_f1 = 0.3
 
 frange = np.linspace(0, 1, 100)
 
-plt.plot(frange, map(C.eta_r, frange), frange, map(C1.eta_r, frange))
+plt.plot(frange, list(map(C.eta_r, frange)), frange, list(map(C1.eta_r, frange)))
 # plt.ylim([0, 50])
 plt.show()
 
@@ -37,6 +37,6 @@ wr1.setDriver()
 n,m,r,mg= wr.stars()
 n1,m1,r1,mg1= wr1.stars()
 
-print max(m), max(m1)
+print(max(m), max(m1))
 
 

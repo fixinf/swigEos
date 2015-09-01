@@ -29,13 +29,13 @@ folder = '/home/const/Dropbox/Documents/For DN/XLambda/data/hyper_alpha=%i_%s_%.
 if not path.exists(folder):
     os.makedirs(folder)
 
-C.set_hs_alpha(np.array([0., 0.] + [alpha for i in xrange(6)]))
+C.set_hs_alpha(np.array([0., 0.] + [alpha for i in range(6)]))
 C.set_hs_z(np.array([0., 0., zl, zl, zl, zl, zl, zl]))
 
-print 'hey'
+print('hey')
 
 frange = np.linspace(0., 1., 100)
-scF = map(lambda z: ((1 + zl * C.f0) / (1 + zl * z))**alpha, frange)
+scF = [((1 + zl * C.f0) / (1 + zl * z))**alpha for z in frange]
 plt.plot(frange, scF)
 plt.show()
 
@@ -45,7 +45,7 @@ wr.setDriver()
 plt.plot(wr.n/wr.n0, wr.concentrations(), wr.n/wr.n0, wr.rho[:,0])
 plt.show()
 
-scN = map(lambda z: ((1 + zl * C.f0) / (1 + zl * z))**alpha, wr.rho[:, 0])
+scN = [((1 + zl * C.f0) / (1 + zl * z))**alpha for z in wr.rho[:, 0]]
 
 tabscF = np.array([frange, scF]).transpose()
 tabscN = np.array([wr.n/wr.n0, scN]).transpose()
@@ -69,8 +69,8 @@ with open(join(folder, 'masses.dat'), 'w') as f:
     f.write(mtable)
 
 rho = wr.concentrations()
-print wr.n.shape
-print rho.shape
+print(wr.n.shape)
+print(rho.shape)
 rtab = []
 for i, _n in enumerate(wr.n/wr.n0):
 #     print _n

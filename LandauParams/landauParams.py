@@ -41,8 +41,8 @@ def I1num(n, m):
     return res
 
 
-print I1(1., 1.)
-print I1num(1., 1.)
+print(I1(1., 1.))
+print(I1num(1., 1.))
 
 def I2(n, m):
     p = eos.p_f(n)
@@ -76,14 +76,14 @@ def I4num(n, m):
     res /= pi**2
     return res
 
-print I3(1., 1.)
-print I3num(1., 1.)
+print(I3(1., 1.))
+print(I3num(1., 1.))
 
-print I2(1., 1.)
+print(I2(1., 1.))
 
-print I2num(1., 1.)
+print(I2num(1., 1.))
 
-print I4num(1., 1.)
+print(I4num(1., 1.))
 # exit()
 f_f0 = 0.
 
@@ -171,14 +171,14 @@ def f0_der(n):
     f_eq0_der, = eos.f_eq(np.array([n/2, n/2]), np.array([f_eq0_der]), 1, C)
     meff = mn*C.phi_n(0, f_eq0_der)
     
-    print f_eq0_der
+    print(f_eq0_der)
     mu = lambda z, f: derivative(lambda x: eos._E(np.array([f, x/2, x/2]), C), z, dx=1e-3)
     
     dmu_df = derivative(lambda x: mu(n, x), f_eq0_der, dx=1e-3)
     dmu_dn = derivative(lambda x: mu(x, f_eq0_der), n, dx=1e-3)
     d2E_df = derivative(lambda z: eos._E(np.array([z, n/2, n/2]), C), f_eq0_der, dx=1e-3, n=2)
-    print 'dmu_dn = ', dmu_dn, ' ?= ', C.Co/ mn**2 /C.eta_o(f_eq0_der) + (3 * pi**2)**(2./3) * (n/2)**(-1./3) / sqrt(pf**2 + meff**2) / 6
-    print derivative(lambda x: eos._E(np.array([f_eq0_der, x/2, x/2]), C), n, dx=1e-3, n=2)
+    print('dmu_dn = ', dmu_dn, ' ?= ', C.Co/ mn**2 /C.eta_o(f_eq0_der) + (3 * pi**2)**(2./3) * (n/2)**(-1./3) / sqrt(pf**2 + meff**2) / 6)
+    print(derivative(lambda x: eos._E(np.array([f_eq0_der, x/2, x/2]), C), n, dx=1e-3, n=2))
     res = dmu_dn - (3 * pi**2)**(2./3) * (n/2)**(-1./3) / sqrt(pf**2 + meff**2) / 6 - dmu_df**2 / d2E_df
     
     mult = 4 * pf * sqrt(pf**2 + meff**2) / (2 * pi**2)
@@ -194,7 +194,7 @@ def f0_der_NM(n):
     
     meff = mn*C.phi_n(0, f)
     
-    print f
+    print(f)
     mu = lambda z, f: derivative(lambda x: eos._E(np.array([f, x, 0.]), C), z, dx=1e-3)
     
     dmu_df = derivative(lambda x: mu(n, x), f, dx=1e-3)
@@ -208,44 +208,44 @@ def f0_der_NM(n):
     return res*mult
 
 n_nm = np.linspace(0., 4., 100)
-plt.plot(n_nm, map(f0_der_NM, n_nm))
+plt.plot(n_nm, list(map(f0_der_NM, n_nm)))
 plt.show()
 
-print f0_der(wr.n0)
-print f0(wr.n0)
+print(f0_der(wr.n0))
+print(f0(wr.n0))
 # exit()
 
-print (135./197.33)*eos.p_f(n0/2)
-print 'F_0(n0) = ', f0(n0)
+print((135./197.33)*eos.p_f(n0/2))
+print('F_0(n0) = ', f0(n0))
 pf0 = eos.p_f(n0/2)
 f_0 = 0.
 for n in linspace(0, n0, 1000):
     f_0, = eos.f_eq(np.array([n/2, n/2]), np.array([f_0]), 1, C)
 #     print f_0
-print 'f_0 = ', f_0
-print pf0
-print C.M[0]
-print 'K1 = ', eos.K(n0, C)
+print('f_0 = ', f_0)
+print(pf0)
+print(C.M[0])
+print('K1 = ', eos.K(n0, C))
 
-print 3 * pf0**2 /sqrt(pf0**2 + (C.M[0]*C.phi_n(0, f_0))**2) * (1 + f0(n0)) * 135.
+print(3 * pf0**2 /sqrt(pf0**2 + (C.M[0]*C.phi_n(0, f_0))**2) * (1 + f0(n0)) * 135.)
 
 # wr.solve()
-print C.f0
-print eos.K(wr.n0, C)
+print(C.f0)
+print(eos.K(wr.n0, C))
 f_0 = C.f0
 pf0 = eos.p_f(wr.n0/2)
-print 3 * pf0**2 /sqrt(pf0**2 + (C.M[0]*C.phi_n(0, C.f0))**2) * (1 + f0(wr.n0)) * 135.
+print(3 * pf0**2 /sqrt(pf0**2 + (C.M[0]*C.phi_n(0, C.f0))**2) * (1 + f0(wr.n0)) * 135.)
 exit()
 denomlist=[]
 numlist=[]
 fig, ax = plt.subplots(2,1)
-ax[0].plot(nlist/wr.n0, map(f0, nlist))
-ax[0].plot(nlist/wr.n0, map(f1, nlist))
-ax[0].plot(nlist/wr.n0, map(f0_der, nlist))
+ax[0].plot(nlist/wr.n0, list(map(f0, nlist)))
+ax[0].plot(nlist/wr.n0, list(map(f1, nlist)))
+ax[0].plot(nlist/wr.n0, list(map(f0_der, nlist)))
 ax[1].plot(nlist/wr.n0, denomlist)
 ax[1].plot(nlist/wr.n0, numlist)
 ax[1].plot(nlist/wr.n0, np.array(numlist)/np.array(denomlist))
-ax[0].plot(nlist/wr.n0, map(lambda z: f0_der(z) - f0(z), nlist))
+ax[0].plot(nlist/wr.n0, [f0_der(z) - f0(z) for z in nlist])
 # plt.plot(nlist/wr.n0, map(f0, nlist))
 # plt.plot(nlist/wr.n0, map(f1, nlist))
 ax[0].plot(nlist/wr.n0, [-1. for i in nlist], c='red', ls='--')
@@ -255,10 +255,10 @@ ax[0].plot(klist, f0list)
 # plt.xlim([0., 5.])
 plt.show()
 
-tab0 = np.array([nlist/wr.n0, map(f0, nlist)]).transpose()
+tab0 = np.array([nlist/wr.n0, list(map(f0, nlist))]).transpose()
 table0 = tabulate(tab0, tablefmt='plain')
 
-tab1 = np.array([nlist/wr.n0, map(f1, nlist)]).transpose()
+tab1 = np.array([nlist/wr.n0, list(map(f1, nlist))]).transpose()
 table1 = tabulate(tab1, tablefmt='plain')
 
 # with open(fname_0, 'w') as f:

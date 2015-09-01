@@ -56,4 +56,4 @@ plt.show()
 wr.reset(npoints=1000)
 wr.setDriver()
 n, m, r, mg = wr.stars()
-print max(m), n[np.argmax(m)]/wr.n0
+print(max(m), n[np.argmax(m)]/wr.n0)

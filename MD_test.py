@@ -32,7 +32,7 @@ C.rho_prime = derivative(KV.eta_r, C.f0, dx=1e-3)
 # plt.plot(frange, map(lambda z: derivative(C.eta_o, z, dx=1e-3), frange))
 # plt.show()
 
-print derivative(KV.eta_r, C.f0, dx=1e-3), derivative(KV.eta_o, C.f0, dx=1e-3)
+print(derivative(KV.eta_r, C.f0, dx=1e-3), derivative(KV.eta_o, C.f0, dx=1e-3))
 # exit()
 
 # fig, ax = plt.subplots(3, 1)

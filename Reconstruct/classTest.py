@@ -18,13 +18,13 @@ P = wr.Psymm(n)/wr.const/wr.m_pi**4
 f_eq = 0.
 for i,_n in enumerate(n):
     f_eq, = eos.f_eq(np.array([_n/2, _n/2]), np.array([f_eq]), 1, C) 
-    print E[i] + P[i], _n * eos.mu(np.array([f_eq, _n/2, _n/2]), 1, C), _n*(
-          C.Co * _n / C.M[0]**2 + sqrt(eos.p_f(_n/2)**2 + C.M[0]**2*(1-f_eq)**2))
+    print(E[i] + P[i], _n * eos.mu(np.array([f_eq, _n/2, _n/2]), 1, C), _n*(
+          C.Co * _n / C.M[0]**2 + sqrt(eos.p_f(_n/2)**2 + C.M[0]**2*(1-f_eq)**2)))
     f_eq_new = (E[i] + P[i] - C.Co * _n**2 / C.M[0]**2)
 
 
 Eos1 = FromEos()
-print Eos1.mn, C.M[0]
+print(Eos1.mn, C.M[0])
 # exit()
 # Eos1.setScaling(lambda z: (1 + 1.65*0.2)/(1 + 1.65*z),
 #                 lambda z: 1.)
@@ -39,7 +39,7 @@ plt.show()
 exit()
 
 Eos2.setFs(fs0, n)
-Es2 = map(lambda z: Eos1.ES(z), n)
+Es2 = [Eos1.ES(z) for z in n]
 
 lines = plt.plot(n, E, n, Es2)
 plt.legend(lines, ['old', 'new'], loc=0)
@@ -138,14 +138,14 @@ PNS = ipApr(nrange/wr.n0*0.16)
 
 fnsApr = rAPR.FnFromEos(ENS, PNS, nrange)
 plt.plot(nrange/wr.n0, fnsApr)
-ens=map( rAPR.EN, nrange[1:])
+ens=list(map( rAPR.EN, nrange[1:]))
 plt.show()
 plt.plot(nrange[1:]/wr.n0, ens, nrange/wr.n0, ENS)
 plt.show()
 i_ens = interpolate.interp1d(nrange, ens)
 pns = lambda z: z * derivative(lambda x: i_ens(x),z, dx=1e-3) - i_ens(z)
-print ens - ENS
-print pns
+print(ens - ENS)
+print(pns)
 plt.plot(ens[1:], pns(nrange), ENS, PNS)
 plt.show()
 # apr_vsN = np.diff(P)/np.diff(E)

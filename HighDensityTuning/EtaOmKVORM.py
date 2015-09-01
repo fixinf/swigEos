@@ -31,7 +31,7 @@ f_solve = np.linspace(0.5, 1., npoints)
 def func(x):
     C1.omega_a = x[0]
     C1.omega_b = x[1]
-    res = map(lambda z: C.eta_o(z) - C1.eta_o(z), f_solve)
+    res = [C.eta_o(z) - C1.eta_o(z) for z in f_solve]
     res = np.array(res)
     return np.sum(res**2)
 
@@ -40,7 +40,7 @@ def func(x):
 
 frange = np.linspace(0, 1, 100)
 
-plt.plot(frange, map(C.eta_o, frange), frange, map(C1.eta_o, frange))
+plt.plot(frange, list(map(C.eta_o, frange)), frange, list(map(C1.eta_o, frange)))
 plt.ylim([0.5, 1.5])
 plt.show()
 
@@ -64,6 +64,6 @@ wr1.setDriver()
 n,m,r,mg= wr.stars()
 n1,m1,r1,mg1= wr1.stars()
 
-print max(m), max(m1)
+print(max(m), max(m1))
 
 

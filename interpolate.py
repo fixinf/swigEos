@@ -23,7 +23,7 @@ with open("crust.dat", 'r') as f:
         p.append(float(_p))
         n.append(float(_n))
 
-print P
+print(P)
 # 
 # plist = np.append(p[:],P[:])
 # elist = np.append(e[:],E[:])
@@ -37,11 +37,11 @@ nlist = N[:]
 iP = interpolate.interp1d(nlist, plist)
 iE = interpolate.interp1d(nlist, elist)
 
-print nlist
+print(nlist)
 
 nmax = 11.0
-print nlist[0]
-print iP(0.5)
+print(nlist[0])
+print(iP(0.5))
 iN = np.linspace(0.0, nmax, 100)
 
 
@@ -51,8 +51,8 @@ iN = np.linspace(0.0, nmax, 100)
 dr = eos.KVDriver()
 dr.set(E, P, N*wr.n0)
 nstar = np.linspace(0.5, 5.0, 20)
-marr = np.array(map(lambda z: eos.star_crust(z, 2, dr), nstar))
+marr = np.array([eos.star_crust(z, 2, dr) for z in nstar])
 dr.set(iE(iN), iP(iN), iN*wr.n0)
-marr2 = np.array(map(lambda z: eos.star_crust(z, 2, dr), nstar))
-print marr[:,0]
-print marr2[:,0]
+marr2 = np.array([eos.star_crust(z, 2, dr) for z in nstar])
+print(marr[:,0])
+print(marr2[:,0])

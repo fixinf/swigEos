@@ -69,10 +69,10 @@ power_1 = 3
 a_s = -0.0
 
 frange = np.linspace(-1e-2, 1+1e-3, npoints)
-etar = np.array(map(C1.eta_r, frange))
-etao = np.array(map(C1.eta_o, frange))
-u = np.array(map(C1.U, frange))
-etas = np.array(map(C1.eta_s, frange))
+etar = np.array(list(map(C1.eta_r, frange)))
+etao = np.array(list(map(C1.eta_o, frange)))
+u = np.array(list(map(C1.U, frange)))
+etas = np.array(list(map(C1.eta_s, frange)))
 # etas = 2*C.Cs*np.array(map(C1.U, frange))*frange**2/C.M[0]**4 + 1
 # etas[0] = 1.
 
@@ -136,13 +136,13 @@ def func(x):
     return sqsum
 
 def callback(x):
-    print x
+    print(x)
 
 
 x = 0
 def solve():
-    print func(etar[start:stop])
-    print etar[start:stop]
+    print(func(etar[start:stop]))
+    print(etar[start:stop])
     res = optimize.minimize(func, etar[start:stop],options={'disp':1},
                       callback=callback, method='BFGS')
     
@@ -153,15 +153,15 @@ def solve():
     plt.plot(n/wr1.n0, 135*(wr.Eneutr(n)/n - C1.M[0]),c='blue')
     plt.show()
     
-    plt.plot(frange, map(C.eta_r, frange))
-    plt.plot(frange, map(C1.eta_r, frange))
+    plt.plot(frange, list(map(C.eta_r, frange)))
+    plt.plot(frange, list(map(C1.eta_r, frange)))
     plt.xlim([0,0.2])
     plt.ylim([0,5])
     plt.show()
     
     
 solve()
-print x
+print(x)
 # x = np.array([ 0.11275636 , 0.53558749 , 0.56976262 ,
 #                0.58749857 , 0.62771884 , 0.68508924,
 #                0.74709851 , 0.82433091  ,0.89304006 , 0.98390119])
@@ -170,9 +170,9 @@ C.set_eta_r(frange, etar)
 
 # fsmall = np.linspace(0., 0.195, 20)
 fsmall = frange[start:stop]
-etar_old = np.array(map(C1.eta_r, fsmall))
+etar_old = np.array(list(map(C1.eta_r, fsmall)))
 
-etar_new0 = map(C.eta_r, fsmall)
+etar_new0 = list(map(C.eta_r, fsmall))
 # 
 # fig, ax = plt.subplots()
 # plt.subplots_adjust(left=0.25, bottom=0.25)
@@ -214,7 +214,7 @@ C.f0 = 0.27
 f0 = f_stop
 
 def f(x):
-    print x
+    print(x)
     a = x[0]
     b = x[1]
     c = x[2]
@@ -226,7 +226,7 @@ def f(x):
 
 res = optimize.minimize(f, [0.5, 05., -0.1,], callback=callback, tol=1e-8,
                         method='BFGS')
-print res
+print(res)
 a, b, c = res.x 
 
 etar1 = etar
@@ -236,9 +236,9 @@ etar_new = (etar_old -
              c*(fsmall/f0)**power_0*(1-fsmall/f0)**(power_1+1))
 etar1[start:stop] = etar_new
 frange_dense = np.linspace(0., wr.n0, 100)
-plt.plot(frange_dense, map(C.eta_r, frange_dense))
+plt.plot(frange_dense, list(map(C.eta_r, frange_dense)))
 C.set_eta_r(frange, etar1)
-plt.plot(frange_dense, map(C.eta_r, frange_dense))
+plt.plot(frange_dense, list(map(C.eta_r, frange_dense)))
 plt.xlim([0, 0.2])
 plt.ylim([0, 1])
 plt.show()
@@ -255,5 +255,5 @@ wrLD= Wrapper(LD)
 plt.plot(n/wr.n0, wrLD.Esymm(n))
 plt.show()
 
-print [a, b, c]
+print([a, b, c])
 

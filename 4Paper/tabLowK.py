@@ -24,7 +24,7 @@ for K in Klist:
                           '%.0f'%(K))
     #     wr.dumpEos(folderName)
     #     exit()
-        print folderName
+        print(folderName)
         
         wr.dumpAll(folderName)
     #     wr.dumpMasses(folderName)

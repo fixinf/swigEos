@@ -42,7 +42,7 @@ wr = Wrapper(C)
 
 C2 = Models.KVOR_cut_mod()
 wr2 = Wrapper(C2)
-plt.plot(frange, map(C.eta_o, frange), frange, map(C2.eta_o, frange))
+plt.plot(frange, list(map(C.eta_o, frange)), frange, list(map(C2.eta_o, frange)))
 plt.show()
 
 C2.alpha = 0
@@ -50,7 +50,7 @@ C2.f0 = C.f0
 
 C2.omega_f = 0.55
 
-plt.plot(frange, map(C.eta_o, frange), frange, map(C2.eta_o, frange))
+plt.plot(frange, list(map(C.eta_o, frange)), frange, list(map(C2.eta_o, frange)))
 plt.show()
 n = np.linspace(0., 2., 100)
 C2.beta1 = 0
@@ -95,13 +95,13 @@ def f(x):
     return np.sum(res**2)
     
 res = optimize.minimize(f, [C.omega_b, C.omega_f])
-print res
+print(res)
 if res.x[0] > 10**5:
     pass
 
 # x_Matsui = [53.30066647,   0.56083489]
 
-plt.plot(frange, map(C.eta_o, frange), frange, map(C2.eta_o, frange))
+plt.plot(frange, list(map(C.eta_o, frange)), frange, list(map(C2.eta_o, frange)))
 plt.show()
 
 wr2.n0 = wr.n0
@@ -114,9 +114,9 @@ C2.Co = C.Co
 C2.Cr = C.Cr
 plt.plot(n, wr.ESbind(n), n, wr2.ESbind(n))
 plt.show()
-plt.plot(frange, map(C2.eta_s, frange))
-plt.plot(frange, map(C2.eta_r, frange))
-plt.plot(frange, map(C2.U, frange))
+plt.plot(frange, list(map(C2.eta_s, frange)))
+plt.plot(frange, list(map(C2.eta_r, frange)))
+plt.plot(frange, list(map(C2.U, frange)))
 plt.ylim([0, 2])
 plt.show()
 
@@ -158,7 +158,7 @@ for model in models:
         
 #     wr.dumpEos(folderName)
 #     exit()
-    print folderName
+    print(folderName)
     
 #     wr.dumpMasses(folderName)
 #     wr.dumpEos(folderName)

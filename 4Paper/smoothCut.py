@@ -20,10 +20,10 @@ for model in models:
                       model.__name__)
 #     wr.dumpEos(folderName)
 #     exit()
-    print folderName
+    print(folderName)
     wr.dumpAll(folderName)
     wr.reset(npoints=100)
-    eta_s_list.append(map(lambda z: C.eta_s(z), wr.rho[:, 0]))
+    eta_s_list.append([C.eta_s(z) for z in wr.rho[:, 0]])
     #wr.dumpEos(folderName)
     
 eta_s_list = np.array(eta_s_list).transpose()
