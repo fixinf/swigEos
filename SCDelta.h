@@ -23,13 +23,13 @@ public:
     int setDeltaConstants(int, int);
 };
 
-class KVOR_d : public SCDelta, public KVOR{
+class KVOR_d : public KVOR, public SCDelta{
 public:
-    KVOR_d() : SCDelta(), KVOR(){
+    KVOR_d(){
     }
 };
 
-class Walecka_d: public SCDelta, public Walecka{
+class Walecka_d: public Walecka, public SCDelta{
 public:
     Walecka_d() : Walecka(), SCDelta(){
         double mn = 938 / 197.33;
@@ -42,9 +42,16 @@ public:
     }
 };
 
-class MKVOR_d: public SCDelta, public KVOR_mod2{
+class MKVOR_d: public KVOR_mod2, public SCDelta{
 public:
     MKVOR_d() : KVOR_mod2(), SCDelta(){
+
+    }
+};
+
+class KVORcut_d: public KVOR_cut, public SCDelta{
+public:
+    KVORcut_d() : KVOR_cut(), SCDelta(){
 
     }
 };

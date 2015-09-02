@@ -51,8 +51,8 @@ void testMass(){
 }
 
 void testDelta(){
-    set_const * m = new KVOR();
-    set_const * m2 = new KVOR_d();
+    set_const * m = new KVOR_cut();
+    set_const * m2 = new KVORcut_d();
     m->Hyper = 1;
     m->phi_meson = 0;
     m->sigma_kind = 0;
@@ -61,7 +61,7 @@ void testDelta(){
     m2->Hyper = 1;
     m2->phi_meson = 0;
     m2->sigma_kind = 0;
-    m2->SetHyperConstants(2);
+//    m2->SetHyperConstants(2);
     double n= 2.833225;
     double dn = .8;
 

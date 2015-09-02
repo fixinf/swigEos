@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(eosWrap)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Ofast -std=c++11")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O0 -g -std=c++11")
 
 set(SOURCE_FILES
     ap.cpp
@@ -41,16 +43,18 @@ set(SOURCE_FILES
     Walecka.h
 )
 
+
 include_directories("/opt/levmar-2.6")
 include_directories("/usr/include/python3.4m")
 include_directories("/usr/lib/python3.4/site-packages/numpy/core/include/")
-set(LIBRARY_OUTPUT_PATH ${eosWrap_SOURCE_DIR})
+set(LIBRARY_OUTPUT_PATH ${eosWrap_SOURCE_DIR}/lib)
 
 add_library(wrapper OBJECT ${eosWrap_SOURCE_DIR}/wrap.cpp)
 
-add_library(eosWrap SHARED ${SOURCE_FILES} $<TARGET_OBJECTS:wrapper> SCDelta.cpp SCDelta.h)
+add_library(eosWrap SHARED ${SOURCE_FILES} $<TARGET_OBJECTS:wrapper> SCDelta.cpp SCDelta.h Baryon.cpp Baryon.h)
 #target_link_libraries(wrapper python3)
 #add_dependencies(wrapper wrapper_src)
+set_target_properties( eosWrap PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${eosWrap_SOURCE_DIR}/bin")
 add_dependencies(eosWrap wrapper)
 target_link_libraries(eosWrap gsl gslcblas levmar lapack)
 
@@ -61,7 +65,7 @@ target_link_libraries(eosWrap gsl gslcblas levmar lapack)
 
 add_custom_command(
 OUTPUT ${eosWrap_SOURCE_DIR}/wrap.cpp
-COMMAND swig -DSWIG_PYTHON_LEGACY_BOOL -c++ -python -o ${eosWrap_SOURCE_DIR}/wrap.cpp -outdir ${eosWrap_BINARY_DIR} ${eosWrap_SOURCE_DIR}/wrap.i
+COMMAND swig -DSWIG_PYTHON_LEGACY_BOOL -c++ -python -o ${eosWrap_SOURCE_DIR}/wrap.cpp -outdir ${LIBRARY_OUTPUT_PATH} ${eosWrap_SOURCE_DIR}/wrap.i
 COMMAND echo "Command run"
 DEPENDS ${eosWrap_SOURCE_DIR}/wrap.i
 )

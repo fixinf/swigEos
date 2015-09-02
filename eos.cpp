@@ -130,7 +130,7 @@ namespace calc{
 
 
 	void fun_n_eq(double * p, double * hx, int m, int n, void * adata){
-		bool debug = 0;
+		bool debug = 1;
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;

@@ -64,7 +64,7 @@ public:
 	double eta_s(double f){
 		if (f < f0)	return 1 + b_sigma * pow(f-f0,2)/pow(f0, 2);
 		else return 1.;
-	}
+}
 
 
 
