@@ -19,6 +19,8 @@
 //#include "constants.h"
 //#include "setconst.h"
 double p_f(double n, double gamma) {
+	if (n < 0)
+		return 0.;
 	return pow(6. * M_PI * M_PI * D * n / gamma, 1.0 / 3.0);
 }
 
@@ -130,7 +132,7 @@ namespace calc{
 
 
 	void fun_n_eq(double * p, double * hx, int m, int n, void * adata){
-		bool debug = 1;
+		bool debug = 0;
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;
