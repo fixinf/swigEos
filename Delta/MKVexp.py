@@ -1,10 +1,12 @@
+from Wrapper2 import Model
+
 __author__ = 'const'
 import Models2
 from matplotlib import pyplot as plt
 import numpy as np
+import eosWrap as eos
 
-wr1 = Models2.MKVOR_d()
-wr2 = Models2.MKVORexp()
+
 # plt.plot(m.nrange, [m.sym.Ebind(m.nrange), m2.sym.Ebind(m.nrange)])
 frange = np.linspace(0, 1, 100)
 
@@ -29,16 +31,76 @@ frange = np.linspace(0, 1, 100)
 # plt.plot(m.nrange, f2)
 # plt.show()
 
-m1 = wr1.delta
-m2 = wr2.delta
+
+wr = Models2.MKVOR_d()
+m1 = wr.delta_phi
+# wr.setDeltaConst(np.array([1.25, 1.25, 1.25, 1.25]),
+#                  np.array([1., 1., 1., 1.]),
+#                  np.array([1., 1., 1., 1.]),
+#                  '1')
+
+# wr.setDeltaConst(np.array([1.15, 1.15, 1.15, 1.15]),
+#                  np.array([.9, .9, .9, .9]),
+#                  np.array([1., 1., 1., 1.]),
+#                  '2')
+n = 12
+print([m1.C.X_s[i] for i in range(n)])
+
+print([m1.C.X_o[i] for i in range(n)])
+
+print([m1.C.X_r[i] for i in range(n)])
+
+print([m1.C.X_p[i] for i in range(n)])
+
+print([m1.C.Q[i] for i in range(n)])
+
+print([m1.C.S[i] for i in range(n)])
+print([m1.C.T[i] for i in range(n)])
+
+print(m2.C.f0)
+
+wr.delta_phi.reset()
+raise SystemExit
+m1 = wr.delta
+m2 = wr.delta_phi
+m3 = wr.delta_phi_sigma
+
+
+print([m1.C.X_s[i] for i in range(n)])
+
+print([m1.C.X_o[i] for i in range(n)])
+
+print([m1.C.X_r[i] for i in range(n)])
+
+print([m1.C.X_p[i] for i in range(n)])
+
+print([m1.C.Q[i] for i in range(n)])
+
+print([m1.C.S[i] for i in range(n)])
+print([m1.C.T[i] for i in range(n)])
+
+print(m2.C.f0)
+
+# exit()
+
+
 
 for m in [m2]:
-    m.dumpEos()
-    # m.dumpMassesCrust()
-    # m.dumpScalings()
-    # m.dumpVs()
-    m.dumpMassesCrust(nmin=2.4*m.n0, nmax=2.55*m.n0, fname='mass_crust_detail.dat')
-exit()
+    for x in [[1.0, 1.0], [1.25, 1.], [1.15, .9]]:
+        wr.setDeltaConst(np.array([x[0] for i in range(4)]),
+             np.array([x[1] for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             's=%.2f o=%.2f'%(x[0], x[1]))
+        m.dumpEos()
+        # m.dumpMassesCrust(nmax=m.nrange[m.rho.shape[0]-1])
+        # m.dumpScalings()
+        # m.dumpVs()
+        # m.dumpChi()
+        # m.dumpEtap()
+        # m.dumpMeff()
+        m.dumpMu()
+        # m.dumpMassesCrust(nmin=2.4*m.n0, nmax=2.55*m.n0, fname='mass_crust_detail.dat')
+        exit()
 
 n = 12
 print([m1.C.X_s[i] for i in range(n)])

@@ -12,21 +12,31 @@ from numpy import array as arr
 
 np.set_printoptions(threshold=np.nan)
 
-# C = eos.SCDelta
-# C = eos.Walecka
-C = _KVOR
-# C = eos.Walecka_d
-
-wr = Wrapper2.Model(C)
-
 wr = Models2.MKVOR_d()
-# wr = Models2.myMod()
 
-
-
-m = wr.delta
-m.C.SetHyperConstants(2)
+m = wr.delta_phi
 m.inspect_f()
+mu = m.mu()
+lines = plt.plot(m.nrange/m.n0, m.concentrations())
+line_f = plt.plot(m.nrange/m.n0, m.rho[:,0])
+
+# lines = plt.semilogy(m.nrange*.16/m.n0, m.concentrations())
+# plt.ylim([1e-3, 1])
+plt.legend(lines + line_f, m.part_names + ['f'], loc=0)
+plt.show()
+
+print(mu[:,0] - (mu[:,1] + mu[:,8]))
+
+lines = plt.plot(m.nrange/wr.n0, mu)
+plt.legend(lines, m.part_names)
+plt.show()
+exit()
+plt.plot(m.nrange, mu[:,0] + m.mu_e)
+Xm, = plt.plot(m.nrange, mu[:,6])
+Dm, = plt.plot(m.nrange, mu[:,8])
+plt.legend([Xm, Dm], ['Xm', 'Dm'])
+
+plt.show()
 exit()
 #void func_f_eq(double * p, double * hx, int m, int _n, void * adata)
 out = eos.dArray(1)

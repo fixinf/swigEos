@@ -31,8 +31,24 @@ def _KVOR():
 def KVOR():
     return Model(_KVOR)
 
+def _KVORd():
+    C = eos.KVOR_d()
+    C.Csp = 1.
+    C.Cs = 179.56233875171566
+    C.Co =87.5996397368707
+    C.Cr = 100.63642242798424
+    C.b = 0.00773460805148428
+    C.c = 0.00034461786646922604
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+def KVOR_d():
+    return Model(_KVORd)
+
 def _KVORcut04():
-    C = eos.KVOR_cut()
+    C = eos.KVORcut_d()
     C.SetHyperConstants(2)
     C.omega_kind = 2
     C.Cs = 179.5623289954
@@ -50,7 +66,7 @@ def _KVORcut04():
     return C
 
 def _KVORcut03():
-    C = eos.KVOR_cut()
+    C = eos.KVORcut_d()
     C.SetHyperConstants(2)
     C.omega_kind = 2
     C.Cs = 179.5639888271
@@ -73,8 +89,12 @@ def KVORcut03():
     return Model(_KVORcut03)
 
 def _KVORcut02():
-    C = eos.KVOR_cut()
-    C.SetHyperConstants(2)
+    C = eos.KVORcut_d()
+    # print([C.X_s[i] for i in range(12)])
+
+    # C.SetHyperConstants(2)
+    # print([C.X_s[i] for i in range(12)])
+
     C.omega_kind = 2
     C.Cs = 184.0636560083
     C.Co = 87.5944165214

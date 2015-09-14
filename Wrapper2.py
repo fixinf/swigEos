@@ -1,4 +1,6 @@
 import eosWrap as eos
+# from lmfit.minimizer import minimize
+# from lmfit.parameter import Parameters
 from matplotlib.widgets import Slider
 import numpy as np
 from numpy import array as arr, pi, sqrt
@@ -6,15 +8,16 @@ import matplotlib.pyplot as plt
 import os
 from os.path import join
 from scipy.interpolate.interpolate import interp1d
+from scipy.optimize.minpack import leastsq
 from tabulate import tabulate
-from scipy import interpolate
+from scipy import interpolate, optimize
 from scipy.misc import derivative
 from multiprocessing import Queue, Process
 from Wrapper import Wrapper as Wrapper_old
 import six
 
 
-BASEFOLDER = '/home/const/Dropbox/Documents/For DN/Very final/data_new/'
+BASEFOLDER = '/home/const/MKVdelta_local/data_new/'
 
 class Wrapper(object):
     def __init__(self, Ctype, basefolder_suffix=''):
@@ -36,7 +39,7 @@ class Wrapper(object):
         self.mpi3tofmm3 = (self.m_pi/197.33)**3
         self.nmin = 0.
         self.nmax = 10*self.n0
-        self.npoints = 100
+        self.npoints = 400
         self.nrange = np.linspace(self.nmin, self.nmax, self.npoints,
                                   endpoint=False)
         #example of setting filenames for a descendant of Wrapper
@@ -60,8 +63,8 @@ class Wrapper(object):
         rho = eos.stepE(n, last, f, len(last), iter, C)
         que.put(rho)
 
-    def reset(self, iterations=30, timeout=5):
-        """Calculates the EoS stored in the wrapper. Has to be overrided in
+    def reset(self, iterations=100, timeout=20):
+        """Calculates the EoS stored in the wrapper. Has to be overriden in
         Symm, Neutron. 
         
         Calculates the particle composition, scalar field, energy density, 
@@ -491,14 +494,15 @@ class Wrapper(object):
                 eos._E(np.insert(n+dn/2, 0, f), self.C, de1)
                 eos._E(np.insert(n-dn/2, 0, f), self.C, de2)
                 dEparts.append((arr(de1) - arr(de2))/np.sum(dn, axis=0))
-        dEparts = arr(dEparts)
+        if dn is not None:
+            dEparts = arr(dEparts)
 
-        p1 = np.sum(nlist, axis=1) * dEparts.transpose()
-        self.Pparts = p1.transpose() - self.Eparts
+            p1 = np.sum(nlist, axis=1) * dEparts.transpose()
+            self.Pparts = p1.transpose() - self.Eparts
         if ret_f:
             return [arr(elist), arr(flist)]
         else:
-            return [arr(elist)]
+            return arr(elist)
 
 
     def E(self, nlist, ret_f=False, f=0.):
@@ -688,6 +692,13 @@ class Wrapper(object):
         conc = self.rho
         mu = []
         for n in conc:
+            mu.append([eos.mu(n, i+1, self.C) for i in range(self.n_baryon)])
+
+        return arr(mu)
+
+    def mu_gen(self, nrange_with_f):
+        mu = []
+        for n in nrange_with_f:
             mu.append([eos.mu(n, i+1, self.C) for i in range(self.n_baryon)])
 
         return arr(mu)
@@ -978,31 +989,94 @@ class HyperonPhiSigma(HyperonPhi):
         self.filenames['grig'] = 'grig_hyper_phi_sigma.dat'
         self.filenames['mu'] = 'mu_hyper_phi_sigma.dat'
 
-class Delta(Hyperon):
+class DeltaBase(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
-        super(Delta, self).__init__(C, basefolder_suffix=basefolder_suffix)
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.foldername = join(self.foldername, 'delta')
         if not os.path.exists(self.foldername):
             os.makedirs(self.foldername)
-        self.C.setDeltaConstants(2, 0)
-        self.C.Hyper = 1
-        self.C.phi_meson = 1
-        self.C.sigma_kind = 0
-        self.C.hyper_sigma_kind = 0
-        self.filenames['mass_crust'] = 'mass_delta.dat'
-        self.filenames['mass_nocrust'] = None
-        self.filenames['eos'] = 'hyper_delta.dat'
-        self.filenames['etap_f'] = 'etap_delta.dat'
-        self.filenames.update(etap_n='etap_delta.dat')
-        self.filenames['meff'] = 'meff_delta.dat'
-        self.filenames['vs'] = 'vs_delta.dat'
-        self.filenames['grig'] = 'grig_delta.dat'
-        self.filenames['mu'] = 'mu_delta.dat'
-        self.part_names.append('D-')
-        self.part_names.append('D0')
-        self.part_names.append('D+')
-        self.part_names.append('D++')
-        self.n_baryon = 12
+        if hasattr(self.C, 'setDeltaConstants'):
+            self.C.setDeltaConstants(2, 0)
+            self.part_names.append('D-')
+            self.part_names.append('D0')
+            self.part_names.append('D+')
+            self.part_names.append('D++')
+            self.n_baryon = 12
+
+    def getSymm(self, n, lastx=0., lastf=0.):
+        def eq(x, params):
+            ### n = [n_p, n_D0]
+            # x = [x['n_p'].value, x['n_D0'].value]
+            n = params[0]
+            n_ch = params[0]/2
+            if x[0] < 0:
+                return [100500., 0]
+            n = arr([n/2 - x[0]/2, n/2 - x[0]/2, 0., 0., 0., 0., 0., 0., 0., x[0]/2, x[0]/2, 0.])
+            f = eos.f_eq(n, arr([lastf]), 1, self.C)[0]
+            n_in = np.insert(n, 0, f)
+            # return np.sum(np.arr([
+            #     eos.mu(1, n_in, self.C) - eos.mu(10, n_in, self.C),
+            #     eos.mu(2, n_in, self.C) - eos.mu(11, n_in, self.C)
+            # ])**2)
+            res = arr([
+                eos.mu(n_in, 1, self.C) - eos.mu(n_in, 10, self.C),
+            ])
+            # print(x, res)
+            return [res, f]
+
+        res = leastsq(lambda z: eq(z, [n])[0], [lastx])[0]
+        # res = optimize.minimize(lambda z: eq(z, [n])[0], [lastx], bounds=[[0,None]], method='SLSQP').x
+        if res > n:
+            res = [0.]
+        return [res] + eq(res, [n])
+
+    def dumpDeltaSym(self, suffix=''):
+        lastn = 0.
+        lastf = 0.
+        res = []
+        for i, n in enumerate(self.nrange):
+            _res = self.getSymm(n, lastx=lastn, lastf=lastf)
+            print('res = ', _res)
+            if (i > 1):
+                lastn = _res[0][0]
+            print('lastn =', lastn)
+            lastf = _res[-1]
+            res.append(_res)
+        res = np.array(res)
+        n_d = res[:, 0]
+        # n_d[0][0] = [0.0]
+        frac = []
+        for i, n in enumerate(n_d):
+            nd = n[0]
+            nn = (self.nrange[i] - nd)/2
+            frac.append([nn, nn, 0., 0., 0., 0., 0., 0., 0., nd/2, nd/2])
+        frac = arr(frac)
+
+        E = self.E_gen(frac)
+        Ebind = self.m_pi * (E/self.nrange - self.C.M[0])
+        n_w_f = np.insert(frac, 0, res[:, -1], axis=1)
+        mu = self.mu_gen(n_w_f)
+        P = self.P_chem(n_w_f)
+        np.savetxt(join(self.foldername, 'delta_sym'+suffix+'.dat'),
+                   arr([self.nrange/self.n0, E, P, [q[0]/self.nrange[i] for i,q in enumerate(n_d)], Ebind]).transpose())
+        np.savetxt(join(self.foldername, 'delta_sym_mu'+suffix+'.dat'),
+                   np.insert(mu, 0, self.nrange/self.n0, axis=1).transpose())
+
+
+
+class Delta(DeltaBase, Hyperon):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+        # Delta.__init__(self, C, basefolder_suffix='')
+
+class DeltaPhi(DeltaBase, HyperonPhi):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+
+
+class DeltaPhiSigma(DeltaBase, HyperonPhiSigma):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
 
 class Model(Wrapper):
     def __init__(self, C, K0=None, f0=None, J0=None, suffix=None, basefolder_suffix=''):
@@ -1028,8 +1102,11 @@ class Model(Wrapper):
         self.hyper_phi = HyperonPhi(C, basefolder_suffix=basefolder_suffix)
         self.hyper_phi_sigma = HyperonPhiSigma(C, basefolder_suffix=basefolder_suffix)
         self.delta = Delta(C, basefolder_suffix=basefolder_suffix)
+        self.delta_phi = DeltaPhi(C, basefolder_suffix=basefolder_suffix)
+        self.delta_phi_sigma = DeltaPhiSigma(C, basefolder_suffix=basefolder_suffix)
         self.children = [self.nucl, self.sym, self.neutr, self.hyper,
-                         self.hyper_phi, self.hyper_phi_sigma, self.delta]
+                         self.hyper_phi, self.hyper_phi_sigma,
+                         self.delta, self.delta_phi]
 
         if any([K0, f0, J0]):
             C = wr.C
@@ -1053,6 +1130,15 @@ class Model(Wrapper):
         self.filenames.update(props='props.dat')
         self.filenames.update(intro='intro.dat')
 
+
+    def setDeltaConst(self, Xs, Xo, Xr, folder_suffix):
+        for m in [self.delta, self.delta_phi, self.delta_phi_sigma]:
+            m.C.setDeltaRho(Xr)
+            m.C.setDeltaOmega(Xo)
+            m.C.setDeltaSigma(Xs)
+            m.foldername = self.foldername + folder_suffix
+            if not os.path.exists(m.foldername):
+                os.makedirs(m.foldername)
 
     def setParams(self, Cs, Co, Cr, b, c, f0):
         for m in [self]+self.children:

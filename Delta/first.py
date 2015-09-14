@@ -15,17 +15,13 @@ np.set_printoptions(threshold=np.nan)
 # C = _KVOR
 # C = eos.Walecka_d
 C = eos.KVOR_d
-wr = Wrapper2.Model(C)
+wr = Models2.KVOR()
 
 # wr = Models2.KVOR()
 # wr = Models2.myMod()
 
-m = wr.delta
+m = wr.hyper
 m.C.SetHyperConstants(2)
-n_in = np.array([0.2, 0.25, 0.25, 0, 0, 0, 0, 0, 0, 0.2])
-print(eos.mu(n_in, 8, m.C))
-print(derivative(lambda z: eos._E(np.array([0.2, 0.25, 0.25, 0, 0, 0, 0, 0, z, .2]), m.C), 0., dx=1e-3))
-# exit()
 
 # m.C.set_xs(np.array([1, 1, -28, 30., 30, 30, -18, -18]))
 m.verbose = 1
@@ -39,7 +35,7 @@ print([i for i in m.C.T])
 
 m.reset()
 print(m.rho)
-
+# exit()
 mu = m.mu()
 lines = plt.plot(m.nrange/m.n0, m.concentrations())
 line_f = plt.plot(m.nrange/m.n0, m.rho[:,0])
