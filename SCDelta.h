@@ -21,23 +21,38 @@ public:
     }
 
     int setDeltaConstants(int, int);
+
+    void setDeltaRho(double * X, int dimX){
+        for (int i = 0; i < dimX; i++){
+            this->X_r[i+8] = X[i];
+        }
+    }
+    void setDeltaOmega(double * X, int dimX){
+        for (int i = 0; i < dimX; i++){
+            this->X_o[i+8] = X[i];
+        }
+    }
+    void setDeltaSigma(double * X, int dimX){
+        for (int i = 0; i < dimX; i++){
+            this->X_s[i+8] = X[i];
+        }
+    }
 };
 
 class KVOR_d : public KVOR, public SCDelta{
 public:
-    KVOR_d(){
+    KVOR_d() : KVOR(), SCDelta(){
     }
 };
 
 class Walecka_d: public Walecka, public SCDelta{
 public:
     Walecka_d() : Walecka(), SCDelta(){
-        double mn = 938 / 197.33;
-        Cs = 9.927 * mn * mn;
-        Co = 4.82 * mn * mn;
-        Cr = 4.791 * mn * mn;
-        b = 0.008659;
-        c = -0.002421;
+        Cs = 246;
+        Co = 156.3;
+        b = 1.8e-3;
+        c = 2.87e-4;
+        n0 = 163./160*n0;
         f0 = .22;
     }
 };

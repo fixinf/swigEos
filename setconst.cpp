@@ -122,6 +122,7 @@ int set_const::SetHyperConstants(int type){
 	this->T.clear();
 	this->Q.clear();
 	this->M.clear();
+	this->S.clear();
 	double xo[8];
 	double xr[8];
 	double ebind[8];

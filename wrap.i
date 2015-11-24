@@ -66,4 +66,5 @@ namespace std{
 %apply (double * INPLACE_ARRAY1, int DIM1) {(double * f_in, int dimF_in), (double * y_in, int dimY_in)};
 %include "InterpolatedScalings.h"
 
+%apply (double * INPLACE_ARRAY1, int DIM1) {(double * X, int dimX)};
 %include "SCDelta.h"

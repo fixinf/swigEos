@@ -103,7 +103,7 @@ public:
 //		if (f > this->rho_f){
 ////			printf("!");
 //			res /= cosh(this->rho_a*pow(f-rho_f, 2.));
-//		}
+//		}4
 
 		if (f > this->rho_f){
 			res += rho_a * pow(f-rho_f, 3.);

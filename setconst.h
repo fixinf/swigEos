@@ -44,6 +44,7 @@
 #include <functional>
 #include <vector>
 #include <math.h>
+#include "constants.h"
 /*
  * set_const.h
  *
@@ -77,6 +78,7 @@ public:
 		double alpha[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 		this->set_hs_alpha(alpha, 8);
 		this->set_hs_z(alpha, 8);
+		this->m_rho = 770./135.;
 	}
 	set_const(double, double, double, double, double, double);
 	//			Cs		Co		Cr		b		c		z
@@ -102,6 +104,7 @@ public:
 	double c;
 	double z;
 	double f0;
+	double m_rho;
 	double exp_alpha;
 	std::vector<double> X_s;
 	std::vector<double> X_o;

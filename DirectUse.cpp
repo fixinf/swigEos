@@ -122,10 +122,62 @@ void testDelta(){
     for (int i = 0; i < 8; i++){
         cout << m->X_p[i] <<  " " << m2->X_p[i] << endl;
     }
+}
 
+void testDeltaWalecka(){
+    Walecka_d * C = new Walecka_d();
+    double n0 = 2*C->n0;
+    cout << C->n0 << endl;
+    double Eparts[9];
+    cout << C->Co << endl;
+    C->X_s[8] = 1.4;
+    C->X_s[9] = 1.4;
+    C->X_s[10] = 1.4;
+    C->X_s[11] = 1.4;
+    for (int i = 0; i < 12; i++){
+        printf("%f ", C->X_s[i]);
+    }
+    printf("\n");
 
+    for (int i = 0; i < 12; i++){
+        printf("%f ", C->X_o[i]);
+    }
+    printf("\n");
+
+    for (int i = 0; i < 12; i++){
+        printf("%f ", C->M[i]);
+    }
+    printf("\n");
+
+    for (int i = 0; i < 12; i++){
+        printf("%f ", C->S[i]);
+    }
+    printf("\n");
+
+    for (int i = 0; i < 12; i++){
+        printf("%f ", C->T[i]);
+    }
+    printf("\n");
+//    C->X_s[12] = 1.4;
+//    C->X_s[13] = 1.4;
+    double n_in[13] = {.6, n0/4, n0/4, 0., 0., 0., 0., 0., 0.,
+                        n0/8, n0/8, n0/8, n0/8};
+    for (int i = 0; i < 12; i++){
+        printf("%f ", n_in[i]);
+    }
+    printf("\n");
+    double E = _E(n_in, 13, C, Eparts, 9);
+    cout << E << endl;
+    for (int i = 0; i < 9; i++){
+        cout << Eparts[i] << endl;
+    }
+    cout << endl;
+    double K = kineticInt(n0/8, C->M[10]*C->phi_n(10, C->M[0]/C->M[10]*C->X_s[10]*.6), 4);
+    cout << n0/8 << endl;
+    cout << K << endl;
+    cout << C->M[0]/C->M[10]*C->X_s[10]*.6 << endl;
 }
 
 int main(){
-    testDelta();
+    testDeltaWalecka();
 }
