@@ -18,25 +18,28 @@ public:
         double alpha[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
         this->set_hs_alpha(alpha, 9);
         this->set_hs_z(alpha, 9);
+        this->offset = 8;
     }
 
     int setDeltaConstants(int, int);
 
     void setDeltaRho(double * X, int dimX){
         for (int i = 0; i < dimX; i++){
-            this->X_r[i+8] = X[i];
+            this->X_r[i+offset] = X[i];
         }
     }
     void setDeltaOmega(double * X, int dimX){
         for (int i = 0; i < dimX; i++){
-            this->X_o[i+8] = X[i];
+            this->X_o[i+offset] = X[i];
         }
     }
     void setDeltaSigma(double * X, int dimX){
         for (int i = 0; i < dimX; i++){
-            this->X_s[i+8] = X[i];
+            this->X_s[i+offset] = X[i];
         }
     }
+    int offset;
+    int setDeltaOnlyConstants();
 };
 
 class KVOR_d : public KVOR, public SCDelta{
@@ -67,6 +70,13 @@ public:
 class KVORcut_d: public KVOR_cut, public SCDelta{
 public:
     KVORcut_d() : KVOR_cut(), SCDelta(){
+
+    }
+};
+
+class KVORcut_sigma_d: public KVOR_cut_sigma, public SCDelta{
+public:
+    KVORcut_sigma_d() : KVOR_cut_sigma(), SCDelta(){
 
     }
 };

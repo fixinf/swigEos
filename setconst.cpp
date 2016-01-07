@@ -84,12 +84,12 @@ std::string set_const::repr(){
 }
 
 
-set_const::set_const(double C_s, double C_o, double C_r, double b, double c, double z) {
-	this->init(C_s,C_o,C_r,b,c,z);
+set_const::set_const(double C_s, double C_o, double C_r, double b, double c) {
+	this->init(C_s,C_o,C_r,b,c);
 }
 
-set_const::set_const(std::string name, double C_s, double C_o , double C_r, double b, double c, double z){
-	this->init(C_s,C_o,C_r,b,c,z);
+set_const::set_const(std::string name, double C_s, double C_o , double C_r, double b, double c){
+	this->init(C_s,C_o,C_r,b,c);
 	this->name = name;
 }
 
@@ -97,7 +97,7 @@ void set_const::set_name(std::string name){
 	this->name = name;
 }
 
-void set_const::init(double C_s, double C_o, double C_r, double b, double c, double z){
+void set_const::init(double C_s, double C_o, double C_r, double b, double c){
 	this->Hyper = true;
 	this->SetHyperConstants(0);
 	this->Co = C_o;
@@ -105,7 +105,6 @@ void set_const::init(double C_s, double C_o, double C_r, double b, double c, dou
 	this->Cs = C_s;
 	this->b = b;
 	this->c = c;
-	this->z = z;
 	this->fmax = 1.;
 	this->exp_alpha = 1.0;
 }

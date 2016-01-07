@@ -1,0 +1,397 @@
+Index: DirectUse.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- DirectUse.cpp	(date 1439759435000)
++++ DirectUse.cpp	(date 1439759435000)
+@@ -0,0 +1,49 @@
++//
++// Created by const on 8/4/15.
++//
++#include "KVOR.h"
++#include "TOV.h"
++#include "KVDriver.h"
++#include <iostream>
++#include <sstream>
++using namespace std;
++
++KVDriver * parseEos(string eosfile){
++    ifstream f(eosfile);
++    int num_lines = 0;
++    string line;
++    while (getline(f, line))
++        if (line[0] != '#')
++            num_lines++;
++    f.clear();
++    f.seekg(0, ios::beg);
++
++    double * N = new double[num_lines];
++    double * E = new double[num_lines];
++    double * P = new double[num_lines];
++    int i = 0;
++    while (getline(f, line)){
++        if (line[0] != '#') {
++//            cout << line << endl;
++            stringstream line_ss(line);
++            line_ss >> N[i] >> E[i] >> P[i];
++            i++;
++        }
++    }
++    for (int i = 1; i < num_lines; i++){
++        if (E[i] < E[i-1] || N[i] < N[i-1] || (P[i] < P[i-1])){
++            cout << i << " " << N[i] << " " << E[i] << " " << P[i] << endl;
++            cout << " " << " " << N[i-1] << " " << E[i-1] << " " << P[i-1] << endl;
++        }
++    }
++    return new KVDriver(E, num_lines, P, num_lines, N, num_lines);
++}
++
++int main(){
++    cout << "HW" << endl;
++    KVOR * m = new KVOR();
++    cout << m->b << endl;
++    double result[3];
++    KVDriver * dr = parseEos("/home/const/workspace2/swigEosWrapper/Cuts/EPmpi4_KVOR06.dat");
++    star_crust2(1., result, 3, dr, 1e-10);
++}
+\ No newline at end of file
+Index: DriverBase.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- DriverBase.cpp	(date 1432834490000)
++++ DriverBase.cpp	(date 1439759435000)
+@@ -29,22 +29,6 @@
+ 
+ }
+ 
+-double DriverBase::PofE(double E){
+-	return 0.0;
+-}
+-
+-double DriverBase::PofN(double n) {
+-	return 0;
+-}
+-
+-double DriverBase::EofN(double n) {
+-	return 0.0;
+-}
+-
+-double DriverBase::EofP(double P){
+-	return 0.0;
+-}
+-
+ double DriverBase::NofE(double E){
+ 	return 0.;
+ }
+Index: DriverBase.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- DriverBase.h	(date 1432834490000)
++++ DriverBase.h	(date 1439759435000)
+@@ -22,12 +22,11 @@
+ 	double * P;
+ 	double * n;
+ 	int count;
+-	virtual double PofE(double E);
+-	virtual double PofN(double n);
+-	virtual double EofN(double n);
+-	virtual double EofP(double P);
+ 	virtual double NofP(double N);
+ 	virtual double NofE(double N);
++	virtual double EofP(double N) = 0;
++	virtual double EofN(double N) = 0;
++	virtual double PofN(double N) = 0;
+ 	double * lastNstar;
+ 	double * lastRstar;
+ 	double * lastMstar;
+Index: KVDriver.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- KVDriver.cpp	(date 1432834490000)
++++ KVDriver.cpp	(date 1439759435000)
+@@ -10,6 +10,8 @@
+ #include <cmath>
+ #include <cstdio>
+ //#include <fstream>
++#include <gsl/gsl_interp.h>
++#include <iostream>
+ 
+ 
+ using namespace std;
+@@ -18,91 +20,33 @@
+ }
+ 
+ KVDriver::KVDriver(double * E, int dimE, double * P, int dimP, double * n, int dimN){
+-	for (int i = 0; i < dimE; i++){
+-		this->E[i] = E[i];
+-		this->P[i] = P[i];
+-		this->n[i] = n[i];
++	if (dimE != dimP or dimE!=dimN or dimP != dimN){
++		throw 20;
+ 	}
+-	this->count = dimN;
++	this->isSet = 0;
++	this->set(E, dimE, P, dimP, n, dimN);
+ }
+ 
+-KVDriver::KVDriver(set_const* C, string fname) {
+-	this->C = C;
+-	this->fname = fname;
++double KVDriver::NofP(double P){
++	return gsl_spline_eval(iNofP, P, accNofP);
+ }
+ 
+-double KVDriver::PofE(double _E){
+-	double min = 1e45;
+-	int iMin;
+-	for (int i = 0; i < count; i++){
+-		if (abs(E[i] - _E) < min){
+-			min = abs(E[i] - _E);
+-			iMin = i;
++double KVDriver::NofE(double E){
++	return gsl_spline_eval(iNofE, E, accNofE);
+-		}
++}
+-	}
+-	return P[iMin];
+-}
+ 
+-double KVDriver::EofN(double _n) {
+-	double min = 1e45;
+-	int iMin;
+-	for (int i = 0; i < count; i++){
+-		if (abs(n[i] - _n) < min){
+-			min = abs(n[i] - _n);
+-			iMin = i;
++double KVDriver::EofP(double P){
++	return gsl_spline_eval(iEofP, P, accEofP);
+-		}
++}
+-	}
+-	return E[iMin];
+-}
+ 
+-double KVDriver::PofN(double _n) {
+-	double min = 1e45;
+-	int iMin;
+-	for (int i = 0; i < count; i++){
+-		if (abs(n[i] - _n) < min){
+-			min = abs(n[i] - _n);
+-			iMin = i;
++double KVDriver::EofN(double N){
++	return gsl_spline_eval(iEofN, N, accEofN);
+-		}
++}
+-	}
+-	return P[iMin];
+-}
+ 
+-double KVDriver::EofP(double _P) {
+-	double min = 1e45;
+-	int iMin;
+-	for (int i = 0; i < count; i++){
+-		if (abs(P[i] - _P) < min){
+-			min = abs(P[i] - _P);
+-			iMin = i;
++double KVDriver::PofN(double N){
++	return gsl_spline_eval(iPofN, N, accPofN);
+-		}
++}
+-	}
+-	return E[iMin];
+-}
+ 
+-double KVDriver::NofP(double _P){
+-	double min = 1e45;
+-	int iMin;
+-	for (int i = 0; i < count; i++){
+-		if (abs(P[i] - _P) < min){
+-			min = abs(P[i] - _P);
+-			iMin = i;
+-		}
+-	}
+-	return n[iMin];
+-}
+-
+-double KVDriver::NofE(double _E){
+-	double min = 1e45;
+-	int iMin;
+-	for (int i = 0; i < count; i++){
+-		if (abs(E[i] - _E) < min){
+-			min = abs(E[i] - _E);
+-			iMin = i;
+-		}
+-	}
+-	return n[iMin];
+-}
+-
+ int KVDriver::lookFor(double* src, int dim_src, double what) {
+ 	double max_diff = 10e42;
+ 	bool got = 0;
+@@ -126,16 +70,43 @@
+ }
+ 
+ void KVDriver::set(double * E, int dimE, double * P, int dimP, double * n, int dimN){
+-	this->E = new double[dimE];
+-	this->P = new double[dimP];
+-	this->n = new double[dimN];
+-	for (int i = 0; i < dimE; i++){
+-//		printf("%f %f %f \n", E[i], P[i], n[i]);
+-		this->E[i] = E[i];
+-		this->P[i] = P[i];
+-		this->n[i] = n[i];
++	cout << "KVDriver::set" << endl;
++	if (this->isSet) {
++		delete iEofN;
++		delete accEofN;
++		delete iNofE;
++		delete accNofE;
++		delete iNofP;
++		delete accNofP;
++		delete iEofP;
++		delete accEofP;
++		delete iPofN;
++		delete accPofN;
+ 	}
+-	this->count = dimN;
++	accEofN = gsl_interp_accel_alloc();
++	iEofN = gsl_spline_alloc(gsl_interp_cspline, dimN);
++	gsl_spline_init(iEofN, n, E, dimN);
++	cout << "E spline init" << endl;
++	accNofE = gsl_interp_accel_alloc();
++	iNofE = gsl_spline_alloc(gsl_interp_cspline, dimN);
++	gsl_spline_init(iNofE, E, n, dimN);
++
++
++	accNofP = gsl_interp_accel_alloc();
++	iNofP = gsl_spline_alloc(gsl_interp_cspline, dimN);
++	gsl_spline_init(iNofP, P, n, dimN);
++
++
++	accEofP = gsl_interp_accel_alloc();
++	iEofP = gsl_spline_alloc(gsl_interp_cspline, dimN);
++	gsl_spline_init(iEofP, P, E, dimN);
++
++
++	accPofN = gsl_interp_accel_alloc();
++	iPofN = gsl_spline_alloc(gsl_interp_cspline, dimN);
++	gsl_spline_init(iPofN, n, P, dimN);
++	this->isSet = 1;
++	cout << "Set!" << endl;
+ }
+ 
+ KVDriver::~KVDriver() {
+Index: KVDriver.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- KVDriver.h	(date 1432834490000)
++++ KVDriver.h	(date 1439759435000)
+@@ -11,24 +11,16 @@
+ #include <string>
+ 
+ #include "DriverBase.h"
+-#include "setconst.h"
++#include <gsl/gsl_spline.h>
+ 
+ using namespace std;
+ class KVDriver: public DriverBase {
+ public:
+ 	KVDriver();
+ 	KVDriver(double * E, int dimE, double * P, int dimP, double * n, int dimN);
+-	KVDriver(set_const *, string fname);
+ 	virtual ~KVDriver();
+ 
+-	set_const* getC() const {
+-		return C;
+-	}
+ 
+-	void setC(set_const* c) {
+-		C = c;
+-	}
+-
+ 	const std::string& getName() const {
+ 		return name;
+ 	}
+@@ -44,18 +36,30 @@
+ 	void setFname(const string& fname) {
+ 		this->fname = fname;
+ 	}
+-	double PofE(double);
+-	double EofN(double);
+-	double PofN(double);
+-	double EofP(double);
++
+ 	double NofP(double);
+ 	double NofE(double);
++	double EofP(double);
++	double EofN(double);
++	double PofN(double);
+ 	int lookFor(double * src, int dim_src, double what);
+ 	void set(double * E, int dimE, double * P, int dimP, double * n, int dimN);
+ private:
+-	set_const * C;
++	gsl_spline * iNofE;
++	gsl_spline * iNofP;
++	gsl_spline * iEofP;
++	gsl_spline * iEofN;
++	gsl_spline * iPofN;
++
++	gsl_interp_accel * accNofE;
++	gsl_interp_accel * accNofP;
++	gsl_interp_accel * accEofP;
++	gsl_interp_accel * accEofN;
++	gsl_interp_accel * accPofN;
++
+ 	std::string name;
+ 	string fname;
++	bool isSet;
+ };
+ 
+ #endif /* KVDRIVER_H_ */
+Index: TOV.cpp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- TOV.cpp	(date 1432834490000)
++++ TOV.cpp	(date 1439759435000)
+@@ -278,6 +278,7 @@
+ }
+ 
+ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, double nmin) {
++	printf("Hey\n");
+ 	gsl_odeiv2_system sys = { eq_volkov2, NULL, 3, NULL};
+ 	double delta = 0.;
+ 	gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(&sys,
+@@ -286,6 +287,7 @@
+ 	double step = 0.0;
+ 	double r_init = 1e-6;
+ 	double t = r_init, t1 = 50.0 + r_init;
++
+ 	double P_init = D->PofN(rho_init);
+ 	double E_init = D->EofN(rho_init);
+ 	double y[3] = { D->PofN(rho_init), 1.333 * M_PI * pow(r_init, 3.0) * 1.4766,
+@@ -359,7 +361,12 @@
+ 			D->nSize = i;
+ 			return;
+ 		}
++		if (y[0] > 0) {
+-		y[2] = D->EofP(y[0]);
++			y[2] = D->EofP(y[0]);
++		}
++		else{
++			y[2] = 1e-26;
++		}
+ 		bMass += (0.0004898007281478712)*D->NofE(y[2])*pow((1.0 - (2.0*y[1]*1.4766)/t),-0.5)*t*t*(t1/n_points);
+ 		D->lastNstar[i-1] = D->NofE(y[2]);
+ //		printf("%f \n", D->lastNstar[i-1]);
+\ No newline at end of file

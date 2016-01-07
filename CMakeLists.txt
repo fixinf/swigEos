@@ -48,7 +48,8 @@ set(SOURCE_FILES
 
 include_directories("/opt/levmar-2.6")
 include_directories("/usr/include/python3.5m")
-include_directories("/usr/lib/python3.4/site-packages/numpy/core/include/")
+include_directories("/usr/lib/python3.5/site-packages/numpy/core/include/")
+link_directories("/opt/levmar-2.6")
 set(LIBRARY_OUTPUT_PATH ${eosWrap_SOURCE_DIR}/lib)
 
 add_library(wrapper OBJECT ${eosWrap_SOURCE_DIR}/wrap.cpp)

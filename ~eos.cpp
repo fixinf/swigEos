@@ -68,40 +68,7 @@ namespace calc{
 		int dimF_init;
 	};
 
-        double mu_deriv(double *n, int dimN, int i, set_const *C){
-	        bool debug = false;
-		double dn = 1e-3;
 
-//		n[i] += dn;
-//		double dE = _E(n, dimN, C);
-//		n[i] -= 2.0*dn;
-//		dE -= _E(n, dimN, C);
-//		n[i] += dn;
-
-		//Increased precision: f'(x) = (1/3h)(2(f(1) - f(-1)) - 0.25 (f(2) - f(-2)) )
-
-		n[i] += 2*dn;
-		double dE = -0.25*_E(n, dimN, C);
-		n[i] -= dn;
-		dE += 2*_E(n, dimN, C);
-		n[i] -= 2*dn;
-		dE += -2*_E(n, dimN, C);
-		n[i] -= dn;
-		dE += 0.25*_E(n, dimN, C);
-		n[i] += 2*dn;
-
-		if (debug) {
-			printf("mu: n[0] = %f, n[1] = %f, n[2] = %f", n[0], n[1], n[2]);
-			for (int j = 3; j < dimN; j++){
-				printf("n[%i] = %e",j, n[j]);
-			}
-			printf(" res=%f", dE/(2*dn));
-			printf("\n");
-		}
-//		return dE/(2.0*dn);
-		return dE/(3.0*dn);
-
-	}
 
 	double mu(double * n, int dimN, int i, set_const * C){
 //		bool debug = false;
@@ -376,7 +343,7 @@ double _E(double * n, int dimN, set_const * C, double * out, int dim_Out){
 }
 
 
-double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, int dim_inplace){
+double E_rho(double * n, int dimN, double rho_0, double rho_c, double mu_c, set_const * C, double *inplace, int dim_inplace){
 	bool debug = 0;
 	bool ret_parts = (inplace) && (dim_inplace == 9);
 	if (debug){
@@ -454,14 +421,8 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 	}
 	//rho
 	double gr = sqrt(C->Cr/C->eta_r((f)))*(C->m_rho* (1-f)) / C->M[0];
-	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) * 
-		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
-
-	double E_r =  C->Cr * sum_t3*sum_t3/(2.0*C->M[0]*C->M[0]*C->eta_r(f));
-	if (abs(sum_t3) > n_rho/2){
-	    E_r -= C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(abs(sum_t3) - n_rho, 2.);
-	}
-        printf("sum_t3 = %f, n_rho = %f, E_r = %f \n", sum_t3, n_rho, E_r);
+	double E_r = gr * sum_t3 * rho_0 - .5 * pow(rho_0 * C->m_rho * C->phi_n(0, f),2);
+	E_r -= pow(rho_c, 2)*(pow(gr * rho_0, 2) - pow(C->m_rho*C->phi_n(0, f), 2));
 	//phi
 	double part_phi = pow(m_o/m_p ,2.0)*C->Co * sum_p*sum_p/(2.0*C->M[0]*C->M[0]*C->eta_p(f));
 	res += part_phi;

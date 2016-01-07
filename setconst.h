@@ -68,7 +68,7 @@ public:
 
 	//			Cs		Co		Cr		b		c		z
 	set_const(){
-		init(164.462, 54.6041, 121.69, 0.0202832, 0.0471633, 0.65);
+		init(164.462, 54.6041, 121.69, 0.0202832, 0.0471633);
 		this->n0 = pow(197.33/135.0, 3) * 0.16;
 		this->phi_meson = 0;
 		this->sprime = 0;
@@ -80,11 +80,11 @@ public:
 		this->set_hs_z(alpha, 8);
 		this->m_rho = 770./135.;
 	}
-	set_const(double, double, double, double, double, double);
-	//			Cs		Co		Cr		b		c		z
+	set_const(double, double, double, double, double);
+	//			Cs		Co		Cr		b		c		z nahren
 
-	set_const(std::string name, double Cs, double Co , double Cr, double b, double c, double z);
-	void init(double, double, double, double, double, double);
+	set_const(std::string name, double Cs, double Co , double Cr, double b, double c);
+	void init(double, double, double, double, double);
 	double diff_phi_n(double);
 	void set(double * p, int dimP);
 	virtual double U(double) = 0;
@@ -102,7 +102,6 @@ public:
 	std::string name;
 	double b;
 	double c;
-	double z;
 	double f0;
 	double m_rho;
 	double exp_alpha;

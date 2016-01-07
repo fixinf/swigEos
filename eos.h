@@ -22,12 +22,13 @@ void potentials(double * n, int dimN, double * out, int dimOut, set_const * C);
 //extern double stepF(var, set_const *);
 extern double _E(double * n, int dimN, set_const *, double * inplace = NULL, int dim_inplace = 0);
 extern double E(double * n, int dimN, set_const *, double * inplace = NULL, int dim_inplace = 0);
-extern double E_rho(double * n, int dimN, double rho0, double rho_c, double mu_c, set_const * C, double * inplace = NULL, int dim_inplace = 0);
+extern double E_rho(double * n, int dimN, double mu_c, set_const * C, double * inplace = NULL, int dim_inplace = 0);
 extern double sum(std::vector<double> x);
 extern double kineticInt(double n, double m, double f);
 extern double p_f(double n, double gamma);
 namespace calc{
 extern double mu(double * n, int dimN, int i, set_const * C);
+extern double mu_deriv(double * n, int dimN, int i, set_const * C);
 }
 
 extern float sumTest(double * in, int n);
