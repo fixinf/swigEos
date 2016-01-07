@@ -6,7 +6,7 @@ import numpy as np
 K0 = 250.
 f0 = 0.2
 J0 = 30.
-zlist = [1.]#, 0.5, 0.4, 0.3, 0.2]
+zlist = [1.]#, 0.4, 0.3, 0.2]
 
 params = [
     {
@@ -60,13 +60,17 @@ params = [
         'c' : 0.2689864144
     }
 ]
-for p in params:
+for p in [params[0]]:
     models = [Models2.Cubero_cut(z, K0=p['K'], f0=p['f0'], J0=J0, suffix='K=%3.0ff=%1.2f'%(p['K'], p['f0']), params=p)
               for z in zlist]
     frange = np.linspace(0, 1, 100)
     lines = []
     legend = []
     for m in models:
+        print([m.C.X_s[i] for i in range(8)])
+        print(m.foldername)
+        exit()
+        # exit()
         # m.dumpUofE()
         # m.dumpUofE_anti()
         # m.sym.dumpJ()
@@ -78,15 +82,17 @@ for p in params:
         # plt.plot(frange, map(m.C.eta_o, frange))
         # plt.plot(frange, map(m2.C.eta_o, frange))
         # plt.show()
-        print(m.foldername)
+        # print(m.foldername)
+
         # m.dumpProps()
         # m.dumpScalings()
         # l, = plt.plot(frange, map(m.C.U, frange))
         # lines.append(l)
         # legend.append('%1.1f'%m.C.c_sigma)
         # m.dumpEos()
-        # m.nucl.dumpMassesCrust()
-        # m.dumpAll(hyper=0)
+        m.nucl.dumpMassesCrust()
+        # m.dumpAll(hyper=1)
+        # m.hyper.dumpMeff()
         # m.nucl.dumpMasses()
         # m.sym.dumpVs()
         # m.sym.dumpParts()

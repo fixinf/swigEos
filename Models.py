@@ -1076,7 +1076,7 @@ def myMod240J28():
     return C
 
 def myMod():
-    # return myModFinal()
+    return myModFinal()
     return myModR()
     C = myMod240_L(1.2, 7.5)
     C.Cs = 234.1580555929

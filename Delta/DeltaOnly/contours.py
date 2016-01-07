@@ -5,15 +5,24 @@ import numpy as np
 import eosWrap as eos
 import joblib as jl
 wr = Models2.Wal_d()
-m = wr.delta
-
+m = wr.delta_only
+wr.dumpProps()
+# exit()
 def fun(xs, xo):
     wr.setDeltaConst(np.array([xs for i in range(4)]),
                  np.array([xo for i in range(4)]),
                  np.array([1., 1., 1., 1.]),
                  's = %.2f o = %.2f' % (xs, xo))
+    print(m.foldername)
+
+    # exit()
     m.reset(timeout=None, iterations=60)
     m.dumpEos()
+    m.dumpMu()
+    m.dumpMeff()
+    # m.dumpScalings()
+    m.dumpVs()
+    m.dumpParts()
     ##### Pressure behavior
     trans = 0
     conc = m.concentrations()
@@ -32,10 +41,6 @@ def fun(xs, xo):
                 break
     return [trans, ncrit]
 
-# print(fun(1.147368421052631593e+00, 8.947368421052630527e-01))
-#
-# exit()
-
 npoints = 10
 out = []
 xslist = np.linspace(0.8, 1.3, npoints)
@@ -49,5 +54,3 @@ for xs in xslist:
         out.append(np.insert(res[1], 0, [xs, xo, res[0]]))
 
 np.savetxt("test_4.dat", np.array(out))
-
-

@@ -84,7 +84,7 @@ class NLVector():
         # frange = N.linspace(0, 1, 100)
         # plt.plot(frange, list(map(eq, frange)))
         # plt.show()
-        self.f_last = root(eq, self.f_last).x[0]
+        self.f_last = root(eq, self.f_last, tol=1e-10).x[0]
         return self.f_last
 
     def vec_eq(self, nn, np):
@@ -94,7 +94,7 @@ class NLVector():
             np = np[0]
         eq = lambda x: [-self.mo**2 * x[0] + self.go * (nn + np) - 4*self.Co4 * x[0]**3 - 2 * self.Cr4 * x[1]**2 * x[0],
                             -self.mr**2 * x[1] + self.gr * (np - nn)/2 - 2 * self.Cr4 * x[1] * x[0]**2]
-        self.vec_last = root(eq, self.vec_last).x
+        self.vec_last = root(eq, self.vec_last,tol=1e-10).x
         return self.vec_last
 
     def _E(self, f, om, rho, nn, np):
@@ -156,7 +156,10 @@ class NLVector():
                                          dx=1e-3, n=2, order=9)
 
     def P(self, nrange, E):
-        return nrange * N.gradient(E, [nrange[1]-nrange[0]]) - E
+        # return nrange * N.gradient(E, [nrange[1]-nrange[0]]) - E
+        iE = interp1d(nrange, E, fill_value=0., bounds_error=0)
+        P = nrange * N.array(list(map(lambda z: derivative(iE, z, dx=1e-4, order=7), nrange))) - E
+        return P
 
     def EPN_NS(self, npoints, ret_np=0):
         res = []
@@ -186,6 +189,15 @@ class NLVector():
 
         N.savetxt(name+'_eos.dat', N.array([n, E, P, np, Ebind]).transpose(), fmt='%.6e')
         return [E, P, n]
+
+    def tabEosSym(self, name='test_sym', npoints=80):
+        n = N.linspace(0, 10*self.n0, npoints, endpoint=0)
+        nsym = N.array([[z/2, z/2] for z in n])
+        Esym = N.nan_to_num(N.array([self.E(*z) for z in nsym]))
+        Ebind = self.mpi * (Esym/n - self.mn)
+        Psym = self.P(n, Esym)*self.mpi4_2_mevfm3
+        N.savetxt(name+'_eos_sym.dat', N.array([n/self.n0, Ebind, Psym]).transpose(), fmt='%.6e')
+
 
 
     def tabMass(self, name='test', nstars=40):

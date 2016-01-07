@@ -57,14 +57,20 @@ print([m1.C.Q[i] for i in range(n)])
 print([m1.C.S[i] for i in range(n)])
 print([m1.C.T[i] for i in range(n)])
 
-print(m2.C.f0)
+# print(m2.C.f0)
 
-wr.delta_phi.reset()
-raise SystemExit
+# wr.delta_phi.reset()
+# raise SystemExit
 m1 = wr.delta
 m2 = wr.delta_phi
 m3 = wr.delta_phi_sigma
 
+
+# print(wr.nucl.needsMaxw())
+# plt.plot(wr.nrange, wr.neutr.P(wr.nrange))
+# plt.plot(wr.nrange, np.gradient(wr.neutr.P(wr.nrange), [wr.nrange[1]-wr.nrange[0]]))
+# plt.show()
+# exit()
 
 print([m1.C.X_s[i] for i in range(n)])
 
@@ -86,21 +92,31 @@ print(m2.C.f0)
 
 
 for m in [m2]:
-    for x in [[1.0, 1.0], [1.25, 1.], [1.15, .9]]:
+    # for x in [[1.0, 1.0], [1.25, 1.], [1.15, .9]]:
+    for x in [[i, 1.] for i in np.linspace(1.0, 1.15, 4, endpoint=1)]:
         wr.setDeltaConst(np.array([x[0] for i in range(4)]),
              np.array([x[1] for i in range(4)]),
              np.array([1., 1., 1., 1.]),
              's=%.2f o=%.2f'%(x[0], x[1]))
+        m.reset()
         m.dumpEos()
-        # m.dumpMassesCrust(nmax=m.nrange[m.rho.shape[0]-1])
+        if not m.needsMaxw():
+            print(x, ' doesn\'t need the Maxwell construction')
+            # exit()
+            # m.dumpMassesCrust(nmax=m.nrange[m.rho.shape[0]-1])
+            m.dumpMassesCrust(nmin=2*m.n0, nmax=3*m.n0, fname='mass_crust_detail.dat')
+
+        else:
+            print(x, ' needs the Maxwell construction')
+            # exit()
         # m.dumpScalings()
+        # m.dumpPf()
         # m.dumpVs()
         # m.dumpChi()
         # m.dumpEtap()
         # m.dumpMeff()
-        m.dumpMu()
-        # m.dumpMassesCrust(nmin=2.4*m.n0, nmax=2.55*m.n0, fname='mass_crust_detail.dat')
-        exit()
+        # m.dumpMu()
+
 
 n = 12
 print([m1.C.X_s[i] for i in range(n)])

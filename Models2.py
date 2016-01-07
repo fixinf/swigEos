@@ -45,7 +45,7 @@ def _KVORd():
     return C
 
 def KVOR_d():
-    return Model(_KVORd)
+    return Model(_KVORd, basefolder_suffix='KVOR_Delta')
 
 def _KVORcut04():
     C = eos.KVORcut_d()
@@ -86,7 +86,7 @@ def _KVORcut03():
     return C
 
 def KVORcut03():
-    return Model(_KVORcut03)
+    return Model(_KVORcut03, basefolder_suffix='KVORcut03_Delta')
 
 def _KVORcut02():
     C = eos.KVORcut_d()
@@ -281,8 +281,9 @@ def HyperTest():
     return Model(_HyperTest)
 
 def __Cubero_cut(c, params=None):
-    C = eos.KVOR_cut_sigma()
+    C = eos.KVORcut_sigma_d()
     # K=250., f0=0.2
+    C.f0 = 0.2
     if params is not None:
         C.Cs = params['Cs']
         C.Co = params['Co']
@@ -296,35 +297,7 @@ def __Cubero_cut(c, params=None):
         C.b = 0.0089455122
         C.c = 0.0077076578
 
-        # K =200., f0=0.2
-        # C.Cs = 213.2607824762
-        # C.Co = 90.7681524182
-        # C.Cr = 88.7261190772
-        # C.b = 0.0150061019
-        # C.c = -0.0124942770
-
-        #K=200., f0=0.19
-        # C.Cs = 205.0913029877
-        # C.Co = 84.4290026333
-        # C.Cr = 89.6408647791
-        # C.b = 0.0166215109
-        # C.c = -0.0114022252
-
-        # K=200., f0=0.3
-        # C.Cs = 273.0836626079
-        # C.Co = 153.6303271470
-        # C.Cr = 78.4149744148
-        # C.b = 0.0057865796
-        # C.c = -0.0072525183
-
-        #K=200., f0=0.13
-        # C.Cs = 143.7534593933
-        # C.Co = 39.8340610093
-        # C.Cr = 95.5473126488
-        # C.b = 0.0102107661
-        # C.c = 0.2689864144
-
-    C.z = 0
+    C.z = 0.
     C.b_sigma = 70.
     C.a_sigma = +1.
     C.c_sigma = c
@@ -414,7 +387,7 @@ def Cubero_cut(c, K0=None, f0=None, J0=None, suffix=None, params=None):
     def _Cubero_cut():
         return __Cubero_cut(c, params)
     _Cubero_cut.__name__ = _Cubero_cut.__name__ + '%.2f'%c + suffix
-    return Model(_Cubero_cut, K0=K0, f0=f0, J0=J0, suffix=suffix, basefolder_suffix='NLWCuts/K%2.fm%1.1f'%(K0, 1-f0))
+    return Model(_Cubero_cut, K0=K0, f0=f0, J0=J0, suffix=suffix, basefolder_suffix='NLWCuts_Delta')
 
 def Cubero_cut2(c, K0=None, f0=None, J0=None, suffix=None, params=None):
     def _Cubero_cut():
@@ -461,8 +434,24 @@ def myMod2():
         return _myMod()
     return Model(_myMod2)
 
+
 def Cubero_cut_rho(c, K0=None, f0=None, J0=None, suffix=None, params=None):
     def _Cubero_cut_rho():
         return __Cubero_cut_rho(c, params)
     _Cubero_cut_rho.__name__ = _Cubero_cut_rho.__name__ + '%.2f'%c + suffix
     return Model(_Cubero_cut_rho, K0=K0, f0=f0, J0=J0, suffix=suffix, basefolder_suffix='NLWCutsRho/K%2.fm%1.1f'%(K0, 1-f0))
+
+
+def _Wal_d():
+    C = eos.Walecka_d()
+    C.Cs = 196.3428132661
+    C.Co = 90.7681870142
+    C.Cr = 88.7261140316
+    C.b = 0.0089455122
+    C.c = 0.0077076578
+    C.n0 = 0.16*(197.33/135)**3
+    C.f0 = 0.2
+    return C
+
+def Wal_d(J0=None, f0=0.2):
+    return Model(_Wal_d, K0=250., J0=J0, f0=f0, basefolder_suffix='Walecka_Delta')

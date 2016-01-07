@@ -38,10 +38,11 @@ class Wrapper(object):
         self.mpi4_2_mevfm3 = self.m_pi * (self.m_pi / 197.33) ** 3
         self.mpi3tofmm3 = (self.m_pi/197.33)**3
         self.nmin = 0.
-        self.nmax = 10*self.n0
-        self.npoints = 400
-        self.nrange = np.linspace(self.nmin, self.nmax, self.npoints,
-                                  endpoint=False)
+        self.nmax = 11*self.n0
+        self.npoints = 1000
+        gamma = 1
+        self.nrange = np.linspace(self.nmin, self.nmax**gamma, self.npoints,
+                                  endpoint=False)**(1/gamma)
         #example of setting filenames for a descendant of Wrapper
         self.filenames = {'mass_nocrust': None, 'eos': None,
                           'mass_crust' : None, 'meff':None,
@@ -51,7 +52,8 @@ class Wrapper(object):
                           'uniparts': None,
                           'profiles' : None,
                           'grig' : None,
-                          'mu' : None}
+                          'mu' : None,
+                          'pf' : None}
 
         self.part_names = ['n', 'p', 'Lambda', 'Sigma-',
                            'Sigma0', 'Sigma+', 'Xi-', 'Xi0', 'e', 'mu']
@@ -63,7 +65,7 @@ class Wrapper(object):
         rho = eos.stepE(n, last, f, len(last), iter, C)
         que.put(rho)
 
-    def reset(self, iterations=100, timeout=20):
+    def reset(self, iterations=30, timeout=None):
         """Calculates the EoS stored in the wrapper. Has to be overriden in
         Symm, Neutron. 
         
@@ -197,9 +199,12 @@ class Wrapper(object):
     #     return n, m, r
 
 
-    def dumpMassesCrust(self, nmin=0.4, nmax=4.8, npoints=100, write=True, fname=None, ret_frac=True):
+    def dumpMassesCrust(self, nmin=0.4, nmax=None, npoints=100, write=True, fname=None, ret_frac=True):
         self.check()
-        out = self.stars_crust(nmin=nmin, nmax=nmax, npoints=npoints, ret_frac=ret_frac)
+        inter = 'linear'
+        if nmax == None:
+            nmax = 10.5*self.n0
+        out = self.stars_crust(nmin=nmin, nmax=nmax, npoints=npoints, ret_frac=ret_frac, inter=inter)
         out[0] /= self.n0
         if write:
             tab = arr(out).transpose()
@@ -208,7 +213,7 @@ class Wrapper(object):
                 names += self.part_names[1:self.n_baryon]
             table = tabulate(tab, names, tablefmt='plain')
             if fname is None:
-                fname = self.filenames['mass_crust']
+                fname = self.filenames['mass_crust']+'_'+inter
             with open(join(self.foldername, fname), 'w') as f:
                 f.write(table)
         return out
@@ -242,7 +247,7 @@ class Wrapper(object):
         MR = np.array(MR)
         return [nstars, MR[:, 0], MR[:, 1]]
 
-    def stars_crust(self, ncut_crust=0.45, ncut_eos=0.7, inter='cubic',
+    def stars_crust(self, ncut_crust=0.45, ncut_eos=0.7, inter='linear',
                     n_stars=None, nmin=.6, nmax=5.0, npoints=50,
                     crust="crust.dat", show=False, crustName=None,
                     ret_frac=False, fasthyp=False, neutron=0, ret_i=0, force_reset=0):
@@ -251,63 +256,15 @@ class Wrapper(object):
             nmax = n_stars[-1]  # TODO too dirty workaround
         if not np.all([self.md.E, self.md.N, self.md.P]) or force_reset:
             self.check(nrange=self.nrange)
-            E, P, N = self.EPN(self.nrange)
-            P = P / self.mpi4_2_mevfm3
-            N = N / self.n0
-            print(self.Ctype.__name__)
-            np.savetxt('eos'+self.Ctype.__name__+'.dat', arr([E, P, N]).transpose())
-            E *= self.m_pi ** 4
-            P *= self.m_pi ** 4
-
-            e = []
-            p = []
-            n = []
-            with open("/home/const/workspace/swigEosWrapper/crust.dat", 'r') as f:
-                for line in f:
-                    # print line
-                    _e, _p, _n = line.split()
-                    if float(_n) < ncut_crust:
-                        e.append(float(_e))
-                        p.append(float(_p))
-                        n.append(float(_n))
-
-            crust = np.loadtxt("/home/const/workspace/swigEosWrapper/crust.dat")
-            crust[:, 0] /= self.m_pi**4
-            crust[:, 1] /= self.m_pi**4
-            np.savetxt( 'crust_export.dat', crust)
-            n_eos = 5
-            i_n_eos = np.argmin(abs(N - [ncut_eos for i in N]))
-
-
-
-            plist = np.append(p[:], P[i_n_eos:(i_n_eos + n_eos)])
-            elist = np.append(e[:], E[i_n_eos:(i_n_eos + n_eos)])
-            nlist = np.append(n[:], N[i_n_eos:(i_n_eos + n_eos)])
-
-            print(i_n_eos)
-            print(P[i_n_eos:(i_n_eos + n_eos)])
-            print(N[i_n_eos:(i_n_eos + n_eos)])
-            # exit()
-            iP = interpolate.interp1d(nlist, plist, kind=inter)
-            iE = interpolate.interp1d(nlist, elist, kind=inter)
-
-            gamma = 1. / 4.
-            iN = np.linspace(0, ncut_eos ** gamma, 10000)
-            iN = iN ** (1. / gamma)
-
-            crust_p = np.array(list(map(iP, iN)))
-            crust_e = np.array(list(map(iE, iN)))
-
-            #         finalE = np.append(crust_e, E[i_n_eos+n_eos:])
-            #         finalP = np.append(crust_p, P[i_n_eos + n_eos:])
-            #         finalN = np.append(iN, N[i_n_eos+n_eos:])
-
-            finalE = np.append(crust_e, E[i_n_eos + n_eos:]) / self.m_pi ** 4
-            finalP = np.append(crust_p, P[i_n_eos + n_eos:]) / self.m_pi ** 4
-            finalN = np.append(iN, N[i_n_eos + n_eos:])
-            finalE[0] = 0
-            finalP[0] = 0
-            print(finalN)
+            E, N, P, e, finalE, finalN, finalP, n, p = self.setCrust(inter, ncut_crust, ncut_eos)
+            # gradP = np.gradient(finalP)
+            # for _i, _n in enumerate(finalN):
+            #     if gradP[_i] < 0:
+            #         print(_n, gradP[_i])
+            # plt.plot(finalN, finalP)
+            # # plt.plot(finalN, np.gradient(finalE))
+            # plt.show()
+            # print(finalN)
             self.md.setEos(finalN, finalE, finalP)
         else:
             finalE = self.md.E
@@ -411,6 +368,68 @@ class Wrapper(object):
             return [n_stars, MR[:, 0], MR[:, 1], 931.5 / self.m_pi * MR[:, 2],
                     931.5 / self.m_pi * Mgrav]
 
+    def setCrust(self, inter, ncut_crust, ncut_eos):
+        E, P, N = self.EPN(self.nrange)
+        P = P / self.mpi4_2_mevfm3
+        N = N / self.n0
+        print(self.Ctype.__name__)
+        np.savetxt('eos' + self.Ctype.__name__ + '.dat', arr([E, P, N]).transpose())
+        E *= self.m_pi ** 4
+        P *= self.m_pi ** 4
+        e = [0.]
+        p = [0.]
+        n = [0.]
+        # e = []
+        # p = []
+        # n = []
+        with open("/home/const/workspace/swigEosWrapper/crust.dat", 'r') as f:
+            for line in f:
+                # print line
+                _e, _p, _n = line.split()
+                if float(_n) < ncut_crust:
+                    e.append(float(_e))
+                    p.append(float(_p))
+                    n.append(float(_n))
+        crust = np.loadtxt("/home/const/workspace/swigEosWrapper/crust.dat")
+        crust[:, 0] /= self.m_pi ** 4
+        crust[:, 1] /= self.m_pi ** 4
+        np.savetxt('crust_export.dat', crust)
+        n_eos = 5
+        i_n_eos = np.argmin(abs(N - [ncut_eos for i in N]))
+        plist = np.append(p[:], P[i_n_eos:(i_n_eos + n_eos)])
+        elist = np.append(e[:], E[i_n_eos:(i_n_eos + n_eos)])
+        nlist = np.append(n[:], N[i_n_eos:(i_n_eos + n_eos)])
+
+        nraw = np.append(n[:], N[i_n_eos:])
+        praw = np.append(p[:], P[i_n_eos:])
+        eraw = np.append(e[:], E[i_n_eos:])
+        conc = self.concentrations()[i_n_eos:]
+        cr_conc = arr([[1.] + [0. for i in range(conc.shape[1]-1)] for n in e])
+        print(conc.shape, cr_conc.shape)
+        res_conc = np.append(cr_conc, conc, axis=0).transpose()
+        self.md.setRawEos(nraw, eraw/self.m_pi**4, praw/self.m_pi**4, res_conc)
+        # print(i_n_eos)
+        # print(P[i_n_eos:(i_n_eos + n_eos)])
+        # print(N[i_n_eos:(i_n_eos + n_eos)])
+        # exit()
+        iP = interpolate.interp1d(nlist, plist, kind=inter)
+        iE = interpolate.interp1d(nlist, elist, kind=inter)
+        gamma = 1. / 4.
+        iN = np.linspace(0, ncut_eos ** gamma, 10000)
+        iN = iN ** (1. / gamma)
+        crust_p = np.array(list(map(iP, iN)))
+        crust_e = np.array(list(map(iE, iN)))
+        np.savetxt("crust_dense.dat", np.array([crust_e/self.m_pi**4,
+                                                crust_p/self.m_pi**4, iN]).transpose())
+        #         finalE = np.append(crust_e, E[i_n_eos+n_eos:])
+        #         finalP = np.append(crust_p, P[i_n_eos + n_eos:])
+        #         finalN = np.append(iN, N[i_n_eos+n_eos:])
+        finalE = np.append(crust_e, E[i_n_eos + n_eos:]) / self.m_pi ** 4
+        finalP = np.append(crust_p, P[i_n_eos + n_eos:]) / self.m_pi ** 4
+        finalN = np.append(iN, N[i_n_eos + n_eos:])
+        finalE[0] = 0
+        finalP[0] = 0
+        return E, N, P, e, finalE, finalN, finalP, n, p
 
     def dumpScalings(self):
         E, f = self.E(self.nrange, ret_f=1)
@@ -512,11 +531,19 @@ class Wrapper(object):
 
     def Ebind(self, nrange, ret_f=False):
         out = self.E(nrange, ret_f=ret_f)
-        res = np.nan_to_num(self.m_pi * (out[0] / nrange - self.C.M[0]))
         if ret_f:
-            return res, out[1]
+            E = out[0]
         else:
+            E = out
+        res = np.nan_to_num(self.m_pi * (E / nrange - self.C.M[0]))
+        # if ret_f:
+        #     return res, out[1]
+        # else:
+        #     return res
+        if not ret_f:
             return res
+        else:
+            return [res, out[1]]
 
     def dumpLP(self):
         pass
@@ -630,6 +657,8 @@ class Wrapper(object):
         _n = self.nrange * self.mpi3tofmm3
         mu_n = [self.m_pi * eos.mu(z, 1, self.C) for z in self.rho]
         meff = [self.C.phi_n(0, z) for z in self.rho[:, 0]]
+        mH = [ [self.C.phi_n(0, self.C.X_s[i] * self.C.M[0]/self.C.M[i] * z) for z in self.rho[:, 0]]
+               for i in range (2, self.n_baryon)]
         table = arr([mu_n, P, E * self.mpi4_2_mevfm3,
                      _n,
                      _n * conc[:, 0],
@@ -637,21 +666,46 @@ class Wrapper(object):
                      meff,
                      meff,
                      n_e * self.mpi3tofmm3,
-                     n_mu * self.mpi3tofmm3,
-                     np.zeros(_n.shape),
-                     np.zeros(_n.shape),
-                     np.zeros(_n.shape),
+                     n_mu * self.mpi3tofmm3]+
+                    3 * [np.zeros(self.nrange.shape)]
+                    +[
                      self.mu_e * self.m_pi,
                      conc[:, 1]
-        ]).transpose()
+        ] + [_n*conc[:,i] for i in range(2, self.n_baryon)] + mH).transpose()
         tab = tabulate(table, ['mu_n [MeV]', 'P [MeV/fm^3]', 'E[MeV/fm^3]',
                                'n_b [1/fm^3]',
                                'n_n [1/fm^3]', 'n_p [1/fm^3]', 'm_n^*', 'm_p^*',
-                               'n_e [1/fm^3]', 'n_mu [1/fm^3]', 'n_u [1/fm^3]',
-                               'n_d [1/fm^3]', 'n_s [1/fm^3]',
-                               'mu_e [MeV]', 'Y_p'], floatfmt='.6f', tablefmt='plain')
+                               'n_e [1/fm^3]', 'n_mu [1/fm^3]', 'n_u [1/fm^3', 'n_d [1/fm^3',
+                               'n_s [1/fm^3]'] +  [
+                               'mu_e [MeV]', 'Y_p'] + ['Y_' + i for i in self.part_names[2:]]
+                       + ['m_' + i for i in self.part_names[2:]], floatfmt='.6f', tablefmt='plain')
         f.write(tab)
         f.close()
+        return table
+
+    def dumpFortin(self):
+        self.reset()
+        E, P, n = self.EPN()
+        conc = self.concentrations()
+        table = np.array([n/self.n0 * 0.16, E * self.mpi4_2_mevfm3, P] +
+                         [conc[:, i] for i in range(conc.shape[1])]).transpose()
+        print(table)
+        tab = tabulate(table, ['n[fm^-3]', 'E[MeV/fm^3]' ,'P[MeV/fm^3]'] + self.part_names, tablefmt='plain')
+        with open(join(self.foldername,self.filenames['fortin']), 'w') as f:
+            f.write(tab)
+
+        # Output with crust
+        self.setCrust( ncut_crust=0.45, ncut_eos=0.7, inter='cubic')
+
+        table = arr([self.md.rawN * 0.16, self.md.rawE*self.mpi4_2_mevfm3,
+                     self.md.rawP*self.mpi4_2_mevfm3] +
+                     [self.md.rawConc[i] for i in range(self.n_baryon)]).transpose()
+        print(self.md.rawConc)
+        print(table)
+        tab = tabulate(table, ['n[fm^-3]', 'E[MeV/fm^3]' ,'P[MeV/fm^3]'] + self.part_names,
+                       tablefmt='plain')
+        with open(join(self.foldername,'crust_'+self.filenames['fortin']), 'w') as f:
+            f.write(tab)
         return table
 
     def lepton_concentrations(self, ret_du=False):
@@ -684,7 +738,6 @@ class Wrapper(object):
         else:
             return [ne_list, nmu_list]
 
-
     def mu(self, nrange=None):
         if nrange is None:
             nrange = self.nrange
@@ -706,7 +759,32 @@ class Wrapper(object):
     def dumpMu(self):
         mu = self.m_pi*self.mu()
         tab = np.insert(mu, 0, self.nrange/self.n0, axis=1)
-        np.savetxt(join(self.foldername, self.filenames['mu']), tab)
+        np.savetxt(join(self.foldername, self.filenames['mu']), tab, fmt='%.6f')
+
+    def needsMaxw(self):
+        self.check()
+        # for i, p in enumerate(self.P):
+        #     if p < self.P[i-1]:
+        #         return 1
+        # return 0
+        E, P, n = self.EPN()
+        return not all([x < y for x, y in list(zip(P, P[1:]))])
+
+    def dumpPf(self, write=1):
+        self.check()
+        pf = arr([[eos.p_f(n, 2*self.C.S[i] + 1) for i, n in enumerate(r[1:])] for r in self.rho[0:]])
+        ne, nmu = self.lepton_concentrations()
+        pfe = arr([eos.p_f(n, 2.) for n in ne])
+        pfmu = arr([eos.p_f(n, 2.) for n in nmu])
+
+        pf = np.insert(pf, pf.shape[1], pfe, axis=1)
+        pf = np.insert(pf, pf.shape[1], pfmu, axis=1)
+
+        tab = np.insert(self.m_pi*pf, 0, self.nrange/self.n0, axis=1)
+        if write:
+            np.savetxt(join(self.foldername, self.filenames['pf']), tab, fmt='%.6f')
+        return self.m_pi*pf
+
 
     def inspect_f(self):
         self.check()
@@ -734,6 +812,9 @@ class Wrapper(object):
         l, = plt.plot(frange, list(map(
             lambda z: func(z, swArr(self.rho[0, 1:])), frange
         )))
+
+        plt.plot(frange, [0. for f in frange])
+
         plt.subplots_adjust(left=0.25, bottom=0.25)
         axn = plt.axes([0.25, 0.1, 0.65, 0.03])
         sn = Slider(axn, 'N', 0, self.rho.shape[0]-1, valinit=0)
@@ -744,6 +825,7 @@ class Wrapper(object):
         )))
             fig.canvas.draw_idle()
         sn.on_changed(update)
+        axn.set_ylimzz([-7, 7])
         plt.show()
 
 
@@ -752,11 +834,21 @@ class MassDriver():
         self.N = None
         self.E = None
         self.P = None
+        self.rawN = None
+        self.rawE = None
+        self.rawP = None
+        self.rawConc = None
 
     def setEos(self, N, E, P):
         self.N = N
         self.E = E
         self.P = P
+
+    def setRawEos(self, N, E, P, conc):
+        self.rawN = N
+        self.rawP = P
+        self.rawE = E
+        self.rawConc = conc
 
 class Nucleon(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
@@ -774,6 +866,8 @@ class Nucleon(Wrapper):
         self.filenames['profiles'] = 'profiles_nucl.dat'
         self.filenames['grig'] = 'grig_nucl.dat'
         self.filenames['mu'] = 'mu_nucl.dat'
+        self.filenames['fortin'] = 'fortin_nucl.dat'
+        self.filenames['pf'] = 'pf_nucl.dat'
 
 
     def E(self, nrange, ret_f=False, f=0.):
@@ -788,8 +882,9 @@ class Nucleon(Wrapper):
         pass
 
     def dumpMeff(self):
+        print([self.C.Xs(i, 2*self.n0) for i in range(8)])
         self.check()
-        tab = [[self.C.phi_n(i, self.C.Xs(i, z)*z)
+        tab = [[self.C.phi_n(i, self.C.Xs(i, z)*self.C.M[0]/self.C.M[i]*z)
                   for i in range(self.n_baryon)] for z in self.rho[:, 0]]
         data = np.insert(arr(tab), 0, self.nrange/self.n0, axis=1)
         table = tabulate(data, ['n/n0']+[self.part_names[i] for i in range(self.n_baryon)],
@@ -815,7 +910,7 @@ class Sym(Nucleon):
 
 
     def reset(self):
-        self._E, = self.E(self.nrange)
+        self._E = self.E(self.nrange)
         self._P = self.P(self.nrange)
         self.set = 1
 
@@ -883,7 +978,7 @@ class Neutr(Nucleon):
 
 
     def reset(self):
-        self._E, = self.E(self.nrange)
+        self._E = self.E(self.nrange)
         self._P = self.P(self.nrange)
         self.set = 1
 
@@ -912,6 +1007,7 @@ class Hyperon(Nucleon):
         self.n_baryon = 8
         self.C.phi_meson = 0
         self.C.hyper_phi_sigma = 1
+        self.C.hyper_sigma_kind = 1
         self.filenames['mass_crust'] = 'mass_hyper.dat'
         self.filenames['mass_nocrust'] = None
         self.filenames['eos'] = 'hyper.dat'
@@ -921,6 +1017,10 @@ class Hyperon(Nucleon):
         self.filenames['vs'] = 'vs_hyper.dat'
         self.filenames['grig'] = 'grig_hyper.dat'
         self.filenames['mu'] = 'mu_hyper.dat'
+        self.filenames['fortin'] = 'fortin_hyper.dat'
+        self.filenames['pf'] = 'pf_hyper.dat'
+
+
         self.part_names += ['L', 'Sm', 'S0', 'Sp', 'Xm', 'X0']
 
     def dumpEos(self):
@@ -966,8 +1066,27 @@ class HyperonPhi(Hyperon):
         self.filenames['vs'] = 'vs_hyper_phi.dat'
         self.filenames['grig'] = 'grig_hyper_phi.dat'
         self.filenames['mu'] = 'mu_hyper_phi.dat'
+        self.filenames['fortin'] = 'fortin_hyper_phi.dat'
+        self.filenames['pf'] = 'pf_hyper_phi.dat'
 
-
+class HyperonPhi2(Hyperon):
+    def __init__(self, C, basefolder_suffix=''):
+        super(HyperonPhi2, self).__init__(C, basefolder_suffix=basefolder_suffix)
+        self.C.Hyper = 1
+        self.C.phi_meson = 1
+        self.C.phi_kind = 0
+        self.C.hyper_sigma_kind = 1
+        self.filenames['mass_crust'] = 'mass_hyper_phi2.dat'
+        self.filenames['mass_nocrust'] = None
+        self.filenames['eos'] = 'hyper_phi2.dat'
+        self.filenames['etap_f'] = 'etap_phi2_f.dat'
+        self.filenames.update(etap_n='etap_phi2_n.dat')
+        self.filenames['meff'] = 'meff_hyper_phi2.dat'
+        self.filenames['vs'] = 'vs_hyper_phi2.dat'
+        self.filenames['grig'] = 'grig_hyper_phi2.dat'
+        self.filenames['mu'] = 'mu_hyper_phi2.dat'
+        self.filenames['fortin'] = 'fortin_hyper_phi2.dat'
+        self.filenames['pf'] = 'pf_hyper_phi2.dat'
 
 
 
@@ -988,6 +1107,8 @@ class HyperonPhiSigma(HyperonPhi):
         self.filenames['vs'] = 'vs_hyper_phi_sigma.dat'
         self.filenames['grig'] = 'grig_hyper_phi_sigma.dat'
         self.filenames['mu'] = 'mu_hyper_phi_sigma.dat'
+        self.filenames['fortin'] = 'fortin_hyper_phi_sigma.dat'
+        self.filenames['pf'] = 'pf_hyper_phi_sigma.dat'
 
 class DeltaBase(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
@@ -1003,34 +1124,69 @@ class DeltaBase(Wrapper):
             self.part_names.append('D++')
             self.n_baryon = 12
 
+    def loadEos(self):
+        try:
+            eos_tab = np.loadtxt(join(self.foldername, self.filenames['eos']), skiprows=1)
+            self.nrange = eos_tab[:, 0] * self.n0
+            self._E = eos_tab[:, 1]
+            self._P = eos_tab[:, 2]
+            self.set = 1
+            rhos = self.nrange*eos_tab[:, -1-self.n_baryon : -1].transpose()
+            # print(rhos)
+            self.rho = np.insert(rhos.transpose(), 0, eos_tab[:,-1], axis=1)
+
+            mu_e = []
+            n_e = []
+            n_mu = []
+            for r in self.rho:
+                # print(r)
+                # print(eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C))
+                _mue = eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C)
+                mu_e.append(_mue)
+                if _mue > self.m_e:
+                    n_e.append((_mue**2 - self.m_e**2)**(3./2) / (3 * pi **2))
+                else:
+                    n_e.append(0.)
+                if _mue > self.m_mu:
+                    n_mu.append((_mue**2 - self.m_mu**2)**(3./2) / (3*pi**2))
+                else:
+                    n_mu.append(0.)
+
+            self.n_e = np.array(n_e)
+            self.n_mu = np.array(n_mu)
+
+            # print(self.n_e +self.n_mu - self.rho[:,2])
+            # exit()
+
+            self.mu_e = np.array(mu_e)
+
+            self.xDUp = ((3*pi**2 * self.rho[:, 1])**(1./3) - (3*pi**2 * self.n_e)**(1./3))**(3.) / (3*pi**2 * self.nrange)
+        except FileNotFoundError:
+            self.dumpEos()
+
     def getSymm(self, n, lastx=0., lastf=0.):
-        def eq(x, params):
-            ### n = [n_p, n_D0]
-            # x = [x['n_p'].value, x['n_D0'].value]
-            n = params[0]
-            n_ch = params[0]/2
+        def eq(x, n):
             if x[0] < 0:
                 return [100500., 0]
-            n = arr([n/2 - x[0]/2, n/2 - x[0]/2, 0., 0., 0., 0., 0., 0., 0., x[0]/2, x[0]/2, 0.])
+            n = arr([n/2 - x[0]/2, n/2 - x[0]/2, 0., 0., 0., 0., 0., 0., x[0]/4, x[0]/4, x[0]/4, x[0]/4])
             f = eos.f_eq(n, arr([lastf]), 1, self.C)[0]
             n_in = np.insert(n, 0, f)
-            # return np.sum(np.arr([
-            #     eos.mu(1, n_in, self.C) - eos.mu(10, n_in, self.C),
-            #     eos.mu(2, n_in, self.C) - eos.mu(11, n_in, self.C)
-            # ])**2)
-            res = arr([
+            res = [
                 eos.mu(n_in, 1, self.C) - eos.mu(n_in, 10, self.C),
-            ])
-            # print(x, res)
-            return [res, f]
+            ]
 
-        res = leastsq(lambda z: eq(z, [n])[0], [lastx])[0]
-        # res = optimize.minimize(lambda z: eq(z, [n])[0], [lastx], bounds=[[0,None]], method='SLSQP').x
-        if res > n:
+            return res + [f]
+        res = leastsq(lambda z: eq(z, n)[0], [lastx], ftol=1e-16)[0].tolist()
+        p_range = np.linspace(0, n, 100)
+        if res[0] > 1e-5:
+            pass
+            # plt.plot(p_range, list(map(lambda z: eq([z], n)[0], p_range)))
+            # plt.show()
+        if res[0] > n:
             res = [0.]
-        return [res] + eq(res, [n])
+        return res + eq(res, n)
 
-    def dumpDeltaSym(self, suffix=''):
+    def dumpDeltaSym(self, suffix='', write=1):
         lastn = 0.
         lastf = 0.
         res = []
@@ -1038,29 +1194,118 @@ class DeltaBase(Wrapper):
             _res = self.getSymm(n, lastx=lastn, lastf=lastf)
             print('res = ', _res)
             if (i > 1):
-                lastn = _res[0][0]
+                lastn = _res[0]
             print('lastn =', lastn)
             lastf = _res[-1]
             res.append(_res)
         res = np.array(res)
         n_d = res[:, 0]
-        # n_d[0][0] = [0.0]
         frac = []
         for i, n in enumerate(n_d):
-            nd = n[0]
+            nd = n
             nn = (self.nrange[i] - nd)/2
-            frac.append([nn, nn, 0., 0., 0., 0., 0., 0., 0., nd/2, nd/2])
+            frac.append([nn, nn, 0., 0., 0., 0., 0., 0., nd/4, nd/4, nd/4, nd/4])
         frac = arr(frac)
 
         E = self.E_gen(frac)
+        self._E = np.copy(E)
+        Eparts = self.Eparts
         Ebind = self.m_pi * (E/self.nrange - self.C.M[0])
         n_w_f = np.insert(frac, 0, res[:, -1], axis=1)
+        self.rho = np.copy(n_w_f)
         mu = self.mu_gen(n_w_f)
         P = self.P_chem(n_w_f)
-        np.savetxt(join(self.foldername, 'delta_sym'+suffix+'.dat'),
-                   arr([self.nrange/self.n0, E, P, [q[0]/self.nrange[i] for i,q in enumerate(n_d)], Ebind]).transpose())
-        np.savetxt(join(self.foldername, 'delta_sym_mu'+suffix+'.dat'),
-                   np.insert(mu, 0, self.nrange/self.n0, axis=1).transpose())
+        self._P = np.copy(P)
+        self.set = 1
+        if write:
+            np.savetxt(join(self.foldername, 'delta_sym'+suffix+'.dat'),
+                       arr([self.nrange/self.n0, E, P, [q/self.nrange[i] for i,q in enumerate(n_d)], Ebind]).transpose())
+            np.savetxt(join(self.foldername, 'delta_sym_mu'+suffix+'.dat'),
+                       np.insert(self.m_pi*mu, 0, self.nrange/self.n0, axis=1))
+            tab = [[self.C.phi_n(i, self.C.Xs(i, z)*self.C.M[0]/self.C.M[i]*z)
+                for i in range(self.n_baryon)] for z in res[:, -1]]
+            data = np.insert(arr(tab), 0, self.nrange/self.n0, axis=1)
+            table = tabulate(data, ['n/n0']+[self.part_names[i] for i in range(self.n_baryon)],
+                             tablefmt='plain')
+            with open(join(self.foldername, 'meff_deltasym.dat'), 'w') as f:
+                f.write(table)
+        return frac, E, Ebind, Eparts, res[:,-1]
+
+
+class DeltaSym(DeltaBase, Sym):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.foldername = join(self.foldername, 'DeltaSym')
+        if not os.path.exists(self.foldername):
+            os.makedirs(self.foldername)
+        self.filenames['eos'] = 'eos_sym.dat'
+
+    def reset(self, iterations=30, timeout=100, stopnc=0):
+        print([self.C.X_s[i] for i in range(12)])
+        def eq(x, n, lastf=0.):
+            if x[0] < 0:
+                return [100500., 0]
+            n = arr([n/2 - x[0]/2, n/2 - x[0]/2, 0., 0., 0., 0., 0., 0., x[0]/4, x[0]/4, x[0]/4, x[0]/4])
+            f = eos.f_eq(n, arr([lastf]), 1, self.C)[0]
+            n_in = np.insert(n, 0, f)
+            res = [
+                eos.mu(n_in, 1, self.C) - eos.mu(n_in, 10, self.C),
+            ]
+
+            return res + [f]
+        lastx = 0.
+        lastf = 0.
+        deltas = []
+        flist = []
+        rho = []
+        for n in self.nrange:
+            res = leastsq(lambda z: eq(z, n, lastf)[0], [lastx], ftol=1e-16)[0].tolist()
+            lastx = res[0]
+            if lastx > n:
+                lastx = 0.
+            lastf = eq([lastx], n, lastf)[1]
+            if stopnc:
+                if lastx > 1e-5:
+                    return n
+            flist.append(lastf)
+            deltas.append(lastx)
+            rho.append([lastf, (n-lastx)/2, (n-lastx)/2, 0., 0., 0., 0., 0., 0.,
+                        lastx/4, lastx/4, lastx/4, lastx/4])
+            print(n, lastx, lastf)
+
+        self.rho = arr(rho)
+        self._E = self.E_gen(self.rho[:, 1:])
+        self._P = self.P_chem(self.rho)
+        self.set = 1
+
+    def E(self, nrange=None, ret_f=0):
+        if nrange is None:
+            nrange = self.nrange
+        self.check(nrange=nrange)
+        return self._E
+
+    def dumpEos(self, nmax=None, npoints=None, write=True):
+        self.check()
+        E, P, n = self.EPN()
+        frange = self.rho[:, 0]
+        conc = self.concentrations()
+        table = [n/self.n0, frange, self.Ebind(self.nrange), P, conc[:, 0]*2, conc[:, 10]*4]
+        tab = tabulate(arr(table).transpose(), ['n/n0', 'E', 'P', 'N', 'Delta'], tablefmt='plain')
+        with open(join(self.foldername, self.filenames['eos']), 'w') as f:
+            f.write(tab)
+
+    def dumpNc(self):
+        res = []
+        xsrange = np.linspace(2., .8, 50)
+        for x in xsrange:
+            self.C.setDeltaSigma(arr([x for i in range(4)]))
+            nc = self.reset(stopnc=1)
+            if nc is None:
+                break
+            res.append(nc/self.n0)
+
+        np.savetxt(join(self.foldername, 'nc.dat'), arr([xsrange[:len(res)], res]).transpose(), fmt='%.6f')
+
 
 
 
@@ -1069,7 +1314,71 @@ class Delta(DeltaBase, Hyperon):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         # Delta.__init__(self, C, basefolder_suffix='')
 
+class DeltaOnly(DeltaBase, Hyperon):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.foldername = join(self.foldername, 'DOnly')
+        if hasattr(self.C, 'setDeltaConstants'):
+            self.C.setDeltaOnlyConstants()
+            self.n_baryon = 6
+            self.part_names = ['n', 'p', 'D-', 'D0', 'D+', 'D++']
+            self.filenames['eos'] = 'eos_donly.dat'
+            self.filenames['meff'] = 'meff_donly.dat'
+            self.filenames['vs'] = 'vs_donly.dat'
+            self.filenames['grig'] = 'grig_donly.dat'
+            self.filenames['mu'] = 'mu_donly.dat'
+            self.filenames['fortin'] = 'fortin_donly.dat'
+            self.filenames['pf'] = 'pf_donly.dat'
+            self.filenames['mass_crust'] = 'mass_crust_donly.dat'
+            self.filenames['mass_nocrust'] = 'mass_nocrust_donly.dat'
+
+    def loadEos(self):
+        try:
+            eos_tab = np.loadtxt(join(self.foldername, self.filenames['eos']), skiprows=1)
+            self.nrange = eos_tab[:, 0] * self.n0
+            self._E = eos_tab[:, 1]
+            self._P = eos_tab[:, 2]
+            self.set = 1
+            rhos = self.nrange*eos_tab[:, -1-self.n_baryon : -1].transpose()
+            # print(rhos)
+            self.rho = np.insert(rhos.transpose(), 0, eos_tab[:,-1], axis=1)
+    
+            mu_e = []
+            n_e = []
+            n_mu = []
+            for r in self.rho:
+                # print(r)
+                # print(eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C))
+                _mue = eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C)
+                mu_e.append(_mue)
+                if _mue > self.m_e:
+                    n_e.append((_mue**2 - self.m_e**2)**(3./2) / (3 * pi **2))
+                else:
+                    n_e.append(0.)
+                if _mue > self.m_mu:
+                    n_mu.append((_mue**2 - self.m_mu**2)**(3./2) / (3*pi**2))
+                else:
+                    n_mu.append(0.)
+    
+            self.n_e = np.array(n_e)
+            self.n_mu = np.array(n_mu)
+    
+            # print(self.n_e +self.n_mu - self.rho[:,2])
+            # exit()
+    
+            self.mu_e = np.array(mu_e)
+    
+            self.xDUp = ((3*pi**2 * self.rho[:, 1])**(1./3) - (3*pi**2 * self.n_e)**(1./3))**(3.) / (3*pi**2 * self.nrange)
+        except FileNotFoundError:
+            self.dumpEos()
+
+
+
 class DeltaPhi(DeltaBase, HyperonPhi):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+
+class DeltaPhi2(DeltaBase, HyperonPhi2):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
 
@@ -1088,6 +1397,7 @@ class Model(Wrapper):
                 if p[1] is not None:
                     names.append(p[0])
                     params.append(p[1])
+                    basefolder_suffix+=p[0]+"%.2f"%(p[1])
 
             args = dict(list(zip(names, params)))
             print(args)
@@ -1104,9 +1414,12 @@ class Model(Wrapper):
         self.delta = Delta(C, basefolder_suffix=basefolder_suffix)
         self.delta_phi = DeltaPhi(C, basefolder_suffix=basefolder_suffix)
         self.delta_phi_sigma = DeltaPhiSigma(C, basefolder_suffix=basefolder_suffix)
+        self.delta_phi2 = DeltaPhi2(C, basefolder_suffix=basefolder_suffix)
+        self.delta_sym = DeltaSym(C, basefolder_suffix=basefolder_suffix)
+        self.delta_only = DeltaOnly(C, basefolder_suffix=basefolder_suffix)
         self.children = [self.nucl, self.sym, self.neutr, self.hyper,
                          self.hyper_phi, self.hyper_phi_sigma,
-                         self.delta, self.delta_phi]
+                         self.delta, self.delta_phi, self.delta_phi2, self.delta_sym, self.delta_only]
 
         if any([K0, f0, J0]):
             C = wr.C
@@ -1132,13 +1445,15 @@ class Model(Wrapper):
 
 
     def setDeltaConst(self, Xs, Xo, Xr, folder_suffix):
-        for m in [self.delta, self.delta_phi, self.delta_phi_sigma]:
+        for m in [self.delta, self.delta_phi, self.delta_phi_sigma,
+                  self.delta_phi2, self.delta_sym, self.delta_only]:
             m.C.setDeltaRho(Xr)
             m.C.setDeltaOmega(Xo)
             m.C.setDeltaSigma(Xs)
             m.foldername = self.foldername + folder_suffix
             if not os.path.exists(m.foldername):
                 os.makedirs(m.foldername)
+            m.set = 0
 
     def setParams(self, Cs, Co, Cr, b, c, f0):
         for m in [self]+self.children:
@@ -1148,6 +1463,13 @@ class Model(Wrapper):
             m.C.b = b
             m.C.c = c
             m.C.f0 = f0
+
+
+
+
+
+
+
 
 
     def dumpEos(self, nmax=None, npoints=None, write=True):
@@ -1213,7 +1535,7 @@ class Model(Wrapper):
         for s in mods:
             s.dumpEos()
             s.dumpVs()
-            s.dumpMassesCrust(npoints=10)
+            s.dumpMassesCrust(npoints=100)
             s.dumpMeff()
             s.dumpEtap()
 
@@ -1343,10 +1665,11 @@ class Model(Wrapper):
             vlist.append(V)
         tab = np.array([self.nrange/self.n0, slist, vlist]).transpose()
         table = tabulate(tab, ['n/n_0', 'S [MeV]', 'V [MeV]'], tablefmt='plain')
-        print(table)
-        print(join(self.foldername, 'pot_sym.dat'))
+        # print(table)
+        # print(join(self.foldername, 'pot_sym.dat'))
         with open(join(self.foldername, 'pot_sym.dat'), 'w') as f:
             f.write(table)
+        return [arr(slist), arr(vlist)]
 
     def dumpUofE(self, show=False):
         nU = np.array([self.n0/2, self.n0/2])

@@ -24,12 +24,12 @@ m = NLVector(mn**2 * gs / ms**2, mn**2 * gv / mo**2, mn**2 * gr / mr**2,
 
 
 # exit()
-
-
+m.tabEosSym(name='FSUgold', npoints=1000)
+exit()
 m2 = NLVector(mn**2 * gs / ms**2, mn**2 * gv / mo**2, mn**2 * gr / mr**2,
-             kappa/2/mn/mpi, lamb/6, zeta*gv**2/24, L_v*gr*gv, cut_a=1., cut_c=0.4)
+             kappa/2/mn/mpi, lamb/6, zeta*gv**2/24, L_v*gr*gv, cut_a=1., cut_c=0.2)
 
-m2.tabEos(name='FSUgold_cut04', npoints=100)
+m2.tabEosSym(name='FSUgold_cut02', npoints=1000)
 
 exit()
 
