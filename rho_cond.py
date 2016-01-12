@@ -9,10 +9,10 @@ import eosWrap as eos
 from matplotlib import pyplot as plt
 import Models2
 
-wr = Models2.myMod()
+wr = Models2.myModExp()
 C = wr.nucl.C
 
-nrange = np.linspace(0.5, 2.5, 1000)
+nrange = np.linspace(0.5, 5, 1000)
 init = [0.01, 0.2, 0.5]
 nr_list = []
 np_list = []

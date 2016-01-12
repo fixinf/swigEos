@@ -4,7 +4,10 @@ import matplotlib
 from scipy.misc.common import derivative
 from scipy.constants.constants import pi
 from numpy import sqrt
-matplotlib.use('QT4Agg')
+
+import Models
+
+matplotlib.use('QT5Agg')
 import matplotlib.pyplot as plt
 from Wrapper import Wrapper
 import numpy as np
@@ -13,7 +16,7 @@ from pylab import pause
 from scipy import interpolate
 imgfolder = os.path.join('..','img')
 
-C = eos.KVOR_mod2()
+C = Models.myModR()
 C.SetHyperConstants(2)
 wr = Wrapper(C)
 n = np.linspace(0.0, 4.0, 2000)
@@ -29,40 +32,34 @@ C.Csp = 1
 # C.b = 0.007734608051455927
 # C.c = 0.0003446178665624873
 
-C.Cs = 227.825989
-C.Co =  134.882595
-C.Cr = 93.199075
-C.b = 0.005592
-C.c = -0.012123
+# C.Cs = 227.825989
+# C.Co =  134.882595
+# C.Cr = 93.199075
+# C.b = 0.005592
+# C.c = -0.012123
 
 # C.alpha = 0.85
 # C.z = 0.65
-#     
+#
 # C.omega_a = 6.45
 # C.omega_f = 0.53
-# 
+#
 # C.phi_a = -0.85
 # C.phi_f = 0.28
-#     
+#
 # C.d = -5.5
-#     
+#
 # C.phi_gamma = 3.0
 # C.phi_z = 3.5
-#  
+#
 # C.sprime = 0
 # C.Csp = 380.0
-#     
+#
 # C.beta = 0.8
 # C.gamma = 9.0
 # C.exp_alpha = 0.05
 # C.omega_c = -15000.0
 
-C.rho_f = 0.4
-C.rho_a = 100
-# print C.rho_a
-C.beta = 1.0
-C.gamma = 5.5
-C.f0 = 0.195
 
 #C.rho_kind = 0
 

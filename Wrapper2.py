@@ -65,7 +65,10 @@ class Wrapper(object):
         rho = eos.stepE(n, last, f, len(last), iter, C)
         que.put(rho)
 
-    def reset(self, iterations=30, timeout=None):
+    def loadEos(self):
+        raise NotImplementedError("Method should be overloaded")
+
+    def reset(self, iterations=30, timeout=6):
         """Calculates the EoS stored in the wrapper. Has to be overriden in
         Symm, Neutron. 
         
@@ -785,6 +788,35 @@ class Wrapper(object):
             np.savetxt(join(self.foldername, self.filenames['pf']), tab, fmt='%.6f')
         return self.m_pi*pf
 
+    def get_feq(self, n):
+        def swArr(n):
+                out = eos.dArray(len(n))
+                for i, _n in enumerate(n):
+                    out[i] = _n
+                return out
+
+        def func(f, n):
+            arg = eos.dArray(1)
+            out = eos.dArray(1)
+            arg[0] = f
+            params = eos.func_f_eq_params()
+
+            params.n = n
+            params.C = self.C
+            params.dimN = self.n_baryon
+            params.df = 1e-3
+            eos.func_f_eq(arg, out, 1, 1, params)
+            return out[0]
+
+        frange = np.linspace(0, 1, 500)
+        IofN = lambda z: int(interp1d(self.nrange, range(len(self.nrange)))(z))
+        print(IofN(n))
+        func = list(map(
+            lambda z: func(z, swArr(self.rho[IofN(n), 1:])), frange
+        ))
+
+        return frange, func
+
 
     def inspect_f(self):
         self.check()
@@ -809,6 +841,11 @@ class Wrapper(object):
             return out[0]
         frange = np.linspace(0, 1, 500)
         fig, ax = plt.subplots()
+
+        func = list(map(
+            lambda z: func(z, swArr(self.rho[0, 1:])), frange
+        ))
+
         l, = plt.plot(frange, list(map(
             lambda z: func(z, swArr(self.rho[0, 1:])), frange
         )))
@@ -852,6 +889,7 @@ class MassDriver():
 
 class Nucleon(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
+        self.name = 'nucl'
         super(Nucleon, self).__init__(C, basefolder_suffix=basefolder_suffix)
         self.part_names=['n', 'p']
         self.C.Hyper = 0
@@ -868,7 +906,15 @@ class Nucleon(Wrapper):
         self.filenames['mu'] = 'mu_nucl.dat'
         self.filenames['fortin'] = 'fortin_nucl.dat'
         self.filenames['pf'] = 'pf_nucl.dat'
+        self.filenames['eos'] = 'eos.dat'
 
+
+    def loadEos(self):
+        try:
+            data = np.loadtxt(join(self.foldername, self.filenames['eos']))
+        except FileNotFoundError:
+            print("File not found; Resetting")
+            self.reset()
 
     def E(self, nrange, ret_f=False, f=0.):
         E, P, n = self.EPN(nrange=nrange)
@@ -1003,6 +1049,7 @@ class Neutr(Nucleon):
 class Hyperon(Nucleon):
     def __init__(self, C, basefolder_suffix=''):
         super(Hyperon, self).__init__(C, basefolder_suffix=basefolder_suffix)
+        self.name = 'hyper'
         self.C.Hyper = 1
         self.n_baryon = 8
         self.C.phi_meson = 0

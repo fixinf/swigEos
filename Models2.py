@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Qt4Agg')
+matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 from Wrapper2 import Model
 from Wrapper import Wrapper
@@ -261,6 +261,18 @@ def __myMod_L(beta, gamma):
     C.c = -0.0029742083
     Wrapper(C).solve(f0=C.f0, K0=240.,J0=30.)
     return C
+
+def _myModExp():
+    C = _myMod()
+    C.rho_kind = 1
+    C.beta = 1.74991669
+    C.gamma = 5.67486884
+    C.rho_f = 0.42684265
+    C.rho_a = 65.50171728
+    return C
+
+def myModExp():
+    return Model(_myModExp)
 
 def myMod_L(beta, gamma):
     def _myMod_L():

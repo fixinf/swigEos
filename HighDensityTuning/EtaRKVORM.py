@@ -2,7 +2,7 @@ import matplotlib
 from scipy.misc.common import derivative
 from time import sleep
 from math import exp
-matplotlib.use('QT4Agg')
+matplotlib.use('QT5Agg')
 from matplotlib.widgets import Slider
 import numpy as np
 import matplotlib.pyplot as plt
