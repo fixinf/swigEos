@@ -1,7 +1,7 @@
 /*
  * KVORmod2.cpp
  *
- *  Created on: 19 сент. 2014 г.
+ *  Created on: 19 ��������. 2014 ��.
  *      Author: const
  */
 
@@ -85,10 +85,22 @@ double KVOR_mod2::eta_o(double f){
 //	res *= (tanh(1e5*pow(f - f0,3)) + 1)/2 ;
 //	res += 1;
 
-	if (omega_kind ==2){
+	if (omega_kind == 2){
 		double s = 0.5*(1 + tanh(omega_b*(f - omega_f)));
 //        printf("s = %f \n", s);
 		return res +  omega_a * s;
+	}
+
+	if (omega_kind == 3){
+		double s = 0.5*(1 + tanh(omega_b*(f - omega_f)));
+//        printf("s = %f \n", s);
+		res = res +  omega_a * s;
+		//printf("%f %f \n", omega_a2, omega_f2);
+		if (f > this->omega_f2){
+
+			return res / cosh(omega_a2 * pow(f - omega_f2, 2));
+		}
+		else return res;
 	}
 
 	if (f < this->omega_f){

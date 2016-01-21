@@ -1,7 +1,7 @@
 /*
 2 * KVORmod2.h
  *
- *  Created on: 19 сент. 2014 г.
+ *  Created on: 19 ��������. 2014 ��.
  *      Author: const
  */
 
@@ -16,6 +16,8 @@ public:
 	virtual ~KVOR_mod2();
 	double omega_f;
 	double omega_a;
+	double omega_f2;
+	double omega_a2;
 	double d;
 	double e;
 	double rho_f;

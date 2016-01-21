@@ -1,7 +1,7 @@
 /*
  * eos.cpp
  *
- *  Created on: 09 июня 2014 г.
+ *  Created on: 09 �������� 2014 ��.
  *      Author: const
  */
 
@@ -19,8 +19,8 @@
 //#include "constants.h"
 //#include "setconst.h"
 double p_f(double n, double gamma) {
-//	if (n < 0)
-//		return 0.;
+	if (n < 0)
+		return 0.;
 	return pow(6. * M_PI * M_PI * D * n / gamma, 1.0 / 3.0);
 }
 
@@ -68,9 +68,9 @@ namespace calc{
 		int dimF_init;
 	};
 
-        double mu_deriv(double *n, int dimN, int i, set_const *C){
-	        bool debug = false;
-		double dn = 1e-3;
+    double mu_deriv(double *n, int dimN, int i, double mu_c, set_const *C){
+	    bool debug = false;
+		double dn = 1e-4;
 
 //		n[i] += dn;
 //		double dE = _E(n, dimN, C);
@@ -81,13 +81,13 @@ namespace calc{
 		//Increased precision: f'(x) = (1/3h)(2(f(1) - f(-1)) - 0.25 (f(2) - f(-2)) )
 
 		n[i] += 2*dn;
-		double dE = -0.25*_E(n, dimN, C);
+		double dE = -0.25*E_rho(n, dimN, mu_c, C);
 		n[i] -= dn;
-		dE += 2*_E(n, dimN, C);
+		dE += 2*E_rho(n, dimN, mu_c, C);
 		n[i] -= 2*dn;
-		dE += -2*_E(n, dimN, C);
+		dE += -2*E_rho(n, dimN, mu_c, C);
 		n[i] -= dn;
-		dE += 0.25*_E(n, dimN, C);
+		dE += 0.25*E_rho(n, dimN, mu_c, C);
 		n[i] += 2*dn;
 
 		if (debug) {
@@ -256,6 +256,102 @@ namespace calc{
 		delete[] n_f;
 	}
 
+	void fun_n_eq_rho(double * p, double * hx, int m, int n, void * adata){
+		bool debug = 1;
+		fun_n_eq_params * par = (fun_n_eq_params *) adata;
+		set_const * C = par->C;
+		int sc = 1 + C->sprime;
+		double n_sum = 0.0;
+		double n_n = par->n;
+		double * n_in = new double [m+sc+1]; //input set for _E and mu
+		double * n_f = new double [m+sc]; //input set for f_eq; actually is {n_n,n_p,...,n_X0}
+		for (int i = 0; i < m-1; i++){
+			n_n -= p[i];
+			n_in[i + 1 + sc] = p[i]; //scalar + neutron(1) offset
+			n_f[i+1] = p[i];
+		}
+
+		double mu_c = p[m-1];
+
+		n_f[0] = n_n;
+		if (debug) {
+			printf("n_f = ");
+			for (int i = 0; i < m+1; i++){
+				printf("%e ", n_f[i]);
+			}
+			printf("\n");
+		}
+		double * out = new double[sc];
+		f_eq_rho(n_f, m+1, par->f_init, sc, out, sc, mu_c, C);//m -> m+1 fixed
+
+
+		for (int i = 0; i < sc; i++){
+			n_in[i] = out[i];
+			printf("f[%i] = %.3f ", i, out[i]);
+		}
+		printf("\n");
+
+		n_in[sc] = n_n;
+		double sum=0, sum_ch=0, sum_o = 0.0, sum_rho = 0.0, sum_p = 0;
+		for (int i = 0; i < m + 1; i++){
+			sum += n_f[i];
+			sum_ch += n_f[i]*C->Q[i];
+			sum_o += n_f[i]*C->X_o[i];
+			sum_rho += n_f[i]*C->X_r[i]*C->T[i];
+			if (C->phi_meson){
+				sum_p += n_f[i]*C->X_p[i];
+			}
+//			printf("sum %f sum_ch %f sum_o %f sum_rho %f \n", sum, sum_ch, sum_o, sum_rho);
+		}
+
+		double mu_n = mu_deriv(n_in, m + sc + 1, sc + 0, mu_c, C);
+		double mu_p = mu_deriv(n_in, m + sc + 1, sc + 1, mu_c, C);
+		double mu_e = mu_n - mu_p;
+
+		printf("mu_n = %.3f, mu_p = %.3f, mu_e = %.3f", mu_n, mu_p, mu_e);
+
+//		printf("n = %f %f %f \n", n_in[0], n_in[1], n_in[2]);
+//		printf("%f %f %f\n" ,mu_n, mu_p, sum_ch);
+		double n_e = 0, n_mu = 0;
+		if (mu_e > m_e){
+			n_e += pow(mu_e*mu_e - m_e*m_e,1.5)/(3*M_PI*M_PI);
+		}
+		if (mu_e > m_mu){
+			n_mu += pow(mu_e*mu_e - m_mu*m_mu,1.5)/(3*M_PI*M_PI);
+		}
+
+		double * eparts = new double[9];
+		E_rho(n_in, m+sc+1, mu_c, C, eparts, 9);
+		double n_rho = eparts[8];
+
+
+		hx[0] = sum_ch - n_e - n_mu - n_rho;
+
+		double fp = 0;
+		double f = out[0];
+		if (C->sprime){
+			fp = out[1];
+		}
+
+		for (int i = 1; i < m-1; i++){
+			double mu_i = mu_deriv(n_in, m + sc + 1, sc + i, mu_c, C);
+			printf("mu_%i = %.3f", i, mu_i);
+			hx[i] = mu_i - (mu_n - C->Q[i] * mu_e);
+		}
+
+		hx[m] = mu_c - mu_e;
+
+		for (int i = 0; i < m; i++){
+			printf("hx[%i] = %.6e ", i, hx[i]);
+		}
+		printf("\n");
+
+		delete[] n_in;
+		delete[] n_f;
+	}
+
+
+
 }//namespace calc
 
 /**\brief Energy density functional itself.
@@ -377,8 +473,8 @@ double _E(double * n, int dimN, set_const * C, double * out, int dim_Out){
 
 
 double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, int dim_inplace){
-	bool debug = 0;
-	bool ret_parts = (inplace) && (dim_inplace == 9);
+	bool debug = 1;
+	bool ret_parts = (inplace) && (dim_inplace == 10);
 	if (debug){
 		printf("n = ");
 		for (int i = 0; i < dimN; i++){
@@ -459,7 +555,7 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 
 	double E_r =  C->Cr * sum_t3*sum_t3/(2.0*C->M[0]*C->M[0]*C->eta_r(f));
 	if (abs(sum_t3) > n_rho/2){
-	    E_r -= C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(abs(sum_t3) - n_rho, 2.);
+	    E_r -= C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(abs(sum_t3) - n_rho/2, 2.);
 	}
         printf("sum_t3 = %f, n_rho = %f, E_r = %f \n", sum_t3, n_rho, E_r);
 	//phi
@@ -471,6 +567,7 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 
 	if (ret_parts) {
 		inplace[6] = part_phi;
+		inplace[8] = n_rho;
 	}
 
 	return res + E_r;
@@ -542,8 +639,8 @@ void stepE(double n, double * init, int initN, double * f_init, int dimF_init, d
 //		if (i > 2) lb[i] = -100500.0;
 	}
 
-	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
-		opts[4]= -1e-5;
+	opts[0]= 100*LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-24;
+		opts[4]= -1e-2;
 	dlevmar_bc_dif(calc::fun_n_eq, x, NULL, m, m, lb, NULL, NULL, iter, opts, info, NULL, NULL, &p);
 //	dlevmar_dif(calc::fun_n_eq, x, NULL, m, m, 2000, opts, NULL, NULL, NULL, &p);
 
@@ -686,3 +783,57 @@ void solveF(double n, double E, double P, double * init, int initN, double * out
 	out[1] = x[1];
 }
 
+
+void stepE_rho(double n, double * init, int initN, double * f_init, int dimF_init, double * out, int dim_Out, int iter, double mu_init, set_const* C) {
+	double opts[5];
+	bool debug = 1;
+	calc::fun_n_eq_params p = {C, n, f_init};
+	int m = initN;
+	double * x = new double[m];
+	double * lb = new double[m];
+	double * fun = new double[m];
+	double info[LM_INFO_SZ];
+	//double x[3] = {v.n[0], v.n[1], v.f};
+
+	for (int i = 0; i < m-1; i++){
+		x[i] = init[i];
+		lb[i] = 0.0;
+//		if (i > 2) lb[i] = -100500.0;
+	}
+	lb[m-1] = 0.;
+	x[m-1] = mu_init;
+
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
+		opts[4]= -1e-5;
+	dlevmar_bc_dif(calc::fun_n_eq_rho, x, NULL, m, m, lb, NULL, NULL, iter, opts, info, NULL, NULL, &p);
+//	dlevmar_dif(calc::fun_n_eq, x, NULL, m, m, 2000, opts, NULL, NULL, NULL, &p);
+
+	if (debug) {
+		printf("info: ");
+		for (int i = 0; i < LM_INFO_SZ; i++){
+			printf(" %i : %f ", i, info[i]);
+		}
+		printf("\n");
+
+		printf("n = %f, n_p = %e", n, x[0]);
+		printf(",n_L = %e ", x[1]);
+		printf(",n_S- = %e ", x[2]);
+		printf(",n_S0 = %e ", x[3]);
+		printf(",n_S+ = %e ", x[4]);
+		printf(",n_X- = %e ", x[5]);
+		printf(",n_X0 = %e ", x[6]);
+		printf("\n");
+
+		calc::fun_n_eq(x, fun, m, m, &p);
+		for (int i = 0; i < m; i++){
+			printf("f%i = %e  ", i, fun[i]);
+		}
+		printf("\n");
+	}
+	for (int i = 0; i < m; i++){
+		out[i] = x[i];
+	}
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
+}

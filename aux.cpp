@@ -193,6 +193,138 @@ void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int di
 	delete[] ub;
 }
 
+void func_f_eq_rho(double * p, double * hx, int m, int _n, void * adata){
+	bool debug = 1;
+	func_f_eq_params_rho * params = (func_f_eq_params_rho *) adata;
+	double mu_c = params->mu_c;
+	bool sprime = (params->C->sprime and (m > 1));
+	double * n = new double[params->dimN + m];
+	if (debug){
+		printf("sprime = %i \n", sprime);
+	}
+	for (int i = 0; i < m; i++){
+		n[i] = p[i];
+	}
+	for (int i = m; i < m + params->dimN; i++){
+		n[i] = params->n[i-m];
+	}
+	if (debug) {
+		printf("f_eq: n = ");
+		for (int i = 0; i < params->dimN + m; i++){
+			printf("%f ", n[i]);
+		}
+		printf("\n");
+	}
+	double df = params->df;
+	bool anal = 0;
+	if (!anal){
+	double dE;
+	for (int i = 0; i < m; i++){
+//		n[i] += params->df;
+//
+//		dE = _E(n, params->dimN + m, params->C);
+//		n[i] -= params->df;
+//		dE -= _E(n, params->dimN + m, params->C);
+//		dE /= params->df;
+//		hx[i] = dE;
+//		n[i] += params->df;
+
+//Increased precision:
+//		n[i] += 2*params->df;
+//		double dE = -0.25*_E(n, params->dimN + m, params->C);
+//		n[i] -= params->df;
+//		dE += 2*_E(n, params->dimN + m, params->C);
+//		n[i] -= 2*params->df;
+//		dE += -2*_E(n, params->dimN + m, params->C);
+//		n[i] -= params->df;
+//		dE += 0.25*_E(n, params->dimN + m, params->C);
+//		n[i] += 2*params->df;
+//		dE /= 3*params->df;
+//		hx[i] = dE;
+
+//WE NEED MORE!
+		n[i] += 3*df;
+		double dE = E_rho(n, params->dimN + m, mu_c, params->C);
+		n[i] -= df;
+		dE += -9 * E_rho(n, params->dimN + m, mu_c, params->C);
+		n[i] -= df;
+		dE += 45 * E_rho(n, params->dimN + m, mu_c, params->C);
+		n[i] -= 2*df;
+		dE += -45 * E_rho(n, params->dimN + m, mu_c, params->C);
+		n[i] -= df;
+		dE += 9 * E_rho(n, params->dimN + m, mu_c, params->C);
+		n[i] -= df;
+		dE += -1 * E_rho(n, params->dimN + m, mu_c, params->C);
+		n[i] += 3*df;
+		dE /= 60 * df;
+		hx[i] = dE;
+		if (debug){
+			printf("dE[%i] = %f  ", i, dE);
+		}
+	}
+	if (debug){
+		printf("\n");
+	}
+	delete [] n;
+	}
+	else{
+
+	}
+}
+
+void f_eq_rho(double * n, int dimN, double * init, int dimInit, double * res, int dimRes, double mu_c, set_const * C){
+	double opts[5];
+	func_f_eq_params_rho p = {n, dimN, 1e-5, C, mu_c};
+	int m = 1 + C->sprime;
+	double * x = new double[m];
+	double * lb = new double[m];
+	double * ub = new double[m];
+	double * fun = new double[m];
+	double info[LM_INFO_SZ];
+	//double x[3] = {v.n[0], v.n[1], v.f};
+
+	for (int i = 0; i < m; i++){
+		x[i] = init[i];
+		lb[i] = 0.0;
+		ub[i] = 1.0;
+	}
+
+	//debug only
+	double sum = 0;
+	bool debug = 0;
+	for (int i = 0; i < dimN; i++){
+		sum += n[i];
+	}
+
+	if (sum > 2.93){
+		debug = 0;
+	}
+
+	ub[0] = C->fmax;
+	ub[1] = 1.;
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-24;
+		opts[4]= -1e-5;
+	int iter = 300;
+	dlevmar_bc_dif(func_f_eq_rho, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+
+	if (debug){
+		printf("info: ");
+		for (int i = 0; i < LM_INFO_SZ; i++){
+			printf("[%i] = %f ", i, info[i]);
+		}
+		printf("\n");
+	}
+
+	for (int i = 0; i < m; i++){
+		res[i] = x[i];
+	}
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
+	delete[] ub;
+}
+
+
 double EBind(double * n, int dimN, set_const *C){
 	double sum = 0;
 	for (int i = 1; i < dimN; ++i) {

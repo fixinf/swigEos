@@ -178,6 +178,18 @@ void testDeltaWalecka(){
     cout << C->M[0]/C->M[10]*C->X_s[10]*.6 << endl;
 }
 
+void testStepRho(){
+	set_const * C = new KVOR();
+	double n = C->n0;
+	double init[1] = {0.};
+	double finit[1] = {0.};
+	double res[1];
+
+	stepE_rho(n, init, 2, finit, 1, res, 1, 30, 0., C);
+	cout << res[0] << "  " << res[1] << endl;
+
+}
+
 int main(){
-    testDeltaWalecka();
+    testStepRho();
 }
