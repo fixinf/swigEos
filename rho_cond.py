@@ -9,7 +9,7 @@ import eosWrap as eos
 from matplotlib import pyplot as plt
 import Models2
 
-wr = Models2.myModExp()
+wr = Models2.MKValpha00(0.68)
 C = wr.nucl.C
 
 nrange = np.linspace(0.5, 5, 1000)

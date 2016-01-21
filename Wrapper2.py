@@ -1287,9 +1287,7 @@ class DeltaSym(DeltaBase, Sym):
             os.makedirs(self.foldername)
         self.filenames['eos'] = 'eos_sym.dat'
 
-    def reset(self, iterations=30, timeout=100, stopnc=0):
-        print([self.C.X_s[i] for i in range(12)])
-        def eq(x, n, lastf=0.):
+    def eq(self, x, n, lastf=0.):
             if x[0] < 0:
                 return [100500., 0]
             n = arr([n/2 - x[0]/2, n/2 - x[0]/2, 0., 0., 0., 0., 0., 0., x[0]/4, x[0]/4, x[0]/4, x[0]/4])
@@ -1300,17 +1298,21 @@ class DeltaSym(DeltaBase, Sym):
             ]
 
             return res + [f]
+
+    def reset(self, iterations=30, timeout=100, stopnc=0):
+        print([self.C.X_s[i] for i in range(12)])
+
         lastx = 0.
         lastf = 0.
         deltas = []
         flist = []
         rho = []
         for n in self.nrange:
-            res = leastsq(lambda z: eq(z, n, lastf)[0], [lastx], ftol=1e-16)[0].tolist()
+            res = leastsq(lambda z: self.eq(z, n, lastf)[0], [lastx], ftol=1e-16)[0].tolist()
             lastx = res[0]
             if lastx > n:
                 lastx = 0.
-            lastf = eq([lastx], n, lastf)[1]
+            lastf = self.eq([lastx], n, lastf)[1]
             if stopnc:
                 if lastx > 1e-5:
                     return n
@@ -1330,6 +1332,12 @@ class DeltaSym(DeltaBase, Sym):
             nrange = self.nrange
         self.check(nrange=nrange)
         return self._E
+
+    def checkEq(self, n, ndinit, finit):
+        nrange = np.linspace(0, n, 100)
+        eqlist = arr([self.eq([x], n, lastf=finit)[0] for x in nrange])
+        plt.plot(nrange/n, eqlist)
+        plt.show()
 
     def dumpEos(self, nmax=None, npoints=None, write=True):
         self.check()

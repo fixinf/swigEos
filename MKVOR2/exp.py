@@ -49,8 +49,9 @@ plt.show()
 
 C3 = Models2._myModExp()
 wr3 = Models2.myModExp()
-wr3.hyper.reset(timeout=6)
-plt.plot(wr3.nrange[:wr3.hyper.rho.shape[0]]/wr3.hyper.n0, wr3.hyper.concentrations())
+wr3.nucl.nrange = np.linspace(0., 20., 2000)
+wr3.nucl.reset(timeout=6)
+plt.plot(wr3.nrange[:wr3.nucl.rho.shape[0]]/wr3.nucl.n0, wr3.nucl.concentrations())
 plt.show()
 
 

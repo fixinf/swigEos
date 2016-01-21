@@ -263,7 +263,7 @@ def __myMod_L(beta, gamma):
     return C
 
 def _myModExp():
-    C = _myMod()
+    C = _MKVOR_d()
     C.rho_kind = 1
     C.beta = 1.74991669
     C.gamma = 5.67486884
@@ -274,11 +274,81 @@ def _myModExp():
 def myModExp():
     return Model(_myModExp)
 
+def _myModExpOmega(omega_f):
+    C = _myModExp()
+    C.omega_kind = 3
+    C.omega_a2 = 100.
+    C.omega_f2 = omega_f
+    return C
+
+def myModExpOmega(omega_f):
+    func = lambda: _myModExpOmega(omega_f)
+    func.__name__ = _myModExpOmega.__name__ + '%.2f'%omega_f
+    return Model(func)
+
+def _MKValpha03(omega_f):
+    C = _myModExpOmega(omega_f)
+    C.alpha = 0.3
+    C.Cs = 236.3405983248
+    C.Co = 134.8845427865
+    C.Cr = 81.7485395715
+    C.b = 0.0047761455
+    C.c = -0.0024441546
+    Wrapper(C).solve(f0=C.f0, K0=240.,J0=30.)
+    return C
+
+def MKValpha03(omega_f):
+    func = lambda: _MKValpha03(omega_f)
+    func.__name__ = _MKValpha03.__name__ + '%.2f'%omega_f
+    return Model(func)
+
+def _MKValpha02(omega_f):
+    C = _myModExpOmega(omega_f)
+    C.alpha = 0.2
+    C.Cs = 238.5606691067
+    C.Co = 134.8845334593
+    C.Cr = 81.7485399722
+    C.b = 0.0048769734
+    C.c = -0.0019268340
+    Wrapper(C).solve(f0=C.f0, K0=240.,J0=30.)
+    return C
+
+def MKValpha02(omega_f):
+    func = lambda: _MKValpha02(omega_f)
+    func.__name__ = _MKValpha02.__name__ + '%.2f'%omega_f
+    return Model(func)
+
+def _MKValpha00(omega_f):
+    C = _myModExpOmega(omega_f)
+    C.alpha = 0.0
+    C.Cs = 243.0809030395
+    C.Co = 134.8845428131
+    C.Cr = 81.7485401708
+    C.b = 0.0050770291
+    C.c = -0.0009275951
+    Wrapper(C).solve(f0=C.f0, K0=240.,J0=30.)
+    return C
+
+def MKValpha00(omega_f):
+    func = lambda: _MKValpha00(omega_f)
+    func.__name__ = _MKValpha00.__name__ + '%.2f'%omega_f
+    return Model(func)
+
 def myMod_L(beta, gamma):
     def _myMod_L():
         return __myMod_L(beta, gamma)
     _myMod_L.__name__ = '_myMod_Lb=%1.2f g=%1.2f'%(beta, gamma)
     return Model(_myMod_L)
+
+def _OmegaWide(omega_f):
+    C = _myModExpOmega(omega_f)
+    C.omega_a2 = 30.
+    return C
+
+def OmegaWide(omega_f):
+    func = lambda: _OmegaWide(omega_f)
+    func.__name__ = _OmegaWide.__name__ + '%.2f'%omega_f
+    return Model(func)
 
 def myMod():
     return Model(_myMod)
