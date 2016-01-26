@@ -1585,7 +1585,8 @@ class Model(Wrapper):
 
         mods = []
         if hyper:
-            mods = [self.hyper, self.hyper_phi, self.hyper_phi_sigma]
+            # mods = [self.hyper, self.hyper_phi, self.hyper_phi_sigma]
+            mods = [self.hyper_phi, self.hyper_phi_sigma]
             # mods = [self.hyper_phi_sigma]
         for s in mods:
             s.dumpEos()

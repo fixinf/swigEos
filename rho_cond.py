@@ -10,8 +10,16 @@ from matplotlib import pyplot as plt
 import Models2
 
 wr = Models2.MKValpha00(0.68)
+# wr = Models2.myMod()
+# wr= Models2.KVOR()
 C = wr.nucl.C
-
+wr.dumpProps()
+# wr.hyper.dumpEos()
+exit()
+# wr.dumpAll(hyper=1)
+#
+# wr.dumpScalings()
+exit()
 nrange = np.linspace(0.5, 5, 1000)
 init = [0.01, 0.2, 0.5]
 nr_list = []
