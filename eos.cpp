@@ -103,6 +103,59 @@ namespace calc{
 
 	}
 
+    double mu_rho(double * n,  int dimN, int i, double mu_c, set_const * C){
+		int sp = 1 + C->sprime;
+		i = i - sp;
+		double out[5];
+		potentials(n, dimN, out, 5, C);
+
+		double sum_o = 0;
+		double sum_r = 0;
+		double sum_phi = 0;
+
+		for (int j = sp; j < dimN; j++){
+			sum_o += n[j] * C->X_o[j-sp];
+			sum_r += n[j]*(C->T)[j-sp] * C->X_r[j-sp];
+			if (C->phi_meson){
+				sum_phi += n[j]*C->X_p[j-sp];
+			}
+		}
+
+		double f = n[0];
+		double fp = 0.0;
+		if (C->sprime){
+			fp = n[1];
+		}
+		double xs = 0.;
+		if (C->sigma_kind == 0){
+			xs = C->X_s[i];
+		}
+		else{
+			xs = C->Xs(i, f);
+		}
+		double m_eff_arg = xs*(C->M[0]/C->M[i])*f + C->X_sp[i]*(C->M[0]/C->M[i])*fp;
+//		printf("f = %f, m_eff_arg = %f \n", f, m_eff_arg);
+		double m_eff = C->M[i] * C->phi_n(i,m_eff_arg);
+		double res = sqrt(pow(p_f(n[i + sp], 2*C->S[i] + 1), 2.0) + pow(m_eff, 2.0));
+//		double res = 0.0;
+		res += C->X_o[i]*out[2];
+		res += C->X_r[i]*C->T[i]*out[3];
+		res += C->X_p[i]*out[4];
+//		printf("mu[%i] res = %f \n", i, res);
+
+		///////////////Rho-condensate contribution//////////////
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) *
+    		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+
+    	if (fabs(sum_r) > n_rho/2){
+    		res -= C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_r) - n_rho/2) * C->X_r[i] * C->T[i] *
+    				((sum_r > 0) - (sum_r<0));
+    	}
+
+		return res;
+
+    }
+
 	double mu(double * n, int dimN, int i, set_const * C){
 //		bool debug = false;
 //		double dn = 1e-3;
@@ -473,7 +526,7 @@ double _E(double * n, int dimN, set_const * C, double * out, int dim_Out){
 
 
 double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, int dim_inplace){
-	bool debug = 1;
+	bool debug = 0;
 	bool ret_parts = (inplace) && (dim_inplace == 10);
 	if (debug){
 		printf("n = ");
@@ -554,10 +607,16 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
 
 	double E_r =  C->Cr * sum_t3*sum_t3/(2.0*C->M[0]*C->M[0]*C->eta_r(f));
-	if (abs(sum_t3) > n_rho/2){
-	    E_r -= C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(abs(sum_t3) - n_rho/2, 2.);
+	if (debug){
+		printf("sum_t3 = %f, n_rho = %f, E_r = %f \n", sum_t3, n_rho, E_r);
+		printf("Check fabs(sum_t3) > n_rho/2: %i \n", fabs(sum_t3) > n_rho/2);
 	}
-        printf("sum_t3 = %f, n_rho = %f, E_r = %f \n", sum_t3, n_rho, E_r);
+	if (fabs(sum_t3) > n_rho/2){
+	    E_r -= C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(fabs(sum_t3) - n_rho/2, 2.);
+	    if (debug)
+	    printf("rho-condensate on! E_c = %.6f \n", C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(fabs(sum_t3) - n_rho/2, 2.));
+	};
+
 	//phi
 	double part_phi = pow(m_o/m_p ,2.0)*C->Co * sum_p*sum_p/(2.0*C->M[0]*C->M[0]*C->eta_p(f));
 	res += part_phi;
@@ -639,8 +698,8 @@ void stepE(double n, double * init, int initN, double * f_init, int dimF_init, d
 //		if (i > 2) lb[i] = -100500.0;
 	}
 
-	opts[0]= 100*LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-24;
-		opts[4]= -1e-2;
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
+		opts[4]= -1e-5;
 	dlevmar_bc_dif(calc::fun_n_eq, x, NULL, m, m, lb, NULL, NULL, iter, opts, info, NULL, NULL, &p);
 //	dlevmar_dif(calc::fun_n_eq, x, NULL, m, m, 2000, opts, NULL, NULL, NULL, &p);
 

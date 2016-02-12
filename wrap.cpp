@@ -9357,6 +9357,59 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_mu_rho(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double *arg1 = (double *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double arg4 ;
+  set_const *arg5 = (set_const *) 0 ;
+  PyArrayObject *array1 = NULL ;
+  int i1 = 1 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:mu_rho",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  {
+    array1 = obj_to_array_no_conversion(obj0, NPY_DOUBLE);
+    if (!array1 || !require_dimensions(array1,1) || !require_contiguous(array1)
+      || !require_native(array1)) SWIG_fail;
+    arg1 = (double*) array_data(array1);
+    arg2 = 1;
+    for (i1=0; i1 < array_numdims(array1); ++i1) arg2 *= array_size(array1,i1);
+  }
+  ecode3 = SWIG_AsVal_int(obj1, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "mu_rho" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_double(obj2, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "mu_rho" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  res5 = SWIG_ConvertPtr(obj3, &argp5,SWIGTYPE_p_set_const, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "mu_rho" "', argument " "5"" of type '" "set_const *""'"); 
+  }
+  arg5 = reinterpret_cast< set_const * >(argp5);
+  result = (double)calc::mu_rho(arg1,arg2,arg3,arg4,arg5);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_sumTest(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double *arg1 = (double *) 0 ;
@@ -19861,6 +19914,37 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_KVDriver_dEofN(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  KVDriver *arg1 = (KVDriver *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:KVDriver_dEofN",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_KVDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "KVDriver_dEofN" "', argument " "1"" of type '" "KVDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< KVDriver * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "KVDriver_dEofN" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->dEofN(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_KVDriver_PofN(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   KVDriver *arg1 = (KVDriver *) 0 ;
@@ -22433,6 +22517,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"p_f", _wrap_p_f, METH_VARARGS, NULL},
 	 { (char *)"mu", _wrap_mu, METH_VARARGS, NULL},
 	 { (char *)"mu_deriv", _wrap_mu_deriv, METH_VARARGS, NULL},
+	 { (char *)"mu_rho", _wrap_mu_rho, METH_VARARGS, NULL},
 	 { (char *)"sumTest", _wrap_sumTest, METH_VARARGS, NULL},
 	 { (char *)"sumTest2", _wrap_sumTest2, METH_VARARGS, NULL},
 	 { (char *)"solveF", _wrap_solveF, METH_VARARGS, NULL},
@@ -22827,6 +22912,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"KVDriver_NofE", _wrap_KVDriver_NofE, METH_VARARGS, NULL},
 	 { (char *)"KVDriver_EofP", _wrap_KVDriver_EofP, METH_VARARGS, NULL},
 	 { (char *)"KVDriver_EofN", _wrap_KVDriver_EofN, METH_VARARGS, NULL},
+	 { (char *)"KVDriver_dEofN", _wrap_KVDriver_dEofN, METH_VARARGS, NULL},
 	 { (char *)"KVDriver_PofN", _wrap_KVDriver_PofN, METH_VARARGS, NULL},
 	 { (char *)"KVDriver_lookFor", _wrap_KVDriver_lookFor, METH_VARARGS, NULL},
 	 { (char *)"KVDriver_set", _wrap_KVDriver_set, METH_VARARGS, NULL},

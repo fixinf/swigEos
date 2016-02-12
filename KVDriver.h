@@ -41,6 +41,7 @@ public:
 	double NofE(double);
 	double EofP(double);
 	double EofN(double);
+	double dEofN(double);
 	double PofN(double);
 	int lookFor(double * src, int dim_src, double what);
 	void set(double * E, int dimE, double * P, int dimP, double * n, int dimN);

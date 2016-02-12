@@ -11,6 +11,7 @@
 #include <cstdio>
 //#include <fstream>
 #include <gsl/gsl_interp.h>
+#include <gsl/gsl_errno.h>
 #include <iostream>
 
 
@@ -39,12 +40,32 @@ double KVDriver::EofP(double P){
 	return gsl_spline_eval(iEofP, P, accEofP);
 }
 
+void interp_error_handler(const char * reason,
+      const char * file,
+	  int line,
+	  int gsl_errno){
+	cout << "GSL error, doing nothing yet!" << endl;
+}
+
 double KVDriver::EofN(double N){
-	return gsl_spline_eval(iEofN, N, accEofN);
+	gsl_error_handler_t * old_handler;
+	old_handler = gsl_set_error_handler_off();
+	try{
+		return gsl_spline_eval(iEofN, N, accEofN);
+	}
+	catch (int e){
+		cout << "Error caught: " << e << endl;
+		return 0.;
+	}
+	gsl_set_error_handler(old_handler);
 }
 
 double KVDriver::PofN(double N){
 	return gsl_spline_eval(iPofN, N, accPofN);
+}
+
+double KVDriver::dEofN(double N){
+	return gsl_spline_eval_deriv(iEofN, N, accEofN);
 }
 
 int KVDriver::lookFor(double* src, int dim_src, double what) {
