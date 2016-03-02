@@ -194,7 +194,7 @@ void f_eq(double * n, int dimN, double * init, int dimInit, double * res, int di
 }
 
 void func_f_eq_rho(double * p, double * hx, int m, int _n, void * adata){
-	bool debug = 1;
+	bool debug = 0;
 	func_f_eq_params_rho * params = (func_f_eq_params_rho *) adata;
 	double mu_c = params->mu_c;
 	bool sprime = (params->C->sprime and (m > 1));
