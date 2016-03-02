@@ -1,20 +1,43 @@
 __author__ = 'const'
 import matplotlib
 matplotlib.use("QT5Agg")
-from rho_wrap import *
+from RhoCond.rho_wrap import *
 import numpy as np
-import eosWrap as eos
-
 
 from matplotlib import pyplot as plt
 import Models2
 
-wr = Models2.MKValpha00(0.68)
+wr = Models2.myModExpOmega(0.68)
+# wr = Models2.MKValpha00(0.68)
 # wr = Models2.myMod()
 # wr= Models2.KVOR()
-C = wr.nucl.C
-wr.dumpProps()
+# C = wr.nucl.C
+# Cwr.sym.dumpJ()
+# exit()
+# wr.dumpProps()
+# wr.dumpUofE()
+# wr.dumpUofE_anti()
+# wr.nucl.dumpScalingsN()
+# wr.dumpScalings()
+# wr.dumpAll(hyper=0)
+
+# wr.hyper_phi.dumpEos()
+# wr.hyper_phi.dumpMassesCrust()
+# wr.hyper_phi_sigma.dumpEos()
+# wr.hyper_phi_sigma.dumpMassesCrust()
+
+# wr.delta_sym.dumpEos()
+
+wr.delta_phi.dumpEos()
+wr.delta_phi.dumpMassesCrust()
+
+wr.delta_phi_sigma.dumpEos()
+wr.delta_phi_sigma.dumpMassesCrust()
+
+
+# wr.dumpAll(hyper=0)
 # wr.hyper.dumpEos()
+print("Passed")
 exit()
 # wr.dumpAll(hyper=1)
 #

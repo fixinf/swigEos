@@ -38,8 +38,8 @@ class Wrapper(object):
         self.mpi4_2_mevfm3 = self.m_pi * (self.m_pi / 197.33) ** 3
         self.mpi3tofmm3 = (self.m_pi/197.33)**3
         self.nmin = 0.
-        self.nmax = 11*self.n0
-        self.npoints = 1000
+        self.nmax = 6*self.n0
+        self.npoints = 200
         gamma = 1
         self.nrange = np.linspace(self.nmin, self.nmax**gamma, self.npoints,
                                   endpoint=False)**(1/gamma)
@@ -68,7 +68,7 @@ class Wrapper(object):
     def loadEos(self):
         raise NotImplementedError("Method should be overloaded")
 
-    def reset(self, iterations=30, timeout=6):
+    def reset(self, iterations=30, timeout=None):
         """Calculates the EoS stored in the wrapper. Has to be overriden in
         Symm, Neutron. 
         
@@ -298,7 +298,31 @@ class Wrapper(object):
         # plt.plot(np.diff(finalE))
         # plt.show()
 
+        finalN_low, finalE, finalP = self.md.rawN, self.md.rawE, self.md.rawP
+        self.dr = eos.KVDriver(finalE, finalP, finalN_low*self.n0)
+
         if show:
+            drE = arr([self.dr.EofN(z) for z in finalN*self.n0])
+            drP = arr([self.dr.PofN(z) for z in finalN*self.n0])
+            drDe = arr([
+                derivative(self.dr.EofN, z, dx=1e-6, order=3) for z in finalN*self.n0
+            ])
+            drDe2 = arr([self.dr.dEofN(z) for z in finalN*self.n0])
+            np.savetxt('MKVOR_4EE.dat', np.array([finalN*self.n0, drE, drP]).transpose(), fmt='%.16e')
+            print(drP)
+            # lines = plt.plot(finalN, drE, n, arr(e)/self.m_pi**4, N, arr(E)/self.m_pi**4)
+            lines = plt.plot(drE, drP, arr(e)/self.m_pi**4, arr(p)/self.m_pi**4, arr(E)/self.m_pi**4, arr(P)/self.m_pi**4)
+            plt.show()
+
+            lines = plt.plot(finalN, drE/finalN, n, arr(e)/n/self.m_pi**4, N, arr(E)/N/self.m_pi**4)
+            # lines = plt.plot(finalN, finalP, finalN)
+            plt.xlabel(r'$n/n_0$', fontsize=18)
+            plt.xlim([0, 2])
+            plt.ylabel(r'$P \, [MeV^4] $', fontsize=18)
+            plt.legend(lines, ['interpolated', 'crust', 'RMF'], loc=0)
+            plt.show()
+
+            # np.savetxt('driver_crustKVOR.dat', np.array([finalN, drE, drP]).transpose(), fmt='%.8f')
             lines = plt.plot(finalN, finalP * self.m_pi ** 4, n, p, N, P)
             plt.xlabel(r'$n/n_0$', fontsize=18)
             plt.xlim([0, 2])
@@ -313,13 +337,14 @@ class Wrapper(object):
             plt.legend(lines, ['interpolated', 'crust', 'RMF'], loc=0)
             plt.show()
 
+
+
         if crustName is not None:
             tab = np.array([finalN, finalE, finalP]).transpose()
             table = tabulate(tab, ['n/n0', 'E', 'P'], tablefmt='plain')
             with open(crustName, 'w') as f:
                 f.write(table)
 
-        self.dr = eos.KVDriver(finalE, finalP, finalN*self.n0)
         if n_stars is None:
             n_stars = np.linspace(nmin, nmax, npoints)
 
@@ -333,6 +358,8 @@ class Wrapper(object):
         MR = []
         Mgrav = []
         str_fracs = []
+
+
         for _n in n_stars:
             print(_n)
             MR.append(eos.star_crust2(_n, 3, self.dr, 1e-10))
@@ -371,7 +398,7 @@ class Wrapper(object):
             return [n_stars, MR[:, 0], MR[:, 1], 931.5 / self.m_pi * MR[:, 2],
                     931.5 / self.m_pi * Mgrav]
 
-    def setCrust(self, inter, ncut_crust, ncut_eos):
+    def setCrust2(self, inter, ncut_crust, ncut_eos):
         E, P, N = self.EPN(self.nrange)
         P = P / self.mpi4_2_mevfm3
         N = N / self.n0
@@ -418,7 +445,7 @@ class Wrapper(object):
         iP = interpolate.interp1d(nlist, plist, kind=inter)
         iE = interpolate.interp1d(nlist, elist, kind=inter)
         gamma = 1. / 4.
-        iN = np.linspace(0, ncut_eos ** gamma, 10000)
+        iN = np.linspace(0, ncut_eos ** gamma, 1000)
         iN = iN ** (1. / gamma)
         crust_p = np.array(list(map(iP, iN)))
         crust_e = np.array(list(map(iE, iN)))
@@ -434,7 +461,76 @@ class Wrapper(object):
         finalP[0] = 0
         return E, N, P, e, finalE, finalN, finalP, n, p
 
-    def dumpScalings(self):
+    def setCrust(self, inter, ncut_crust, ncut_eos):
+        E, P, N = self.EPN(self.nrange)
+        P = P / self.mpi4_2_mevfm3
+        N = N / self.n0
+        print(self.Ctype.__name__)
+        np.savetxt('eos' + self.Ctype.__name__ + '.dat', arr([E, P, N]).transpose())
+        E *= self.m_pi ** 4
+        P *= self.m_pi ** 4
+        e = [0.]
+        p = [0.]
+        n = [0.]
+        # e = []
+        # p = []
+        # n = []
+        with open("/home/const/workspace/swigEosWrapper/crust.dat", 'r') as f:
+            for line in f:
+                # print line
+                _e, _p, _n = line.split()
+                if float(_n) < ncut_crust:
+                    e.append(float(_e))
+                    p.append(float(_p))
+                    n.append(float(_n))
+        crust = np.loadtxt("/home/const/workspace/swigEosWrapper/crust.dat")
+        crust[:, 0] /= self.m_pi ** 4
+        crust[:, 1] /= self.m_pi ** 4
+        np.savetxt('crust_export.dat', crust)
+        n_eos = 5
+        i_n_eos = np.argmin(abs(N - [ncut_eos for i in N]))
+        plist = np.append(p[:], P[i_n_eos:(i_n_eos + n_eos)])
+        elist = np.append(e[:], E[i_n_eos:(i_n_eos + n_eos)])
+        nlist = np.append(n[:], N[i_n_eos:(i_n_eos + n_eos)])
+
+        nraw = np.append(n[:], N[i_n_eos:])
+        praw = np.append(p[:], P[i_n_eos:])
+        eraw = np.append(e[:], E[i_n_eos:])
+
+        iEP = interp1d(eraw/self.m_pi**4, praw/self.m_pi**4, kind='cubic')
+        erange = np.linspace(0., max(eraw/self.m_pi**4), 1000)
+        np.savetxt('pe_' + self.__repr__() + '.dat', arr([erange, iEP(erange)]).transpose())
+        np.savetxt('np_' + self.__repr__() + '.dat', arr([]))
+
+        conc = self.concentrations()[i_n_eos:]
+        cr_conc = arr([[1.] + [0. for i in range(conc.shape[1]-1)] for n in e])
+        print(conc.shape, cr_conc.shape)
+        res_conc = np.append(cr_conc, conc, axis=0).transpose()
+        self.md.setRawEos(nraw, eraw/self.m_pi**4, praw/self.m_pi**4, res_conc)
+        # print(i_n_eos)
+        # print(P[i_n_eos:(i_n_eos + n_eos)])
+        # print(N[i_n_eos:(i_n_eos + n_eos)])
+        # exit()
+        iP = interpolate.interp1d(nlist, plist, kind=inter)
+        iE = interpolate.interp1d(nlist, elist, kind=inter)
+        gamma = 1. / 4.
+        iN = np.linspace(0, ncut_eos ** gamma, 1000)
+        iN = iN ** (1. / gamma)
+        crust_p = np.array(list(map(iP, iN)))
+        crust_e = np.array(list(map(iE, iN)))
+        np.savetxt(self.__repr__() + "crust_dense.dat", np.array([crust_e/self.m_pi**4,
+                                                crust_p/self.m_pi**4, iN]).transpose())
+        #         finalE = np.append(crust_e, E[i_n_eos+n_eos:])
+        #         finalP = np.append(crust_p, P[i_n_eos + n_eos:])
+        #         finalN = np.append(iN, N[i_n_eos+n_eos:])
+        finalE = np.append(crust_e, E[i_n_eos + n_eos:]) / self.m_pi ** 4
+        finalP = np.append(crust_p, P[i_n_eos + n_eos:]) / self.m_pi ** 4
+        finalN = np.append(iN, N[i_n_eos + n_eos:])
+        finalE[0] = 0
+        finalP[0] = 0
+        return E, N, P, e, finalE, finalN, finalP, n, p
+
+    def dumpScalingsN(self):
         E, f = self.E(self.nrange, ret_f=1)
         C = self.C
         tab = arr([[z, C.eta_s(z), C.eta_o(z), C.eta_r(z), C.phi_n(0, z), C.U(z)] for z in f])
@@ -1369,6 +1465,112 @@ class Delta(DeltaBase, Hyperon):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         # Delta.__init__(self, C, basefolder_suffix='')
 
+
+
+class Rho(Wrapper):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.nc = np.array([])
+
+    def reset(self, iterations=30, timeout=None):
+        """Calculates the EoS stored in the wrapper. Has to be overriden in
+        Symm, Neutron.
+
+        Calculates the particle composition, scalar field, energy density,
+        pressure, ... for the given parameter set self.C. Wrapper.set is
+        set to True after s succesful calculation.
+
+        Note: \sigma^* is not supported in the current version.
+
+        """
+
+        print("Resetting " + self.__repr__() + " for model " + self.Ctype.__name__.strip('_'))
+        init = arr([0. for i in range(self.n_baryon - 1)] + [0.])
+
+        rho = []
+
+        mu_e = []
+        nc = []
+        f = arr([0.])  # sp omitted
+        for i, _n in enumerate(self.nrange):
+
+            if timeout is None:
+                init = eos.stepE_rho(_n, init, f, len(init)+1, iterations, 0., self.C)
+            else:
+                queue = Queue()
+                p = Process(target=self.stepE_rho, args=(_n, init, f, len(init)+1,
+                                                  iterations, 0., self.C, queue))
+                p.start()
+                p.join(timeout)
+                if p.is_alive():
+                    p.terminate()
+                    print("timeout reached")
+                    self.rho = np.ascontiguousarray(rho[:])
+                    self.mu_e = np.ascontiguousarray(arr(mu_e))
+                    self.nrange = self.nrange[: self.rho.shape[0]]
+                    _E = [eos.E(z, self.C) for z in self.rho]
+                    self._E = np.ascontiguousarray(np.array(_E[:]))
+                    self._P = np.ascontiguousarray(self.P_chem(self.rho))
+                    self.set=1
+                    return
+                init = queue.get(timeout=None)
+
+                # print init
+            print(init)
+            if i % (len(self.nrange) / 20) == 0:
+                print('.', end=' ')
+
+            rho.append(init.copy()[:-2]) ## 2 reserved for mu_c and n_c
+            rho[i] = np.insert(rho[i], 0, _n - np.sum(rho[i]))
+            f = eos.f_eq(rho[i], f, 1, self.C)  # sp omitted
+            if self.verbose:
+                pass  # TODO: some verbose output
+            # rho contains all scalar fields as well
+            rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
+            mu_e.append(eos.mu(rho[i], 1, self.C) -
+                        eos.mu(rho[i], 2, self.C))
+            nc.append(init.copy()[-1])
+            init = init[:-1]
+
+        self.nc = np.ascontiguousarray(arr(nc))
+        self.rho = np.ascontiguousarray(arr(rho))
+        self.mu_e = np.ascontiguousarray(arr(mu_e))
+        eparts = []
+        _E = []
+        for z in self.rho:
+            epart = np.zeros((9), dtype='float')
+            _E.append(eos.E(z, self.C, epart))
+            eparts.append(epart)
+        self._E = np.array(_E)
+        self.Eparts = arr(eparts)
+        dEparts = []
+        for part in self.Eparts.transpose():
+            dEparts.append(np.gradient(part, self.nrange[1]-self.nrange[0]))
+        dEparts = arr(dEparts)
+        p1 = self.nrange * dEparts
+        self.Pparts = p1.transpose() - self.Eparts
+        # self._E = np.array(map(lambda z: eos.E(z, self.C), self.rho))
+        self._E = np.ascontiguousarray(self._E)
+        self._P = np.ascontiguousarray(self.P_chem(self.rho))
+        self.set = True
+
+
+class RhoNucleon(Rho, Nucleon):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+
+class RhoHyper(Rho, Hyperon):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+
+class RhoHyperPhi(Rho, HyperonPhi):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+
+class RhoHyperPhiSigma(Rho, HyperonPhiSigma):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+
 class DeltaOnly(DeltaBase, Hyperon):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
@@ -1475,6 +1677,11 @@ class Model(Wrapper):
         self.children = [self.nucl, self.sym, self.neutr, self.hyper,
                          self.hyper_phi, self.hyper_phi_sigma,
                          self.delta, self.delta_phi, self.delta_phi2, self.delta_sym, self.delta_only]
+
+        self.rcond_nucl = RhoNucleon(C, basefolder_suffix=basefolder_suffix)
+        self.rcond_hyper = RhoHyper(C, basefolder_suffix=basefolder_suffix)
+        self.rcond_hyper_phi = RhoHyperPhi(C, basefolder_suffix=basefolder_suffix)
+        self.rcond_hyper_phi_sigma = RhoHyperPhiSigma(C, basefolder_suffix=basefolder_suffix)
 
         if any([K0, f0, J0]):
             C = wr.C
@@ -1591,7 +1798,10 @@ class Model(Wrapper):
         for s in mods:
             s.dumpEos()
             s.dumpVs()
-            s.dumpMassesCrust(npoints=100)
+            try:
+                s.dumpMassesCrust(npoints=100)
+            except:
+                pass
             s.dumpMeff()
             s.dumpEtap()
 
