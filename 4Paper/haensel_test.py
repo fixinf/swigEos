@@ -65,14 +65,14 @@ P_stupid = np.array([iPEcrust(z) for z in erange[::-1] if z < E_join]  +
                     [iPEkv(z) for z in erange[::-1]  if z > E_join ])[::-1]
 print(P_stupid)
 print(E_s)
-# plt.plot(erange, iPE(erange))
-# plt.plot(erange, P_stupid)
-# plt.plot(erange, iPEkv(erange))
-# plt.plot(erange, iPEcrust(erange))
-# plt.legend()
-# plt.show()
+plt.plot(erange, iPE(erange))
+plt.plot(erange, P_stupid)
+plt.plot(erange, iPEkv(erange))
+plt.plot(erange, iPEcrust(erange))
+plt.legend()
+plt.show()
 
-iPE = interp1d(erange, P_stupid)
+# iPE = interp1d(erange, P_stupid)
 
 #####Stupid raw sum
 
@@ -142,7 +142,7 @@ print('eps_rel', epsdiff_rel)
 
 
 
-exit()
+# exit()
 
 out = np.array([erange * wr.mpi4_2_mevfm3,
                 Pnew * wr.mpi4_2_mevfm3,
@@ -156,7 +156,7 @@ out = np.array([erange * wr.mpi4_2_mevfm3,
                 erange/Ncrust * wr.m_pi]).transpose()
 
 
-np.savetxt('outKVOR_rude.dat', out, fmt='%.8f', header='# E | P_new | N_new | P_kv | N_kv | P_bps | N_bps |' +
+np.savetxt('out' + name + '07.dat', out, fmt='%.8f', header='# E | P_new | N_new | P_kv | N_kv | P_bps | N_bps |' +
            ' eps_new | eps_kv | eps.crust')
 
 

@@ -38,8 +38,8 @@ class Wrapper(object):
         self.mpi4_2_mevfm3 = self.m_pi * (self.m_pi / 197.33) ** 3
         self.mpi3tofmm3 = (self.m_pi/197.33)**3
         self.nmin = 0.
-        self.nmax = 6*self.n0
-        self.npoints = 200
+        self.nmax = 8*self.n0
+        self.npoints = 500
         gamma = 1
         self.nrange = np.linspace(self.nmin, self.nmax**gamma, self.npoints,
                                   endpoint=False)**(1/gamma)
@@ -829,13 +829,13 @@ class Wrapper(object):
                     du_list.append(1./(1 + (1 + (n_e/(n_e + n_mu))**(1./3))**3))
                 else:
                     du_list.append(0.11)
-        ne_list = arr(ne_list)
-        nmu_list = arr(nmu_list)
+        ne_list = arr(ne_list)/self.nrange
+        nmu_list = arr(nmu_list)/self.nrange
         du_list = arr(du_list)
         if ret_du:
             return [ne_list, nmu_list, du_list]
         else:
-            return [ne_list, nmu_list]
+            return np.array([ne_list, nmu_list])
 
     def mu(self, nrange=None):
         if nrange is None:
@@ -1471,6 +1471,15 @@ class Rho(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.nc = np.array([])
+        self.foldername = join(self.foldername, 'rcond')
+        if not os.path.exists(self.foldername):
+            os.makedirs(self.foldername)
+        self.filenames['rcond'] = 'rcond.dat'
+
+    def dumpEos(self, ):
+        super().dumpEos()
+        rcond = arr([self.nrange/self.n0, self.nc/self.nrange]).transpose()
+        np.savetxt(self.filenames['rcond'], rcond, fmt='%.8f')
 
     def reset(self, iterations=30, timeout=None):
         """Calculates the EoS stored in the wrapper. Has to be overriden in
@@ -1490,6 +1499,7 @@ class Rho(Wrapper):
         rho = []
 
         mu_e = []
+        mu_c = []
         nc = []
         f = arr([0.])  # sp omitted
         for i, _n in enumerate(self.nrange):
@@ -1527,19 +1537,20 @@ class Rho(Wrapper):
                 pass  # TODO: some verbose output
             # rho contains all scalar fields as well
             rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
-            mu_e.append(eos.mu(rho[i], 1, self.C) -
-                        eos.mu(rho[i], 2, self.C))
+            mu_e.append(init[-2])
+            mu_c.append(init[-2])
             nc.append(init.copy()[-1])
             init = init[:-1]
 
+        self.mu_c = np.array(mu_c)
         self.nc = np.ascontiguousarray(arr(nc))
         self.rho = np.ascontiguousarray(arr(rho))
         self.mu_e = np.ascontiguousarray(arr(mu_e))
         eparts = []
         _E = []
-        for z in self.rho:
+        for i, z in enumerate(self.rho):
             epart = np.zeros((9), dtype='float')
-            _E.append(eos.E(z, self.C, epart))
+            _E.append(eos.E_rho(z, self.mu_e[i], self.C, epart))
             eparts.append(epart)
         self._E = np.array(_E)
         self.Eparts = arr(eparts)
@@ -1553,6 +1564,51 @@ class Rho(Wrapper):
         self._E = np.ascontiguousarray(self._E)
         self._P = np.ascontiguousarray(self.P_chem(self.rho))
         self.set = True
+
+    def check_eq(self, n, C, f, init, mu=None):
+        params = eos.fun_n_eq_params();
+        params.C = C
+        params.n = n
+        f_init = eos.dArray(1)
+        f_init[0] = f
+        params.f_init = f_init
+        mu_min = 0.
+        mu_max = 300./self.m_pi
+        res = []
+        for mu_e in np.linspace(mu_min, mu_max, 100):
+            init[-2] = mu_e
+            res.append(eos.func_f_eq_rho_anal())
+
+
+    def P_chem(self, nlist, leptons=True):
+        res = []
+        sp = 1
+        for n in nlist:
+            n = arr(n)
+            mu_e = eos.mu(n, sp, self.C) - eos.mu(n, sp + 1, self.C)
+            n_e = 0.
+            n_mu = 0.
+            if (mu_e ** 2 - self.m_e ** 2 > 0):
+                n_e += (mu_e ** 2 - self.m_e ** 2) ** (1.5) / (3 * pi ** 2)
+
+            if (mu_e ** 2 - self.m_mu ** 2 > 0):
+                n_mu += (mu_e ** 2 - self.m_mu ** 2) ** (1.5) / (3 * pi ** 2)
+
+            if leptons:
+                E = eos.E(n, self.C)
+            else:
+                E = eos._E(n, self.C)
+
+            sum = 0.
+
+            for i, r in enumerate(n[sp:]):
+                sum += r * eos.mu(n, i + sp, self.C)
+
+            if leptons:
+                sum += n_e * mu_e + n_mu * mu_e
+
+            res.append(sum - E)
+        return np.array(res) * self.mpi4_2_mevfm3
 
 
 class RhoNucleon(Rho, Nucleon):
