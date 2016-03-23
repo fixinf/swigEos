@@ -493,6 +493,8 @@ namespace calc{
 			fp = out[1];
 		}
 
+
+
     	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) *
     		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
     	par->misc = 0.;
@@ -511,6 +513,8 @@ namespace calc{
 			hx[0] -= n_c;
 
 			par->misc = n_c;
+
+//			printf("sum_ch = %.6f, n_e = %.6f, n_mu = %.6f, n_c = %.6f \n", sum_ch, n_e, n_mu, n_c);
 		}
 
 		for (int i = 1; i < m-1; i++){

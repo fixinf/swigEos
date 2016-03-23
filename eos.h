@@ -39,6 +39,7 @@ namespace calc{
 	extern double mu(double * n, int dimN, int i, set_const * C);
 	extern double mu_deriv(double *n, int dimN, int i, double mu_c, set_const *C);
 	extern double mu_rho(double * n,  int dimN, int i, double mu_c, set_const * C);
+	extern void fun_n_eq_rho_anal(double * p, double * hx, int m, int n, void * adata);
 }
 
 extern float sumTest(double * in, int n);
