@@ -1011,7 +1011,7 @@ class Nucleon(Wrapper):
         try:
             eos_tab = np.loadtxt(join(self.foldername, self.filenames['eos']), skiprows=1)
         except:
-            return
+            raise
         self.nrange = eos_tab[:, 0] * self.n0
         self._E = eos_tab[:, 1]
         self._P = eos_tab[:, 2]
@@ -1568,6 +1568,16 @@ class Rho(Wrapper):
             os.makedirs(self.foldername)
         self.filenames['rcond'] = 'rcond.dat'
 
+    def mu(self, nrange=None):
+        if nrange is None:
+            nrange = self.nrange
+        self.check()
+        conc = self.rho
+        mu = []
+        for j, n in enumerate(conc):
+            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+        return arr(mu)
+
     def dumpEos(self):
         super().dumpEos()
 
@@ -1679,7 +1689,7 @@ class Rho(Wrapper):
             init[-2] = mu_e
             res.append(eos.func_f_eq_rho_anal())
 
-    def Efull(self, n, mu_e):
+    def Efull(self, n=None, mu_e=None):
         epart = np.zeros((9), dtype='float')
         E = eos.E_rho(n, mu_e, self.C, epart)
         n_e = 0.
@@ -1713,7 +1723,7 @@ class Rho(Wrapper):
                 n_mu += (mu_e ** 2 - self.m_mu ** 2) ** (1.5) / (3 * pi ** 2)
 
             if leptons:
-                E, epart = self.Efull(n, self.mu_e[i])
+                E, epart = self.Efull(n=n, mu_e=self.mu_e[i])
             else:
                 E = eos.E_rho(n, self.mu_e[i], self.C)
 

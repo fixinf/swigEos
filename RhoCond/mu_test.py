@@ -8,7 +8,7 @@ import Models2
 from RhoCond import rho_wrap as rw
 
 wr = Models2.KVOR()
-C = wr.C
+C = wr.hyper_phi.C
 
 n = 5.
 n_p = .5
@@ -16,7 +16,7 @@ mu_c = .5
 f = 0.2
 dx=1e-4
 
-n_in = np.array([f, n-n_p, n_p])
+n_in = np.array([f, n-n_p, n_p, n_p, n_p, n_p, n_p, n_p])
 
 print ('deriv = ', eos.mu_deriv(n_in, 1, mu_c, C))
 # print (eos.mu(n_in, 1, C))
