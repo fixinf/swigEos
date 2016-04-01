@@ -15,6 +15,7 @@
 #include "KVORmod2.h"
 #include "InterpolatedScalings.h"
 #include "SCDelta.h"
+#include "MKVOR.h"
 %}
 
 %include "std_vector.i"
@@ -45,6 +46,7 @@ namespace std{
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* x, int dimX)};
 %include "setconst.h"
 %include "KVOR.h"
+%include "MKVOR.h"
 %include "KVORmod.h"
 %include "KVORmod2.h"
 %include "Walecka.h"

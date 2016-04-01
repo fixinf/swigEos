@@ -32,6 +32,7 @@ extern void func_f_eq(double * p, double * hx, int m, int _n, void * adata);
 
 extern void f_eq_rho(double * n, int dimN, double * init, int dimInit, double * res, int dimRes, double mu_c, set_const * C);
 extern void func_f_eq_rho(double * p, double * hx, int m, int _n, void * adata);
+extern double wrap_func_feq_rho(double x, double * n, int dimN, double mu_c, set_const * C);
 
 extern double K(double n, set_const *C);
 extern double EBind(double * n, int dimN, set_const *C);

@@ -3024,30 +3024,33 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_KVORcut_d swig_types[12]
 #define SWIGTYPE_p_KVORcut_sigma_d swig_types[13]
 #define SWIGTYPE_p_KVORphi swig_types[14]
-#define SWIGTYPE_p_MKVOR_d swig_types[15]
-#define SWIGTYPE_p_SCDelta swig_types[16]
-#define SWIGTYPE_p_Walecka swig_types[17]
-#define SWIGTYPE_p_Walecka_d swig_types[18]
-#define SWIGTYPE_p_allocator_type swig_types[19]
-#define SWIGTYPE_p_char swig_types[20]
-#define SWIGTYPE_p_dArray swig_types[21]
-#define SWIGTYPE_p_difference_type swig_types[22]
-#define SWIGTYPE_p_double swig_types[23]
-#define SWIGTYPE_p_func_f_eq_params swig_types[24]
-#define SWIGTYPE_p_func_f_eq_params_rho swig_types[25]
-#define SWIGTYPE_p_p_PyObject swig_types[26]
-#define SWIGTYPE_p_set_const swig_types[27]
-#define SWIGTYPE_p_size_type swig_types[28]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[29]
-#define SWIGTYPE_p_std__invalid_argument swig_types[30]
-#define SWIGTYPE_p_std__string swig_types[31]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[32]
-#define SWIGTYPE_p_string swig_types[33]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[34]
-#define SWIGTYPE_p_value_type swig_types[35]
-#define SWIGTYPE_p_var swig_types[36]
-static swig_type_info *swig_types[38];
-static swig_module_info swig_module = {swig_types, 37, 0, 0, 0, 0};
+#define SWIGTYPE_p_MKVOR swig_types[15]
+#define SWIGTYPE_p_MKVOR2 swig_types[16]
+#define SWIGTYPE_p_MKVOR_d swig_types[17]
+#define SWIGTYPE_p_MKVOR_delta swig_types[18]
+#define SWIGTYPE_p_SCDelta swig_types[19]
+#define SWIGTYPE_p_Walecka swig_types[20]
+#define SWIGTYPE_p_Walecka_d swig_types[21]
+#define SWIGTYPE_p_allocator_type swig_types[22]
+#define SWIGTYPE_p_char swig_types[23]
+#define SWIGTYPE_p_dArray swig_types[24]
+#define SWIGTYPE_p_difference_type swig_types[25]
+#define SWIGTYPE_p_double swig_types[26]
+#define SWIGTYPE_p_func_f_eq_params swig_types[27]
+#define SWIGTYPE_p_func_f_eq_params_rho swig_types[28]
+#define SWIGTYPE_p_p_PyObject swig_types[29]
+#define SWIGTYPE_p_set_const swig_types[30]
+#define SWIGTYPE_p_size_type swig_types[31]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[32]
+#define SWIGTYPE_p_std__invalid_argument swig_types[33]
+#define SWIGTYPE_p_std__string swig_types[34]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[35]
+#define SWIGTYPE_p_string swig_types[36]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[37]
+#define SWIGTYPE_p_value_type swig_types[38]
+#define SWIGTYPE_p_var swig_types[39]
+static swig_type_info *swig_types[41];
+static swig_module_info swig_module = {swig_types, 40, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3166,6 +3169,7 @@ namespace swig {
 #include "KVORmod2.h"
 #include "InterpolatedScalings.h"
 #include "SCDelta.h"
+#include "MKVOR.h"
 
 
 #include <iostream>
@@ -12889,6 +12893,1074 @@ SWIGINTERN PyObject *KVOR_MD_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObje
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_MKVOR(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_MKVOR")) SWIG_fail;
+  result = (MKVOR *)new MKVOR();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MKVOR, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_phi_n(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  int arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:MKVOR_phi_n",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_phi_n" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_phi_n" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "MKVOR_phi_n" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  result = (double)(arg1)->phi_n(arg2,arg3);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_eta_s(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_eta_s",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_eta_s" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_eta_s" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->eta_s(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_eta_o(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_eta_o",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_eta_o" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_eta_o" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->eta_o(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_eta_r(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_eta_r",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_eta_r" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_eta_r" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->eta_r(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_eta_p(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_eta_p",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_eta_p" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_eta_p" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->eta_p(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_U(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_U",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_U" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_U" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->U(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_MKVOR(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_MKVOR",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MKVOR" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_phi_kind_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_phi_kind_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_phi_kind_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_phi_kind_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->phi_kind = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_phi_kind_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_phi_kind_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_phi_kind_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (int) ((arg1)->phi_kind);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_alpha_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_alpha_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_alpha_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_alpha_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->alpha = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_alpha_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_alpha_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_alpha_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->alpha);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_om_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_a_om_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_om_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_a_om_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->a_om = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_om_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_a_om_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_om_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->a_om);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_b_om_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_b_om_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_b_om_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_b_om_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->b_om = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_b_om_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_b_om_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_b_om_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->b_om);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_f_om_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_f_om_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_f_om_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_f_om_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->f_om = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_f_om_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_f_om_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_f_om_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->f_om);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_z_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_z_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_z_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_z_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->z = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_z_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_z_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_z_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->z);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_d_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_d_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_d_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_d_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->d = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_d_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_d_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_d_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->d);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r0_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_a_r0_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r0_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_a_r0_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->a_r0 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r0_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_a_r0_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r0_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->a_r0);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_a_r1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r1_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_a_r1_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->a_r1 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_a_r1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r1_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->a_r1);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_a_r2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r2_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_a_r2_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->a_r2 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_a_r2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r2_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->a_r2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r3_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_a_r3_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r3_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_a_r3_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->a_r3 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_a_r3_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_a_r3_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_a_r3_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->a_r3);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_beta_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_beta_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_beta_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_beta_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->beta = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_beta_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_beta_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_beta_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->beta);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_gamma_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_gamma_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_gamma_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_gamma_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->gamma = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_gamma_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_gamma_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_gamma_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->gamma);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_f_r_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_f_r_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_f_r_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_f_r_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->f_r = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_f_r_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_f_r_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_f_r_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->f_r);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_e_r_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_e_r_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_e_r_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_e_r_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->e_r = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_e_r_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_e_r_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_e_r_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->e_r);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_d_r_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR_d_r_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_d_r_set" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR_d_r_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->d_r = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR_d_r_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR *arg1 = (MKVOR *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR_d_r_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR_d_r_get" "', argument " "1"" of type '" "MKVOR *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR * >(argp1);
+  result = (double) ((arg1)->d_r);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *MKVOR_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_MKVOR, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_new_KVOR_mod(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   KVOR_mod *result = 0 ;
@@ -21243,6 +22315,59 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_wrap_func_feq_rho(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double arg1 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  double arg4 ;
+  set_const *arg5 = (set_const *) 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int i2 = 1 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:wrap_func_feq_rho",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "wrap_func_feq_rho" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = static_cast< double >(val1);
+  {
+    array2 = obj_to_array_no_conversion(obj1, NPY_DOUBLE);
+    if (!array2 || !require_dimensions(array2,1) || !require_contiguous(array2)
+      || !require_native(array2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = 1;
+    for (i2=0; i2 < array_numdims(array2); ++i2) arg3 *= array_size(array2,i2);
+  }
+  ecode4 = SWIG_AsVal_double(obj2, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "wrap_func_feq_rho" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  res5 = SWIG_ConvertPtr(obj3, &argp5,SWIGTYPE_p_set_const, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "wrap_func_feq_rho" "', argument " "5"" of type '" "set_const *""'"); 
+  }
+  arg5 = reinterpret_cast< set_const * >(argp5);
+  result = (double)wrap_func_feq_rho(arg1,arg2,arg3,arg4,arg5);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_K(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double arg1 ;
@@ -22500,6 +23625,462 @@ SWIGINTERN PyObject *KVORcut_sigma_d_swigregister(PyObject *SWIGUNUSEDPARM(self)
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_MKVOR_delta(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR_delta *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_MKVOR_delta")) SWIG_fail;
+  result = (MKVOR_delta *)new MKVOR_delta();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MKVOR_delta, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_MKVOR_delta(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR_delta *arg1 = (MKVOR_delta *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_MKVOR_delta",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR_delta, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MKVOR_delta" "', argument " "1"" of type '" "MKVOR_delta *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR_delta * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *MKVOR_delta_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_MKVOR_delta, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_new_MKVOR2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_MKVOR2")) SWIG_fail;
+  result = (MKVOR2 *)new MKVOR2();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MKVOR2, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_eta_o(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_eta_o",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_eta_o" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_eta_o" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->eta_o(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_eta_r(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_eta_r",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_eta_r" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_eta_r" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  result = (double)(arg1)->eta_r(arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_fcut_om_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_fcut_om_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_fcut_om_set" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_fcut_om_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->fcut_om = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_fcut_om_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR2_fcut_om_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_fcut_om_get" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  result = (double) ((arg1)->fcut_om);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_bcut_om_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_bcut_om_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_bcut_om_set" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_bcut_om_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->bcut_om = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_bcut_om_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR2_bcut_om_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_bcut_om_get" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  result = (double) ((arg1)->bcut_om);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_acut_om_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_acut_om_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_acut_om_set" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_acut_om_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->acut_om = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_acut_om_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR2_acut_om_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_acut_om_get" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  result = (double) ((arg1)->acut_om);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_fcut_rho_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_fcut_rho_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_fcut_rho_set" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_fcut_rho_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->fcut_rho = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_fcut_rho_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR2_fcut_rho_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_fcut_rho_get" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  result = (double) ((arg1)->fcut_rho);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_acut_rho_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_acut_rho_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_acut_rho_set" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_acut_rho_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->acut_rho = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_acut_rho_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR2_acut_rho_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_acut_rho_get" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  result = (double) ((arg1)->acut_rho);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_bcut_rho_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:MKVOR2_bcut_rho_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_bcut_rho_set" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MKVOR2_bcut_rho_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->bcut_rho = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_MKVOR2_bcut_rho_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:MKVOR2_bcut_rho_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MKVOR2_bcut_rho_get" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  result = (double) ((arg1)->bcut_rho);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_MKVOR2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  MKVOR2 *arg1 = (MKVOR2 *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_MKVOR2",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MKVOR2, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_MKVOR2" "', argument " "1"" of type '" "MKVOR2 *""'"); 
+  }
+  arg1 = reinterpret_cast< MKVOR2 * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *MKVOR2_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_MKVOR2, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"delete_SwigPyIterator", _wrap_delete_SwigPyIterator, METH_VARARGS, NULL},
@@ -22700,6 +24281,47 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"KVOR_MD_b_rho_get", _wrap_KVOR_MD_b_rho_get, METH_VARARGS, NULL},
 	 { (char *)"delete_KVOR_MD", _wrap_delete_KVOR_MD, METH_VARARGS, NULL},
 	 { (char *)"KVOR_MD_swigregister", KVOR_MD_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_MKVOR", _wrap_new_MKVOR, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_phi_n", _wrap_MKVOR_phi_n, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_eta_s", _wrap_MKVOR_eta_s, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_eta_o", _wrap_MKVOR_eta_o, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_eta_r", _wrap_MKVOR_eta_r, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_eta_p", _wrap_MKVOR_eta_p, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_U", _wrap_MKVOR_U, METH_VARARGS, NULL},
+	 { (char *)"delete_MKVOR", _wrap_delete_MKVOR, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_phi_kind_set", _wrap_MKVOR_phi_kind_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_phi_kind_get", _wrap_MKVOR_phi_kind_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_alpha_set", _wrap_MKVOR_alpha_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_alpha_get", _wrap_MKVOR_alpha_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_om_set", _wrap_MKVOR_a_om_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_om_get", _wrap_MKVOR_a_om_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_b_om_set", _wrap_MKVOR_b_om_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_b_om_get", _wrap_MKVOR_b_om_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_f_om_set", _wrap_MKVOR_f_om_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_f_om_get", _wrap_MKVOR_f_om_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_z_set", _wrap_MKVOR_z_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_z_get", _wrap_MKVOR_z_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_d_set", _wrap_MKVOR_d_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_d_get", _wrap_MKVOR_d_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r0_set", _wrap_MKVOR_a_r0_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r0_get", _wrap_MKVOR_a_r0_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r1_set", _wrap_MKVOR_a_r1_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r1_get", _wrap_MKVOR_a_r1_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r2_set", _wrap_MKVOR_a_r2_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r2_get", _wrap_MKVOR_a_r2_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r3_set", _wrap_MKVOR_a_r3_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_a_r3_get", _wrap_MKVOR_a_r3_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_beta_set", _wrap_MKVOR_beta_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_beta_get", _wrap_MKVOR_beta_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_gamma_set", _wrap_MKVOR_gamma_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_gamma_get", _wrap_MKVOR_gamma_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_f_r_set", _wrap_MKVOR_f_r_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_f_r_get", _wrap_MKVOR_f_r_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_e_r_set", _wrap_MKVOR_e_r_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_e_r_get", _wrap_MKVOR_e_r_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_d_r_set", _wrap_MKVOR_d_r_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_d_r_get", _wrap_MKVOR_d_r_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_swigregister", MKVOR_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_KVOR_mod", _wrap_new_KVOR_mod, METH_VARARGS, NULL},
 	 { (char *)"delete_KVOR_mod", _wrap_delete_KVOR_mod, METH_VARARGS, NULL},
 	 { (char *)"KVOR_mod_omega_f_set", _wrap_KVOR_mod_omega_f_set, METH_VARARGS, NULL},
@@ -23006,6 +24628,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"func_f_eq", _wrap_func_f_eq, METH_VARARGS, NULL},
 	 { (char *)"f_eq_rho", _wrap_f_eq_rho, METH_VARARGS, NULL},
 	 { (char *)"func_f_eq_rho", _wrap_func_f_eq_rho, METH_VARARGS, NULL},
+	 { (char *)"wrap_func_feq_rho", _wrap_wrap_func_feq_rho, METH_VARARGS, NULL},
 	 { (char *)"K", _wrap_K, METH_VARARGS, NULL},
 	 { (char *)"EBind", _wrap_EBind, METH_VARARGS, NULL},
 	 { (char *)"J", _wrap_J, METH_VARARGS, NULL},
@@ -23051,6 +24674,26 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_KVORcut_sigma_d", _wrap_new_KVORcut_sigma_d, METH_VARARGS, NULL},
 	 { (char *)"delete_KVORcut_sigma_d", _wrap_delete_KVORcut_sigma_d, METH_VARARGS, NULL},
 	 { (char *)"KVORcut_sigma_d_swigregister", KVORcut_sigma_d_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_MKVOR_delta", _wrap_new_MKVOR_delta, METH_VARARGS, NULL},
+	 { (char *)"delete_MKVOR_delta", _wrap_delete_MKVOR_delta, METH_VARARGS, NULL},
+	 { (char *)"MKVOR_delta_swigregister", MKVOR_delta_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_MKVOR2", _wrap_new_MKVOR2, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_eta_o", _wrap_MKVOR2_eta_o, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_eta_r", _wrap_MKVOR2_eta_r, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_fcut_om_set", _wrap_MKVOR2_fcut_om_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_fcut_om_get", _wrap_MKVOR2_fcut_om_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_bcut_om_set", _wrap_MKVOR2_bcut_om_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_bcut_om_get", _wrap_MKVOR2_bcut_om_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_acut_om_set", _wrap_MKVOR2_acut_om_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_acut_om_get", _wrap_MKVOR2_acut_om_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_fcut_rho_set", _wrap_MKVOR2_fcut_rho_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_fcut_rho_get", _wrap_MKVOR2_fcut_rho_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_acut_rho_set", _wrap_MKVOR2_acut_rho_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_acut_rho_get", _wrap_MKVOR2_acut_rho_get, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_bcut_rho_set", _wrap_MKVOR2_bcut_rho_set, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_bcut_rho_get", _wrap_MKVOR2_bcut_rho_get, METH_VARARGS, NULL},
+	 { (char *)"delete_MKVOR2", _wrap_delete_MKVOR2, METH_VARARGS, NULL},
+	 { (char *)"MKVOR2_swigregister", MKVOR2_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
@@ -23101,6 +24744,12 @@ static void *_p_KVORcut_dTo_p_SCDelta(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 }
 static void *_p_KVORcut_sigma_dTo_p_SCDelta(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((SCDelta *)  ((KVORcut_sigma_d *) x));
+}
+static void *_p_MKVOR_deltaTo_p_SCDelta(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((SCDelta *)  ((MKVOR_delta *) x));
+}
+static void *_p_MKVOR2To_p_SCDelta(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((SCDelta *)  ((MKVOR2 *) x));
 }
 static void *_p_KVOR_dTo_p_SCDelta(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((SCDelta *)  ((KVOR_d *) x));
@@ -23177,6 +24826,12 @@ static void *_p_MKVOR_dTo_p_KVOR_mod(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 static void *_p_Walecka_dTo_p_Walecka(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((Walecka *)  ((Walecka_d *) x));
 }
+static void *_p_MKVOR_deltaTo_p_MKVOR(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((MKVOR *)  ((MKVOR_delta *) x));
+}
+static void *_p_MKVOR2To_p_MKVOR(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((MKVOR *)  ((MKVOR2 *) x));
+}
 static void *_p_KVORcut_dTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((set_const *) (KVOR *)(KVOR_mod *)(KVOR_mod2 *)(KVOR_cut *) ((KVORcut_d *) x));
 }
@@ -23204,6 +24859,9 @@ static void *_p_KVOR_MDTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 static void *_p_KVORTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((set_const *)  ((KVOR *) x));
 }
+static void *_p_MKVOR2To_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((set_const *) (MKVOR *) ((MKVOR2 *) x));
+}
 static void *_p_KVOR_cutTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((set_const *) (KVOR *)(KVOR_mod *)(KVOR_mod2 *) ((KVOR_cut *) x));
 }
@@ -23213,11 +24871,14 @@ static void *_p_KVOR_cut_sigmaTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmem
 static void *_p_WaleckaTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((set_const *)  ((Walecka *) x));
 }
+static void *_p_KVOR_modTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((set_const *) (KVOR *) ((KVOR_mod *) x));
+}
 static void *_p_Walecka_dTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((set_const *) (Walecka *) ((Walecka_d *) x));
 }
-static void *_p_KVOR_modTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
-    return (void *)((set_const *) (KVOR *) ((KVOR_mod *) x));
+static void *_p_MKVOR_deltaTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((set_const *) (MKVOR *) ((MKVOR_delta *) x));
 }
 static void *_p_MKVOR_dTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((set_const *) (KVOR *)(KVOR_mod *)(KVOR_mod2 *) ((MKVOR_d *) x));
@@ -23227,6 +24888,9 @@ static void *_p_InterpolatedScalingsTo_p_set_const(void *x, int *SWIGUNUSEDPARM(
 }
 static void *_p_ImprovedLDParamTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((set_const *) (KVOR *)(KVOR_mod *)(KVOR_mod2 *) ((ImprovedLDParam *) x));
+}
+static void *_p_MKVORTo_p_set_const(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((set_const *)  ((MKVOR *) x));
 }
 static swig_type_info _swigt__p_DriverBase = {"_p_DriverBase", "DriverBase *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ImprovedLDParam = {"_p_ImprovedLDParam", "ImprovedLDParam *", 0, 0, (void*)0, 0};
@@ -23243,7 +24907,10 @@ static swig_type_info _swigt__p_KVOR_mod2 = {"_p_KVOR_mod2", "KVOR_mod2 *", 0, 0
 static swig_type_info _swigt__p_KVORcut_d = {"_p_KVORcut_d", "KVORcut_d *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_KVORcut_sigma_d = {"_p_KVORcut_sigma_d", "KVORcut_sigma_d *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_KVORphi = {"_p_KVORphi", "KVORphi *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_MKVOR = {"_p_MKVOR", "MKVOR *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_MKVOR2 = {"_p_MKVOR2", "MKVOR2 *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_MKVOR_d = {"_p_MKVOR_d", "MKVOR_d *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_MKVOR_delta = {"_p_MKVOR_delta", "MKVOR_delta *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SCDelta = {"_p_SCDelta", "SCDelta *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Walecka = {"_p_Walecka", "Walecka *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Walecka_d = {"_p_Walecka_d", "Walecka_d *", 0, 0, (void*)0, 0};
@@ -23282,7 +24949,10 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_KVORcut_d,
   &_swigt__p_KVORcut_sigma_d,
   &_swigt__p_KVORphi,
+  &_swigt__p_MKVOR,
+  &_swigt__p_MKVOR2,
   &_swigt__p_MKVOR_d,
+  &_swigt__p_MKVOR_delta,
   &_swigt__p_SCDelta,
   &_swigt__p_Walecka,
   &_swigt__p_Walecka_d,
@@ -23321,8 +24991,11 @@ static swig_cast_info _swigc__p_KVOR_mod2[] = {  {&_swigt__p_KVOR_mod2, 0, 0, 0}
 static swig_cast_info _swigc__p_KVORcut_d[] = {  {&_swigt__p_KVORcut_d, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_KVORcut_sigma_d[] = {  {&_swigt__p_KVORcut_sigma_d, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_KVORphi[] = {  {&_swigt__p_KVORphi, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_MKVOR[] = {  {&_swigt__p_MKVOR, 0, 0, 0},  {&_swigt__p_MKVOR_delta, _p_MKVOR_deltaTo_p_MKVOR, 0, 0},  {&_swigt__p_MKVOR2, _p_MKVOR2To_p_MKVOR, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_MKVOR2[] = {  {&_swigt__p_MKVOR2, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_MKVOR_d[] = {  {&_swigt__p_MKVOR_d, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_SCDelta[] = {  {&_swigt__p_SCDelta, 0, 0, 0},  {&_swigt__p_KVORcut_d, _p_KVORcut_dTo_p_SCDelta, 0, 0},  {&_swigt__p_KVORcut_sigma_d, _p_KVORcut_sigma_dTo_p_SCDelta, 0, 0},  {&_swigt__p_KVOR_d, _p_KVOR_dTo_p_SCDelta, 0, 0},  {&_swigt__p_Walecka_d, _p_Walecka_dTo_p_SCDelta, 0, 0},  {&_swigt__p_MKVOR_d, _p_MKVOR_dTo_p_SCDelta, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_MKVOR_delta[] = {  {&_swigt__p_MKVOR_delta, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_SCDelta[] = {  {&_swigt__p_SCDelta, 0, 0, 0},  {&_swigt__p_KVORcut_d, _p_KVORcut_dTo_p_SCDelta, 0, 0},  {&_swigt__p_KVORcut_sigma_d, _p_KVORcut_sigma_dTo_p_SCDelta, 0, 0},  {&_swigt__p_MKVOR_delta, _p_MKVOR_deltaTo_p_SCDelta, 0, 0},  {&_swigt__p_MKVOR2, _p_MKVOR2To_p_SCDelta, 0, 0},  {&_swigt__p_KVOR_d, _p_KVOR_dTo_p_SCDelta, 0, 0},  {&_swigt__p_Walecka_d, _p_Walecka_dTo_p_SCDelta, 0, 0},  {&_swigt__p_MKVOR_d, _p_MKVOR_dTo_p_SCDelta, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Walecka[] = {  {&_swigt__p_Walecka, 0, 0, 0},  {&_swigt__p_Walecka_d, _p_Walecka_dTo_p_Walecka, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Walecka_d[] = {  {&_swigt__p_Walecka_d, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type, 0, 0, 0},{0, 0, 0, 0}};
@@ -23333,7 +25006,7 @@ static swig_cast_info _swigc__p_double[] = {  {&_swigt__p_double, 0, 0, 0},  {&_
 static swig_cast_info _swigc__p_func_f_eq_params[] = {  {&_swigt__p_func_f_eq_params, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_func_f_eq_params_rho[] = {  {&_swigt__p_func_f_eq_params_rho, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_PyObject[] = {  {&_swigt__p_p_PyObject, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_set_const[] = {  {&_swigt__p_KVORcut_d, _p_KVORcut_dTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_cut_rho, _p_KVOR_cut_rhoTo_p_set_const, 0, 0},  {&_swigt__p_SCDelta, _p_SCDeltaTo_p_set_const, 0, 0},  {&_swigt__p_KVORcut_sigma_d, _p_KVORcut_sigma_dTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_mod2, _p_KVOR_mod2To_p_set_const, 0, 0},  {&_swigt__p_KVORphi, _p_KVORphiTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_MD, _p_KVOR_MDTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_cut, _p_KVOR_cutTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_cut_sigma, _p_KVOR_cut_sigmaTo_p_set_const, 0, 0},  {&_swigt__p_Walecka, _p_WaleckaTo_p_set_const, 0, 0},  {&_swigt__p_Walecka_d, _p_Walecka_dTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_mod, _p_KVOR_modTo_p_set_const, 0, 0},  {&_swigt__p_set_const, 0, 0, 0},  {&_swigt__p_KVOR, _p_KVORTo_p_set_const, 0, 0},  {&_swigt__p_MKVOR_d, _p_MKVOR_dTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_d, _p_KVOR_dTo_p_set_const, 0, 0},  {&_swigt__p_InterpolatedScalings, _p_InterpolatedScalingsTo_p_set_const, 0, 0},  {&_swigt__p_ImprovedLDParam, _p_ImprovedLDParamTo_p_set_const, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_set_const[] = {  {&_swigt__p_KVORcut_d, _p_KVORcut_dTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_cut_rho, _p_KVOR_cut_rhoTo_p_set_const, 0, 0},  {&_swigt__p_SCDelta, _p_SCDeltaTo_p_set_const, 0, 0},  {&_swigt__p_KVORcut_sigma_d, _p_KVORcut_sigma_dTo_p_set_const, 0, 0},  {&_swigt__p_MKVOR2, _p_MKVOR2To_p_set_const, 0, 0},  {&_swigt__p_KVOR_mod2, _p_KVOR_mod2To_p_set_const, 0, 0},  {&_swigt__p_KVORphi, _p_KVORphiTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_MD, _p_KVOR_MDTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_cut, _p_KVOR_cutTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_cut_sigma, _p_KVOR_cut_sigmaTo_p_set_const, 0, 0},  {&_swigt__p_MKVOR, _p_MKVORTo_p_set_const, 0, 0},  {&_swigt__p_Walecka, _p_WaleckaTo_p_set_const, 0, 0},  {&_swigt__p_Walecka_d, _p_Walecka_dTo_p_set_const, 0, 0},  {&_swigt__p_MKVOR_delta, _p_MKVOR_deltaTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_mod, _p_KVOR_modTo_p_set_const, 0, 0},  {&_swigt__p_set_const, 0, 0, 0},  {&_swigt__p_KVOR, _p_KVORTo_p_set_const, 0, 0},  {&_swigt__p_MKVOR_d, _p_MKVOR_dTo_p_set_const, 0, 0},  {&_swigt__p_KVOR_d, _p_KVOR_dTo_p_set_const, 0, 0},  {&_swigt__p_InterpolatedScalings, _p_InterpolatedScalingsTo_p_set_const, 0, 0},  {&_swigt__p_ImprovedLDParam, _p_ImprovedLDParamTo_p_set_const, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_double_t[] = {  {&_swigt__p_std__allocatorT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__invalid_argument[] = {  {&_swigt__p_std__invalid_argument, 0, 0, 0},{0, 0, 0, 0}};
@@ -23360,7 +25033,10 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_KVORcut_d,
   _swigc__p_KVORcut_sigma_d,
   _swigc__p_KVORphi,
+  _swigc__p_MKVOR,
+  _swigc__p_MKVOR2,
   _swigc__p_MKVOR_d,
+  _swigc__p_MKVOR_delta,
   _swigc__p_SCDelta,
   _swigc__p_Walecka,
   _swigc__p_Walecka_d,

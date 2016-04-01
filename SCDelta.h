@@ -10,6 +10,7 @@
 #include "KVOR.h"
 #include "Walecka.h"
 #include "KVORmod2.h"
+#include "MKVOR.h"
 
 class SCDelta: virtual public set_const {
 public:
@@ -81,4 +82,41 @@ public:
     }
 };
 
+class MKVOR_delta: public MKVOR, public SCDelta{
+public:
+    MKVOR_delta(): MKVOR(), SCDelta(){
+
+    }
+};
+
+class MKVOR2: public MKVOR, public SCDelta{
+public:
+    MKVOR2() : MKVOR(), SCDelta(){
+        this->fcut_om = 100500.;
+        this->fcut_rho = 100500.;
+        this->acut_rho = 1;
+        this->acut_om = 1;
+
+        this->bcut_rho = 1;
+        this->bcut_om = 1;
+    }
+
+    double eta_o(double f){
+        return MKVOR::eta_o(f) * 0.5 * acut_om * (1
+                - pow(tanh(bcut_om * (f - fcut_om)), 1));
+    }
+
+    double eta_r(double f){
+        return MKVOR::eta_r(f) * 0.5 * acut_rho * (1
+                - pow(tanh(bcut_rho * (f - fcut_rho)), 1));
+    }
+
+    double fcut_om;
+    double bcut_om;
+    double acut_om;
+
+    double fcut_rho;
+    double acut_rho;
+    double bcut_rho;
+};
 #endif //EOSWRAP_SCDELTA_H

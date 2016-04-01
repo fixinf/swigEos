@@ -220,29 +220,6 @@ void func_f_eq_rho(double * p, double * hx, int m, int _n, void * adata){
 	if (!anal){
 	double dE;
 	for (int i = 0; i < m; i++){
-//		n[i] += params->df;
-//
-//		dE = _E(n, params->dimN + m, params->C);
-//		n[i] -= params->df;
-//		dE -= _E(n, params->dimN + m, params->C);
-//		dE /= params->df;
-//		hx[i] = dE;
-//		n[i] += params->df;
-
-//Increased precision:
-//		n[i] += 2*params->df;
-//		double dE = -0.25*_E(n, params->dimN + m, params->C);
-//		n[i] -= params->df;
-//		dE += 2*_E(n, params->dimN + m, params->C);
-//		n[i] -= 2*params->df;
-//		dE += -2*_E(n, params->dimN + m, params->C);
-//		n[i] -= params->df;
-//		dE += 0.25*_E(n, params->dimN + m, params->C);
-//		n[i] += 2*params->df;
-//		dE /= 3*params->df;
-//		hx[i] = dE;
-
-//WE NEED MORE!
 		n[i] += 3*df;
 		double dE = E_rho(n, params->dimN + m, mu_c, params->C);
 		n[i] -= df;
@@ -270,6 +247,14 @@ void func_f_eq_rho(double * p, double * hx, int m, int _n, void * adata){
 	else{
 
 	}
+}
+
+double wrap_func_feq_rho(double x, double * n, int dimN, double mu_c, set_const * C){
+    double p[1] = {x};
+    double hx[1];
+    func_f_eq_params_rho params = {n, dimN, 1e-5, C, mu_c};
+    func_f_eq_rho(p, hx, 1, 1, &params);
+    return hx[0];
 }
 
 void f_eq_rho(double * n, int dimN, double * init, int dimInit, double * res, int dimRes, double mu_c, set_const * C){

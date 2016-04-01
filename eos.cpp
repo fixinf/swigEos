@@ -535,7 +535,7 @@ namespace calc{
 					2.0);
 
 	    	if (fabs(sum_rho) > n_rho/2){
-	    		res -= C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_rho) - n_rho/2) * C->X_r[i] * C->T[i] *
+	    		res += C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_rho) - n_rho/2) * C->X_r[i] * C->T[i] *
 	    				((sum_rho > 0) - (sum_rho <0));
 	    	}
 
