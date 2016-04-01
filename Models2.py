@@ -186,6 +186,103 @@ def _myMod():
     # wr.solve(f0=C.f0, E0=-16., K0=240., J0=30.)
     return C
 
+def _MKVOR():
+    C = eos.MKVOR()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.SetHyperConstants(2)
+    C.set_hs_alpha(np.array([0. for i in range(8)]))
+    C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+def MKVOR():
+    return Model(_MKVOR)
+
+def _MKVOR2():
+    C = eos.MKVOR2()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    # C.SetHyperConstants(2)
+    # C.set_hs_alpha(np.array([0. for i in range(8)]))
+    # C.set_hs_z(np.array([0. for i in range(8)]))
+    return C
+
+def MKVOR2():
+    M = Model(_MKVOR2)
+
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    print(xs_d)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             's = %.2f U = %.0f' % (xs_d, U))
+    return M
+
+def _MKVOR2_fom(f):
+    C = _MKVOR2()
+    C.fcut_om = f
+    C.bcut_om = 100.
+
+    return C
+
+def MKVOR2_fom(f):
+    __MKVOR2_fom = lambda: _MKVOR2_fom(f)
+    __MKVOR2_fom.__name__ = _MKVOR2_fom.__name__ + '%.2f'%f
+    M = Model(__MKVOR2_fom)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    print(xs_d)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             's = %.2f U = %.0f' % (xs_d, U))
+    return M
+
 def _myModExp():
     return Models.myMod()
 
@@ -321,12 +418,12 @@ def MKValpha02(omega_f):
 def _MKValpha00(omega_f):
     C = _myModExpOmega(omega_f)
     C.alpha = 0.0
-    C.Cs = 243.0809030395
-    C.Co = 134.8845428131
-    C.Cr = 81.7485401708
-    C.b = 0.0050770291
-    C.c = -0.0009275951
-    Wrapper(C).solve(f0=C.f0, K0=240.,J0=30.)
+    C.Cs = 243.0809159724
+    C.Co = 134.8845428070
+    C.Cr = 81.7485403400
+    C.b = 0.0050770283
+    C.c = -0.0009275959
+    # Wrapper(C).solve(f0=C.f0, K0=240.,J0=30.)
     return C
 
 def MKValpha00(omega_f):
