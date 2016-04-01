@@ -3,9 +3,9 @@ project(eosWrap)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O0 -g -std=c++11")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O0 -g -std=c++11")
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Ofast -g -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Ofast -g -std=c++11")
 
 set(SOURCE_FILES
     ap.cpp
@@ -43,6 +43,8 @@ set(SOURCE_FILES
     TOV.h
     Walecka.cpp
     Walecka.h
+    MKVOR.cpp
+    MKVOR.h
 )
 
 

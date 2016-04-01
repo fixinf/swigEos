@@ -528,16 +528,15 @@ namespace calc{
 			}
 			double m_eff = C->M[i+1]*C->phi_n(i+1, xs * (C->M[0]/C->M[i+1]) * f  + C->X_sp[i+1] * (C->M[0]/C->M[i+1]) * fp);
 
-			double res = pow(
-					mu_n - C->Q[i+1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i+1] * sum_o / C->eta_o(f)
+			double res = mu_n - C->Q[i+1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i+1] * sum_o / C->eta_o(f)
 					- C->Cr/pow(C->M[0],2) * C->X_r[i+1]*C->T[i+1] * sum_rho / C->eta_r(f)
-					- C->Co/pow(C->M[0], 2) * C->X_p[i+1] * sum_p * pow(m_o / m_p,2.0) / C->eta_p(f),
-					2.0);
+					- C->Co/pow(C->M[0], 2) * C->X_p[i+1] * sum_p * pow(m_o / m_p,2.0) / C->eta_p(f);
 
 	    	if (fabs(sum_rho) > n_rho/2){
-	    		res += C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_rho) - n_rho/2) * C->X_r[i] * C->T[i] *
+	    		res += C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_rho) - n_rho/2) * C->X_r[i+1] * C->T[i+1] *
 	    				((sum_rho > 0) - (sum_rho <0));
 	    	}
+	    	res = pow(res, 2.0);
 
 			res -= m_eff*m_eff;
 
