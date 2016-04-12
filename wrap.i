@@ -41,7 +41,7 @@ namespace std{
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* init, int dimInit)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* out, int dimOut)};
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double * f_init, int dimF_init)};
-%apply (double* INPLACE_ARRAY1, int DIM1) {(double * inplace, int dim_inplace)};
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double * inplace, int dim_inplace)};
 %include "eos.h" 
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* x, int dimX)};
 %include "setconst.h"

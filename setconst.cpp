@@ -293,9 +293,11 @@ double set_const::Xs(int i, double f) {
 	double res = this->X_s[i];
 //	printf("i = %i \n", i);
 	if (i > 1){
-		res *= pow((1 + hs_z[i] * f0)/ (1 + hs_z[i]*f), hs_alpha[i]);
+		//res *= pow((1 + hs_z[i] * f0)/ (1 + hs_z[i]*f), hs_alpha[i]);
 		if (hyper_sigma_kind == 0){
-			return 0.;
+            if (i < 8){
+			    return 0.;
+            }
 		}
 	}
 	return res;

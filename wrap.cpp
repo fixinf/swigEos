@@ -8508,8 +8508,7 @@ SWIGINTERN PyObject *_wrap__E__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *
   int i1 = 1 ;
   void *argp3 = 0 ;
   int res3 = 0 ;
-  PyArrayObject *array4 = NULL ;
-  int i4 = 1 ;
+  PyObject *array4 = NULL ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -8530,15 +8529,26 @@ SWIGINTERN PyObject *_wrap__E__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *
   }
   arg3 = reinterpret_cast< set_const * >(argp3);
   {
-    array4 = obj_to_array_no_conversion(obj2, NPY_DOUBLE);
-    if (!array4 || !require_dimensions(array4,1) || !require_contiguous(array4)
-      || !require_native(array4)) SWIG_fail;
+    npy_intp dims[1];
+    if (!PyInt_Check(obj2))
+    {
+      const char* typestring = pytype_string(obj2);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg5 = (int) PyInt_AsLong(obj2);
+    dims[0] = (npy_intp) arg5;
+    array4 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array4) SWIG_fail;
     arg4 = (double*) array_data(array4);
-    arg5 = 1;
-    for (i4=0; i4 < array_numdims(array4); ++i4) arg5 *= array_size(array4,i4);
   }
   result = (double)_E(arg1,arg2,arg3,arg4,arg5);
   resultobj = SWIG_From_double(static_cast< double >(result));
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array4);
+  }
   return resultobj;
 fail:
   return NULL;
@@ -8682,15 +8692,20 @@ SWIGINTERN PyObject *_wrap__E(PyObject *self, PyObject *args) {
       int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_set_const, 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        {
-          _v = is_array(argv[2]) && PyArray_EquivTypenums(array_type(argv[2]),
-            NPY_DOUBLE);
-        }
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_double, 0);
+        _v = SWIG_CheckState(res);
         if (_v) {
           if (argc <= 3) {
             return _wrap__E__SWIG_0(self, args);
           }
-          return _wrap__E__SWIG_0(self, args);
+          {
+            int res = SWIG_AsVal_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap__E__SWIG_0(self, args);
+          }
         }
       }
     }
@@ -8717,8 +8732,7 @@ SWIGINTERN PyObject *_wrap_E__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *a
   int i1 = 1 ;
   void *argp3 = 0 ;
   int res3 = 0 ;
-  PyArrayObject *array4 = NULL ;
-  int i4 = 1 ;
+  PyObject *array4 = NULL ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -8739,15 +8753,26 @@ SWIGINTERN PyObject *_wrap_E__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *a
   }
   arg3 = reinterpret_cast< set_const * >(argp3);
   {
-    array4 = obj_to_array_no_conversion(obj2, NPY_DOUBLE);
-    if (!array4 || !require_dimensions(array4,1) || !require_contiguous(array4)
-      || !require_native(array4)) SWIG_fail;
+    npy_intp dims[1];
+    if (!PyInt_Check(obj2))
+    {
+      const char* typestring = pytype_string(obj2);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg5 = (int) PyInt_AsLong(obj2);
+    dims[0] = (npy_intp) arg5;
+    array4 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array4) SWIG_fail;
     arg4 = (double*) array_data(array4);
-    arg5 = 1;
-    for (i4=0; i4 < array_numdims(array4); ++i4) arg5 *= array_size(array4,i4);
   }
   result = (double)E(arg1,arg2,arg3,arg4,arg5);
   resultobj = SWIG_From_double(static_cast< double >(result));
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array4);
+  }
   return resultobj;
 fail:
   return NULL;
@@ -8891,15 +8916,20 @@ SWIGINTERN PyObject *_wrap_E(PyObject *self, PyObject *args) {
       int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_set_const, 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        {
-          _v = is_array(argv[2]) && PyArray_EquivTypenums(array_type(argv[2]),
-            NPY_DOUBLE);
-        }
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_double, 0);
+        _v = SWIG_CheckState(res);
         if (_v) {
           if (argc <= 3) {
             return _wrap_E__SWIG_0(self, args);
           }
-          return _wrap_E__SWIG_0(self, args);
+          {
+            int res = SWIG_AsVal_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_E__SWIG_0(self, args);
+          }
         }
       }
     }
@@ -8929,8 +8959,7 @@ SWIGINTERN PyObject *_wrap_E_rho__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObjec
   int ecode3 = 0 ;
   void *argp4 = 0 ;
   int res4 = 0 ;
-  PyArrayObject *array5 = NULL ;
-  int i5 = 1 ;
+  PyObject *array5 = NULL ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -8957,15 +8986,26 @@ SWIGINTERN PyObject *_wrap_E_rho__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObjec
   }
   arg4 = reinterpret_cast< set_const * >(argp4);
   {
-    array5 = obj_to_array_no_conversion(obj3, NPY_DOUBLE);
-    if (!array5 || !require_dimensions(array5,1) || !require_contiguous(array5)
-      || !require_native(array5)) SWIG_fail;
+    npy_intp dims[1];
+    if (!PyInt_Check(obj3))
+    {
+      const char* typestring = pytype_string(obj3);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg6 = (int) PyInt_AsLong(obj3);
+    dims[0] = (npy_intp) arg6;
+    array5 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array5) SWIG_fail;
     arg5 = (double*) array_data(array5);
-    arg6 = 1;
-    for (i5=0; i5 < array_numdims(array5); ++i5) arg6 *= array_size(array5,i5);
   }
   result = (double)E_rho(arg1,arg2,arg3,arg4,arg5,arg6);
   resultobj = SWIG_From_double(static_cast< double >(result));
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array5);
+  }
   return resultobj;
 fail:
   return NULL;
@@ -9144,15 +9184,20 @@ SWIGINTERN PyObject *_wrap_E_rho(PyObject *self, PyObject *args) {
         int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_set_const, 0);
         _v = SWIG_CheckState(res);
         if (_v) {
-          {
-            _v = is_array(argv[3]) && PyArray_EquivTypenums(array_type(argv[3]),
-              NPY_DOUBLE);
-          }
+          void *vptr = 0;
+          int res = SWIG_ConvertPtr(argv[3], &vptr, SWIGTYPE_p_double, 0);
+          _v = SWIG_CheckState(res);
           if (_v) {
             if (argc <= 4) {
               return _wrap_E_rho__SWIG_0(self, args);
             }
-            return _wrap_E_rho__SWIG_0(self, args);
+            {
+              int res = SWIG_AsVal_int(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_E_rho__SWIG_0(self, args);
+            }
           }
         }
       }

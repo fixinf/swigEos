@@ -152,7 +152,7 @@ namespace calc{
 
     	if (fabs(sum_r) > n_rho/2){
     		res -= C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_r) - n_rho/2) * C->X_r[i] * C->T[i] *
-    				((sum_r > 0) - (sum_r<0));
+    				((sum_r > 0) - (sum_r < 0)); //sign(sum_r) = - sign (n_n - n_p)
     	}
 
 		return res;
@@ -412,11 +412,12 @@ namespace calc{
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;
+        int num_part = m - 1; //actual num. of particles. p = [n_1, n_2, ..., n_num, mu_c]
 		double n_sum = 0.0;
 		double n_n = par->n;
-		double * n_in = new double [m+sc+1]; //input set for _E and mu
+		double * n_in = new double [m+sc]; //input set for _E and mu
 		double * n_f = new double [m+sc]; //input set for f_eq; actually is {n_n,n_p,...,n_X0}
-		for (int i = 0; i < m-1; i++){
+		for (int i = 0; i < num_part; i++){
 			n_n -= p[i];
 			n_in[i + 1 + sc] = p[i]; //scalar + neutron(1) offset
 			n_f[i+1] = p[i];
@@ -434,13 +435,13 @@ namespace calc{
 		n_f[0] = n_n;
 		if (debug) {
 			printf("n_f = ");
-			for (int i = 0; i < m+1; i++){
+			for (int i = 0; i < m; i++){
 				printf("%e ", n_f[i]);
 			}
 			printf("\n");
 		}
 		double * out = new double[sc];
-		f_eq_rho(n_f, m, par->f_init, sc, out, sc, mu_c, C);//m -> m+1 fixed
+		f_eq_rho(n_f, m, par->f_init, sc, out, sc, mu_c, C);
 
 
 		for (int i = 0; i < sc; i++){
@@ -452,8 +453,16 @@ namespace calc{
 
 
 		n_in[sc] = n_n;
+
+        if (debug){
+            printf("n_in = [");
+            for (int i = 0; i < num_part + 1 + sc; i++){
+                printf("%.6f ", n_in[i]);
+            }
+            printf("] \n");
+        }
 		double sum=0, sum_ch=0, sum_o = 0.0, sum_rho = 0.0, sum_p = 0;
-		for (int i = 0; i < m; i++){
+		for (int i = 0; i < num_part + 1; i++){
 			sum += n_f[i];
 			sum_ch += n_f[i]*C->Q[i];
 			sum_o += n_f[i]*C->X_o[i];
@@ -464,8 +473,8 @@ namespace calc{
 //			printf("sum %f sum_ch %f sum_o %f sum_rho %f \n", sum, sum_ch, sum_o, sum_rho);
 		}
 
-		double mu_n = mu_rho(n_in, m + sc, sc + 0, mu_c, C);
-		double mu_p = mu_rho(n_in, m + sc , sc + 1, mu_c, C);
+		double mu_n = mu_rho(n_in, num_part + 1 + sc, sc + 0, mu_c, C);
+		double mu_p = mu_rho(n_in, num_part + 1 + sc, sc + 1, mu_c, C);
 		double mu_e = mu_n - mu_p;
 
 		if (debug)
@@ -517,7 +526,7 @@ namespace calc{
 //			printf("sum_ch = %.6f, n_e = %.6f, n_mu = %.6f, n_c = %.6f \n", sum_ch, n_e, n_mu, n_c);
 		}
 
-		for (int i = 1; i < m-1; i++){
+		for (int i = 1; i < num_part; i++){
 			hx[i] = p_f(p[i], 2*C->S[i+1]+1);
 			double xs = 0.;
 			if (C->sigma_kind == 0){
@@ -534,7 +543,7 @@ namespace calc{
 
 	    	if (fabs(sum_rho) > n_rho/2){
 	    		res += C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_rho) - n_rho/2) * C->X_r[i+1] * C->T[i+1] *
-	    				((sum_rho > 0) - (sum_rho <0));
+	    				((sum_rho < 0) - (sum_rho > 0));
 	    	}
 	    	res = pow(res, 2.0);
 
@@ -593,6 +602,8 @@ double _E(double * n, int dimN, set_const * C, double * out, int dim_Out){
 	if (C->sprime){
 		fp = 0.;
 	}
+
+
 
 	double res = 0.;
 	double part_s = pow(C->M[0], 4.0)*f*f*C->eta_s(f)/(2*C->Cs);
@@ -761,7 +772,7 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 	}
 	//rho
 	double gr = sqrt(C->Cr/C->eta_r((f)))*(C->m_rho* (1-f)) / C->M[0];
-	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) * 
+	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) *
 		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
 
 	double E_r =  C->Cr * sum_t3*sum_t3/(2.0*C->M[0]*C->M[0]*C->eta_r(f));
@@ -770,7 +781,7 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 		printf("Check fabs(sum_t3) > n_rho/2: %i \n", fabs(sum_t3) > n_rho/2);
 	}
 	if (fabs(sum_t3) > n_rho/2){
-	    E_r -= C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(fabs(sum_t3) - n_rho/2, 2.);
+	    E_r -= C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(fabs(-sum_t3) - n_rho/2, 2.);
 	    if (debug)
 	    printf("rho-condensate on! E_c = %.6f \n", C->Cr / (2*pow(C->M[0],2.) * C->eta_r(f)) * pow(fabs(sum_t3) - n_rho/2, 2.));
 	};

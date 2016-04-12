@@ -33,8 +33,6 @@ extern double sum(std::vector<double> x);
 extern double kineticInt(double n, double m, double f);
 extern double p_f(double n, double gamma);
 
-
-
 namespace calc{
 	extern double mu(double * n, int dimN, int i, set_const * C);
 	extern double mu_deriv(double *n, int dimN, int i, double mu_c, set_const *C);
