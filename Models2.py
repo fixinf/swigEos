@@ -283,6 +283,32 @@ def MKVOR2_fom(f):
              's = %.2f U = %.0f' % (xs_d, U))
     return M
 
+def _MKVOR2_fom_a(f, a):
+    C = _MKVOR2()
+    C.fcut_om = f
+    C.bcut_om = 100.
+    C.alpha = 0
+    C.Cs = 243.0809159724
+    C.Co = 134.8845428070
+    C.Cr = 81.7485403400
+    C.b = 0.0050770283
+    C.c = -0.0009275959
+
+    return C
+
+def MKVOR2_fom_a(f, a):
+    __MKVOR2_fom_a = lambda: _MKVOR2_fom_a(f, a)
+    __MKVOR2_fom_a.__name__ = _MKVOR2_fom_a.__name__ + '%.2f_%.2f'%(f, a)
+    M = Model(__MKVOR2_fom_a)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    print(xs_d)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             's = %.2f U = %.0f' % (xs_d, U))
+    return M
+
 def _myModExp():
     return Models.myMod()
 
@@ -321,9 +347,9 @@ def _MKVOR_d():
     C.rho_d = -4.
     C.rho_e = 6.
 
-    C.SetHyperConstants(2)
-    C.set_hs_alpha(np.array([0. for i in range(8)]))
-    C.set_hs_z(np.array([0. for i in range(8)]))
+    # C.SetHyperConstants(2)
+    # C.set_hs_alpha(np.array([0. for i in range(8)]))
+    # C.set_hs_z(np.array([0. for i in range(8)]))
     # wr = Wrapper(C)
     # wr.solve(f0=C.f0, E0=-16., K0=240., J0=30.)
     return C
