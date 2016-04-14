@@ -9,7 +9,7 @@ import eosWrap as eos
 import numpy as np
 from matplotlib import pyplot as plt
 
-m = Models2.KVOR()
+m = Models2.MKVORexp()
 C = m.C
 
 

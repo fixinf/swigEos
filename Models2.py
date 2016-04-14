@@ -212,9 +212,9 @@ def _MKVOR():
     C.d_r = -4.
     C.e_r = 6.
 
-    C.SetHyperConstants(2)
-    C.set_hs_alpha(np.array([0. for i in range(8)]))
-    C.set_hs_z(np.array([0. for i in range(8)]))
+    # C.SetHyperConstants(2)
+    # C.set_hs_alpha(np.array([0. for i in range(8)]))
+    # C.set_hs_z(np.array([0. for i in range(8)]))
     return C
 
 def MKVOR():
@@ -270,10 +270,32 @@ def _MKVOR2_fom(f):
 
     return C
 
+def _MKVOR2_fom_exp(f):
+    C = _MKVOR2()
+    C.fcut_om = f
+    C.bcut_om = 100.
+    C.bcut_rho = 23.96047378
+    C.fcut_rho = 0.67248809
+
+    return C
+
 def MKVOR2_fom(f):
     __MKVOR2_fom = lambda: _MKVOR2_fom(f)
     __MKVOR2_fom.__name__ = _MKVOR2_fom.__name__ + '%.2f'%f
     M = Model(__MKVOR2_fom)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    print(xs_d)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             's = %.2f U = %.0f' % (xs_d, U))
+    return M
+
+def MKVOR2_fom_exp(f):
+    __MKVOR2_fom_exp = lambda: _MKVOR2_fom_exp(f)
+    __MKVOR2_fom_exp.__name__ = _MKVOR2_fom_exp.__name__ + '%.2f'%f
+    M = Model(__MKVOR2_fom_exp)
     U = -50.
     xs_d = M.getDeltaXs(U)
     print(xs_d)
@@ -296,6 +318,28 @@ def _MKVOR2_fom_a(f, a):
 
     return C
 
+
+def _MKVOR2_fom_a_exp(f, a):
+    C = _MKVOR2()
+    C.fcut_om = f
+    C.bcut_om = 30.
+    C.alpha = 0
+    C.Cs = 243.0809159724
+    C.Co = 134.8845428070
+    C.Cr = 81.7485403400
+    C.b = 0.0050770283
+    C.c = -0.0009275959
+    C.bcut_rho = 23.96047378
+    C.fcut_rho = 0.67248809
+
+    return C
+
+def _MKVOR2final():
+    return _MKVOR2_fom_a_exp(0.78, 0.00)
+
+def MKVOR2final():
+    return Model(_MKVOR2final)
+
 def MKVOR2_fom_a(f, a):
     __MKVOR2_fom_a = lambda: _MKVOR2_fom_a(f, a)
     __MKVOR2_fom_a.__name__ = _MKVOR2_fom_a.__name__ + '%.2f_%.2f'%(f, a)
@@ -308,6 +352,35 @@ def MKVOR2_fom_a(f, a):
              np.array([1., 1., 1., 1.]),
              's = %.2f U = %.0f' % (xs_d, U))
     return M
+
+def _MKVOR2_exp():
+    C = _MKVOR2final()
+    C.fcut_om = 100500.
+    #back to MKVOR
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.alpha = 0.4
+    return C
+
+def MKVOR2_exp():
+    return Model(_MKVOR2_exp)
+
+def MKVOR2_fom_a_exp(f, a):
+    __MKVOR2_fom_a_exp = lambda: _MKVOR2_fom_a_exp(f, a)
+    __MKVOR2_fom_a_exp.__name__ = _MKVOR2_fom_a_exp.__name__ + '%.2f_%.2f'%(f, a)
+    M = Model(__MKVOR2_fom_a_exp)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    print(xs_d)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             's = %.2f U = %.0f' % (xs_d, U))
+    return M
+
 
 def _myModExp():
     return Models.myMod()

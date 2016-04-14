@@ -202,7 +202,7 @@ class Wrapper(object):
     #     return n, m, r
 
 
-    def dumpMassesCrust(self, nmin=0.4, nmax=None, npoints=100, write=True, fname=None, ret_frac=True):
+    def dumpMassesCrust(self, nmin=0.4, nmax=None, npoints=100, write=False, fname=None, ret_frac=True):
         self.check()
         inter = 'linear'
         if nmax == None:
@@ -288,11 +288,11 @@ class Wrapper(object):
         # plt.show()
 
         mpi2km = 5.7202e-5
-        np.savetxt('EPkm2_KVOR06.dat',
-                   np.array([finalN, mpi2km*finalE, mpi2km*finalP]).transpose(), fmt='%.6e', header='n/n0  E  P')
+        # np.savetxt('EPkm2_KVOR06.dat',
+        #            np.array([finalN, mpi2km*finalE, mpi2km*finalP]).transpose(), fmt='%.6e', header='n/n0  E  P')
 
-        np.savetxt('EPmpi4_KVOR06.dat',
-                   np.array([finalN, finalE, finalP]).transpose(), fmt='%.6e', header='n/n0  E  P')
+        # np.savetxt('EPmpi4_KVOR06.dat',
+        #            np.array([finalN, finalE, finalP]).transpose(), fmt='%.6e', header='n/n0  E  P')
 
         # plt.plot(finalE, finalE)
         # plt.show()
@@ -310,7 +310,7 @@ class Wrapper(object):
                 derivative(self.dr.EofN, z, dx=1e-6, order=3) for z in finalN*self.n0
             ])
             drDe2 = arr([self.dr.dEofN(z) for z in finalN*self.n0])
-            np.savetxt('MKVOR_4EE.dat', np.array([finalN*self.n0, drE, drP]).transpose(), fmt='%.16e')
+            # np.savetxt('MKVOR_4EE.dat', np.array([finalN*self.n0, drE, drP]).transpose(), fmt='%.16e')
             print(drP)
             # lines = plt.plot(finalN, drE, n, arr(e)/self.m_pi**4, N, arr(E)/self.m_pi**4)
             lines = plt.plot(drE, drP, arr(e)/self.m_pi**4, arr(p)/self.m_pi**4, arr(E)/self.m_pi**4, arr(P)/self.m_pi**4)
@@ -344,8 +344,8 @@ class Wrapper(object):
         if crustName is not None:
             tab = np.array([finalN, finalE, finalP]).transpose()
             table = tabulate(tab, ['n/n0', 'E', 'P'], tablefmt='plain')
-            with open(crustName, 'w') as f:
-                f.write(table)
+            # with open(crustName, 'w') as f:
+            #     f.write(table)
 
         if n_stars is None:
             n_stars = np.linspace(nmin, nmax, npoints)
@@ -468,7 +468,7 @@ class Wrapper(object):
         P = P / self.mpi4_2_mevfm3
         N = N / self.n0
         print(self.Ctype.__name__)
-        np.savetxt('eos' + self.Ctype.__name__ + '.dat', arr([E, P, N]).transpose())
+        # np.savetxt('eos' + self.Ctype.__name__ + '.dat', arr([E, P, N]).transpose())
         E *= self.m_pi ** 4
         P *= self.m_pi ** 4
         e = [0.]
@@ -488,7 +488,7 @@ class Wrapper(object):
         crust = np.loadtxt("/home/const/workspace/swigEosWrapper/crust.dat")
         crust[:, 0] /= self.m_pi ** 4
         crust[:, 1] /= self.m_pi ** 4
-        np.savetxt('crust_export.dat', crust)
+        # np.savetxt('crust_export.dat', crust)
         n_eos = 5
         i_n_eos = np.argmin(abs(N - [ncut_eos for i in N]))
         plist = np.append(p[:], P[i_n_eos:(i_n_eos + n_eos)])
@@ -520,8 +520,8 @@ class Wrapper(object):
         iN = iN ** (1. / gamma)
         crust_p = np.array(list(map(iP, iN)))
         crust_e = np.array(list(map(iE, iN)))
-        np.savetxt(self.__repr__() + "crust_dense.dat", np.array([crust_e/self.m_pi**4,
-                                                crust_p/self.m_pi**4, iN]).transpose())
+        # np.savetxt(self.__repr__() + "crust_dense.dat", np.array([crust_e/self.m_pi**4,
+        #                                         crust_p/self.m_pi**4, iN]).transpose())
         #         finalE = np.append(crust_e, E[i_n_eos+n_eos:])
         #         finalP = np.append(crust_p, P[i_n_eos + n_eos:])
         #         finalN = np.append(iN, N[i_n_eos+n_eos:])
@@ -838,6 +838,7 @@ class Wrapper(object):
             return [ne_list, nmu_list, du_list]
         else:
             return np.array([ne_list, nmu_list]).transpose()
+            # return [ne_list, nmu_list]
 
     def mu(self, nrange=None):
         if nrange is None:
@@ -874,7 +875,7 @@ class Wrapper(object):
     def dumpPf(self, write=1):
         self.check()
         pf = arr([[eos.p_f(n, 2*self.C.S[i] + 1) for i, n in enumerate(r[1:])] for r in self.rho[0:]])
-        ne, nmu = self.lepton_concentrations()
+        ne, nmu = self.lepton_concentrations().transpose()
         pfe = arr([eos.p_f(n, 2.) for n in ne])
         pfmu = arr([eos.p_f(n, 2.) for n in nmu])
 
@@ -915,37 +916,37 @@ class Wrapper(object):
 
         return frange, func
 
+    def func_f(self, f, n, mu):
+        arg = eos.dArray(1)
+        out = eos.dArray(1)
+        arg[0] = f
+        params = eos.func_f_eq_params()
+
+        params.n = n
+        params.C = self.C
+        params.dimN = self.n_baryon
+        params.df = 1e-3
+        eos.func_f_eq(arg, out, 1, 1, params)
+        return out[0]
+
+    def swArr(self, n):
+        out = eos.dArray(len(n))
+        for i, _n in enumerate(n):
+            out[i] = _n
+        return out
 
     def inspect_f(self):
         self.check()
 
-        def swArr(n):
-            out = eos.dArray(len(n))
-            for i, _n in enumerate(n):
-                out[i] = _n
-            return out
-
-        def func(f, n):
-            arg = eos.dArray(1)
-            out = eos.dArray(1)
-            arg[0] = f
-            params = eos.func_f_eq_params()
-
-            params.n = n
-            params.C = self.C
-            params.dimN = self.n_baryon
-            params.df = 1e-3
-            eos.func_f_eq(arg, out, 1, 1, params)
-            return out[0]
         frange = np.linspace(0, 1, 500)
         fig, ax = plt.subplots()
 
-        func = list(map(
-            lambda z: func(z, swArr(self.rho[0, 1:])), frange
-        ))
+        # func = list(map(
+        #     lambda z: func(z, swArr(self.rho[0, 1:])), frange
+        # ))
 
         l, = plt.plot(frange, list(map(
-            lambda z: func(z, swArr(self.rho[0, 1:])), frange
+            lambda z: self.func_f(z, self.swArr(self.rho[0, 1:]), self.mu_e[0]), frange
         )))
 
         plt.plot(frange, [0. for f in frange])
@@ -956,11 +957,11 @@ class Wrapper(object):
 
         def update(val):
             l.set_ydata(list(map(
-            lambda z: func(z, swArr(self.rho[sn.val, 1:])), frange
+            lambda z: self.func_f(z, self.swArr(self.rho[sn.val, 1:]), self.mu_e[sn.val]), frange
         )))
             fig.canvas.draw_idle()
         sn.on_changed(update)
-        axn.set_ylimzz([-7, 7])
+        axn.set_ylim([-7, 7])
         plt.show()
 
 
@@ -1044,6 +1045,7 @@ class Nucleon(Wrapper):
         # exit()
 
         self.mu_e = np.array(mu_e)
+        self.mu_c = np.array(mu_e)
 
         self.xDUp = ((3*pi**2 * self.rho[:, 1])**(1./3) - (3*pi**2 * self.n_e)**(1./3))**(3.) / (3*pi**2 * self.nrange)
 
@@ -1228,7 +1230,7 @@ class Hyperon(Nucleon):
         )
         with open(join(self.foldername, self.filenames['eos']), 'w') as f:
             f.write(table)
-        n_e, n_mu = self.lepton_concentrations()
+        n_e, n_mu = self.lepton_concentrations().transpose()
         self.dumpGrig(E, P, conc, n_e, n_mu)
 
         return tab
@@ -1568,6 +1570,21 @@ class Rho(Wrapper):
             os.makedirs(self.foldername)
         self.filenames['rcond'] = 'rcond.dat'
 
+    def func_f(self, f, n, mu_c):
+        arg = eos.dArray(1)
+        out = eos.dArray(1)
+        arg[0] = f
+        params = eos.func_f_eq_params_rho()
+
+        params.n = n
+        params.C = self.C
+        params.dimN = self.n_baryon
+        params.df = 1e-3
+        params.mu_c = mu_c
+
+        eos.func_f_eq_rho(arg, out, 1, 1, params)
+        return out[0]
+
     def mu(self, nrange=None):
         if nrange is None:
             nrange = self.nrange
@@ -1824,7 +1841,7 @@ class Rho(Wrapper):
 
             if leptons:
                 E, epart = self.Efull(n=n, mu_e=self.mu_e[i])
-                E += self.nc[i] * mu_e
+                # E += self.nc[i] * mu_e
             else:
                 E = eos.E_rho(n, self.mu_e[i], self.C)
 
@@ -2088,6 +2105,7 @@ class Model(Wrapper):
         return self.sym.Jtilde(nrange=nrange)
 
     def dumpAll(self, hyper=True):
+        self.dumpScalings()
         self.dumpProps()
         self.dumpEos()
         self.nucl.dumpMeff()
