@@ -39,7 +39,7 @@ def _KVORd():
     C.Cr = 100.63642242798424
     C.b = 0.00773460805148428
     C.c = 0.00034461786646922604
-    C.SetHyperConstants(2)
+    # C.SetHyperConstants(2)
     C.set_hs_alpha(np.array([0. for i in range(8)]))
     C.set_hs_z(np.array([0. for i in range(8)]))
     return C
@@ -49,7 +49,7 @@ def KVOR_d():
 
 def _KVORcut04():
     C = eos.KVORcut_d()
-    C.SetHyperConstants(2)
+    # C.SetHyperConstants(2)
     C.omega_kind = 2
     C.Cs = 179.5623289954
     C.Co = 87.5996301756
@@ -67,7 +67,7 @@ def _KVORcut04():
 
 def _KVORcut03():
     C = eos.KVORcut_d()
-    C.SetHyperConstants(2)
+    # C.SetHyperConstants(2)
     C.omega_kind = 2
     C.Cs = 179.5639888271
     C.Co = 87.5996147120
@@ -76,8 +76,8 @@ def _KVORcut03():
     C.c = 0.0003416056
     C.z = 0.65
     C.Csp = 1.
-    C.set_hs_alpha(np.array([0. for i in range(8)]))
-    C.set_hs_z(np.array([0. for i in range(8)]))
+    # C.set_hs_alpha(np.array([0. for i in range(8)]))
+    # C.set_hs_z(np.array([0. for i in range(8)]))
 
     C.omega_a = -0.5
     C.omega_f = 0.365
@@ -324,11 +324,11 @@ def _MKVOR2_fom_a_exp(f, a):
     C.fcut_om = f
     C.bcut_om = 30.
     C.alpha = 0
-    C.Cs = 243.0809159724
-    C.Co = 134.8845428070
-    C.Cr = 81.7485403400
+    C.Cs = 243.0809154405
+    C.Co = 134.8845423626
+    C.Cr = 81.8421187920
     C.b = 0.0050770283
-    C.c = -0.0009275959
+    C.c = -0.0009275958
     C.bcut_rho = 23.96047378
     C.fcut_rho = 0.67248809
 
@@ -338,7 +338,21 @@ def _MKVOR2final():
     return _MKVOR2_fom_a_exp(0.78, 0.00)
 
 def MKVOR2final():
-    return Model(_MKVOR2final)
+    C = _MKVOR2final()
+    # C.acut_om = 2.
+    # C.Co = C.Co*2
+    Wrapper(C).solve(f0=0.27, K0=240., J0=30.)
+    # C = _MKVOR2final()
+    # Wrapper(C).solve(f0=0.27, K0=240., J0=30.)
+    M = Model(_MKVOR2final)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             '')
+
+    return M
 
 def MKVOR2_fom_a(f, a):
     __MKVOR2_fom_a = lambda: _MKVOR2_fom_a(f, a)
@@ -550,7 +564,15 @@ def myMod():
     return Model(_myMod)
 
 def MKVOR_d():
-    return Model(_MKVOR_d)
+    M = Model(_MKVOR_d)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             '')
+
+    return M
 
 def waleckaMatsui():
     return Model(_waleckaMatsui)

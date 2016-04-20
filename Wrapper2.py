@@ -40,7 +40,7 @@ class Wrapper(object):
         self.mpi3tofmm3 = (self.m_pi/197.33)**3
         self.nmin = 0.
         self.nmax = 8*self.n0
-        self.npoints = 200
+        self.npoints = 2000
         gamma = 1
         self.nrange = np.linspace(self.nmin, self.nmax**gamma, self.npoints,
                                   endpoint=False)**(1/gamma)
@@ -130,7 +130,7 @@ class Wrapper(object):
         _E = []
         for z in self.rho:
             epart = np.zeros((9), dtype='float')
-            _E.append(eos._E(z, self.C))
+            _E.append(eos.E(z, self.C))
             eparts.append(epart)
         self._E = np.array(_E)
         self.Eparts = arr(eparts)
@@ -202,7 +202,7 @@ class Wrapper(object):
     #     return n, m, r
 
 
-    def dumpMassesCrust(self, nmin=0.4, nmax=None, npoints=100, write=False, fname=None, ret_frac=True):
+    def dumpMassesCrust(self, nmin=0.4, nmax=None, npoints=100, write=True, fname=None, ret_frac=False):
         self.check()
         inter = 'linear'
         if nmax == None:
@@ -271,6 +271,7 @@ class Wrapper(object):
             # plt.show()
             # print(finalN)
             self.md.setEos(finalN, finalE, finalP)
+            # exit()
         else:
             finalE = self.md.E
             finalN = self.md.N
@@ -301,8 +302,17 @@ class Wrapper(object):
         # plt.show()
 
         finalN_low, finalE, finalP = self.md.rawN, self.md.rawE, self.md.rawP
+        finalN_low, finalE, finalP = self.md.N, self.md.E, self.md.P
+        print(finalE)
+        for i, e in enumerate(finalE[1:]):
+            if finalE[i-1] > e: 
+                print(i)
+        # plt.plot(finalE)
+        # plt.plot(finalP)
+        # plt.plot(finalN_low)
+        # plt.show()
         self.dr = eos.KVDriver(finalE, finalP, finalN_low*self.n0)
-
+        # exit()    
         if show:
             drE = arr([self.dr.EofN(z) for z in finalN*self.n0])
             drP = arr([self.dr.PofN(z) for z in finalN*self.n0])
@@ -518,8 +528,10 @@ class Wrapper(object):
         gamma = 1. / 4.
         iN = np.linspace(0, ncut_eos ** gamma, 1000)
         iN = iN ** (1. / gamma)
-        crust_p = np.array(list(map(iP, iN)))
-        crust_e = np.array(list(map(iE, iN)))
+        crust_p = np.nan_to_num(list(map(iP, iN)))
+        crust_e = np.nan_to_num(list(map(iE, iN)))
+        # print(crust_e, crust_p)
+        # exit()
         # np.savetxt(self.__repr__() + "crust_dense.dat", np.array([crust_e/self.m_pi**4,
         #                                         crust_p/self.m_pi**4, iN]).transpose())
         #         finalE = np.append(crust_e, E[i_n_eos+n_eos:])
@@ -530,6 +542,8 @@ class Wrapper(object):
         finalN = np.append(iN, N[i_n_eos + n_eos:])
         finalE[0] = 0
         finalP[0] = 0
+        # print(finalE)
+        # exit()
         return E, N, P, e, finalE, finalN, finalP, n, p
 
     def dumpScalingsN(self):
@@ -1349,7 +1363,7 @@ class HyperonPhiSigma(HyperonPhi):
 class DeltaBase(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
-        self.foldername = join(self.foldername, 'delta')
+        self.foldername = join(self.foldername, 'Delta')
         if not os.path.exists(self.foldername):
             os.makedirs(self.foldername)
         if hasattr(self.C, 'setDeltaConstants'):
@@ -1885,6 +1899,9 @@ class RhoHyperPhiSigma(Rho, HyperonPhiSigma):
         self.filenames['mass_crust'] = 'rc_masses_Hps.dat'
 
 
+
+
+
 class DeltaOnly(DeltaBase, Hyperon):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
@@ -1958,6 +1975,18 @@ class DeltaPhiSigma(DeltaBase, HyperonPhiSigma):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
 
+class RhoDeltaPhi(Rho, DeltaPhi):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.filenames['rcond'] = 'rcond_hyper_phi.dat'
+        self.filenames['mass_crust'] = 'rc_masses_Hp.dat'
+
+class RhoDeltaPhiSigma(Rho, DeltaPhiSigma):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.filenames['rcond'] = 'rcond_hyper_phi_sigma.dat'
+        self.filenames['mass_crust'] = 'rc_masses_Hps.dat'
+
 class Model(Wrapper):
     def __init__(self, C, K0=None, f0=None, J0=None, suffix=None, basefolder_suffix=''):
         if any([K0, f0, J0]):
@@ -1996,6 +2025,8 @@ class Model(Wrapper):
         self.rcond_hyper = RhoHyper(C, basefolder_suffix=basefolder_suffix)
         self.rcond_hyper_phi = RhoHyperPhi(C, basefolder_suffix=basefolder_suffix)
         self.rcond_hyper_phi_sigma = RhoHyperPhiSigma(C, basefolder_suffix=basefolder_suffix)
+        self.rcond_delta_phi = RhoDeltaPhi(C, basefolder_suffix=basefolder_suffix)
+        self.rcond_delta_phi_sigma = RhoDeltaPhiSigma(C, basefolder_suffix=basefolder_suffix)
 
         if any([K0, f0, J0]):
             C = wr.C
@@ -2010,7 +2041,7 @@ class Model(Wrapper):
         # if suffix is not None:
         #     self.foldername = os.path.join(BASEFOLDER+basefolder_suffix,
         #                                    self.Ctype.__name__.strip('_'))
-        #     if not os.path.exists(self.foldername):
+        #     if not os.path.exists(self.foldername):   o
         #         os.makedirs(self.foldername)
         #     for child in self.children:
         #         child.foldername = self.foldername
@@ -2018,6 +2049,7 @@ class Model(Wrapper):
         self.filenames.update(eta='eta_F.dat')
         self.filenames.update(props='props.dat')
         self.filenames.update(intro='intro.dat')
+
 
     def getDeltaXs(self, U):
         i = 8
@@ -2031,11 +2063,12 @@ class Model(Wrapper):
 
     def setDeltaConst(self, Xs, Xo, Xr, folder_suffix):
         for m in [self.delta, self.delta_phi, self.delta_phi_sigma,
-                  self.delta_phi2, self.delta_sym, self.delta_only]:
+                  self.delta_phi2, self.delta_sym, self.delta_only,
+                  self.rcond_delta_phi, self.rcond_hyper_phi_sigma]:
             m.C.setDeltaRho(Xr)
             m.C.setDeltaOmega(Xo)
             m.C.setDeltaSigma(Xs)
-            m.foldername = self.foldername + folder_suffix
+            m.foldername = m.foldername + folder_suffix
             if not os.path.exists(m.foldername):
                 os.makedirs(m.foldername)
             m.set = 0
@@ -2048,8 +2081,6 @@ class Model(Wrapper):
             m.C.b = b
             m.C.c = c
             m.C.f0 = f0
-
-
 
 
 
@@ -2106,6 +2137,7 @@ class Model(Wrapper):
 
     def dumpAll(self, hyper=True):
         self.dumpScalings()
+        self.dumpBaryonParams()
         self.dumpProps()
         self.dumpEos()
         self.nucl.dumpMeff()
@@ -2130,7 +2162,43 @@ class Model(Wrapper):
             s.dumpMeff()
             s.dumpEtap()
 
+    def dumpBaryonParams(self):
+        with open(join(self.foldername, 'b_params.dat'), 'w') as f:
+            for i in range(8):
+                f.write("X_s[%i]=%.6f"%(i, self.C.X_s[i]))
+            f.write("\n")
 
+            for i in range(8):
+                f.write("X_o[%i]=%.6f"%(i, self.C.X_o[i]))
+            f.write("\n")
+
+            for i in range(8):
+                f.write("X_r[%i]=%.6f"%(i, self.C.X_r[i]))
+            f.write("\n")
+
+            for i in range(8):
+                f.write("X_p[%i]=%.6f"%(i, self.C.X_p[i]))
+            f.write("\n")
+
+            for i in range(8, 12):
+                f.write("X_s[%i]=%.6f"%(i, self.delta_phi.C.X_s[i]))
+            f.write("\n")
+
+            for i in range(8, 12):
+                f.write("X_s[%i]=%.6f"%(i, self.delta_phi.C.X_s[i]))
+            f.write("\n")
+
+            for i in range(8, 12):
+                f.write("X_o[%i]=%.6f"%(i, self.delta_phi.C.X_o[i]))
+            f.write("\n")
+
+            for i in range(8, 12):
+                f.write("X_r[%i]=%.6f"%(i, self.delta_phi.C.X_r[i]))
+            f.write("\n")
+
+            for i in range(8, 12):
+                f.write("X_p[%i]=%.6f"%(i, self.delta_phi.C.X_p[i]))
+            f.write("\n")
 
     def dumpInspect(self):
         pass
