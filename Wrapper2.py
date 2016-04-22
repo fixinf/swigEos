@@ -39,7 +39,7 @@ class Wrapper(object):
         self.mpi4_2_mevfm3 = self.m_pi * (self.m_pi / 197.33) ** 3
         self.mpi3tofmm3 = (self.m_pi/197.33)**3
         self.nmin = 0.
-        self.nmax = 8*self.n0
+        self.nmax = 20*self.n0
         self.npoints = 2000
         gamma = 1
         self.nrange = np.linspace(self.nmin, self.nmax**gamma, self.npoints,

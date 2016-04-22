@@ -86,7 +86,15 @@ def _KVORcut03():
     return C
 
 def KVORcut03():
-    return Model(_KVORcut03, basefolder_suffix='KVORcut03_Delta')
+    M = Model(_KVORcut03, basefolder_suffix='KVORcut03_Delta')
+
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             '')
+    return M
 
 def _KVORcut02():
     C = eos.KVORcut_d()
@@ -112,7 +120,14 @@ def _KVORcut02():
     return C
 
 def KVORcut02():
-    return Model(_KVORcut02)
+    M = Model(_KVORcut02)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             '')
+    return M
 
 def KVORcut04():
     return Model(_KVORcut04)
