@@ -147,7 +147,8 @@ namespace calc{
 //		printf("mu[%i] res = %f \n", i, res);
 
 		///////////////Rho-condensate contribution//////////////
-    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) *
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+      (f)) *
     		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
 
     	if (fabs(sum_r) > n_rho/2){
@@ -504,7 +505,8 @@ namespace calc{
 
 
 
-    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) *
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+      (f)) *
     		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
     	par->misc = 0.;
 
@@ -516,7 +518,7 @@ namespace calc{
 		double  n_c = 0.;
 
 		if (fabs(sum_rho) > n_rho/2){
-			double r_c2 = (fabs(sum_rho) - n_rho/2) / (2 * C->m_rho * sqrt(C->eta_r(f)));
+			double r_c2 = (fabs(sum_rho) - n_rho/2) / (2 * C->m_rho * C->chi_prime(f) * sqrt(C->eta_r(f)));
 			n_c = 2 * C->m_rho * C->phi_n(0, f) * r_c2;
 
 			hx[0] -= n_c;
@@ -765,14 +767,14 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 	double part_om = C->Co * sum*sum/(2.0*C->M[0]*C->M[0]*C->eta_o(f));
 	res += part_om;
 	if (debug){
-		printf("res_om : %f \n", part_om);
+		printf("res_om : %f \n", part_om); 
 	}
 	if (ret_parts){
 		inplace[4] = part_om;
 	}
 	//rho
 	double gr = sqrt(C->Cr/C->eta_r((f)))*(C->m_rho* (1-f)) / C->M[0];
-	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr) *
+	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime(f)) *
 		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
 
 	double E_r =  C->Cr * sum_t3*sum_t3/(2.0*C->M[0]*C->M[0]*C->eta_r(f));

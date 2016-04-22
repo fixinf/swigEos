@@ -79,9 +79,10 @@ public:
 		this->set_hs_alpha(alpha, 8);
 		this->set_hs_z(alpha, 8);
 		this->m_rho = 770./135.;
+		this->chi_r_prime = 0;
 	}
 	set_const(double, double, double, double, double);
-	//			Cs		Co		Cr		b		c		z nahren
+	//			Cs		Co		Cr		b		c		z 
 
 	set_const(std::string name, double Cs, double Co , double Cr, double b, double c);
 	void init(double, double, double, double, double);
@@ -95,6 +96,15 @@ public:
 	virtual double eta_o(double) = 0;
 	virtual double eta_r(double) = 0;
 	virtual double eta_p(double) = 0;
+	double chi_prime(double f){
+		if (chi_r_prime == 1){
+			return phi_n(1, f) / sqrt(eta_r(f));
+		}	
+    else{
+      return 1.;
+    }
+	}
+	
 	double Cs;
 	double Co;
 	double Cr;
@@ -134,6 +144,7 @@ public:
 	bool muons;
 	double fmax;
 	bool hyper_sigma_kind;
+	bool chi_r_prime;
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;
