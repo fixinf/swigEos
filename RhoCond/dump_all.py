@@ -6,13 +6,19 @@ from matplotlib import pyplot as plt
 
 
 
-wr1 = Models2.MKVOR2final()
-wr2 = Models2.MKVOR_d()
+# wr1 = Models2.MKVOR2final()
+# wr2 = Models2.MKVOR_d()
 wr3 = Models2.KVORcut03()
-wr4 = Models2.KVORcut02()
+# wr4 = Models2.KVORcut02()
 # wr1.dumpUofE()
 # wr1.sym.dumpJ()
 # exit()
+m = wr3.rcond_hyper_phi_sigma
+# wr1.rcond_delta_phi.dumpEos()
+m.loadEos()
+m.dumpDensities()
+m.dumpNR()
+exit()
 
 for wr in [wr1, wr2, wr3]:
     # wr.dumpAll(hyper=0)
