@@ -413,7 +413,7 @@ namespace calc{
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;
-        int num_part = m - 1; //actual num. of particles. p = [n_1, n_2, ..., n_num, mu_c]
+    int num_part = m - 1; //actual num. of particles. p = [n_1, n_2, ..., n_num, mu_c]
 		double n_sum = 0.0;
 		double n_n = par->n;
 		double * n_in = new double [m+sc]; //input set for _E and mu
@@ -1072,4 +1072,41 @@ void stepE_rho(double n, double * init, int initN, double * f_init, int dimF_ini
 	delete[] x;
 	delete[] fun;
 	delete[] lb;
+}
+
+
+void wrap_fun(double * n, int dimN, set_const * C, double * out, int dim_Out){
+  double *n_in = new double[dimN-2];
+  for (int i = 0; i < dimN-2; i++){
+    n_in[i] = n[i+2];
+  }
+  double ntot = 0;
+  for (int i = 0; i < dimN-1; i++){
+    ntot += n[i+1];
+  }
+//  printf("ntot = %.6f \n", ntot);
+  double finit[1] = {n[0]};
+  calc::fun_n_eq_params p = {C, ntot, finit, 1,  0.};
+  calc::fun_n_eq(n_in, out, dimN-2, dimN-2, &p);
+  delete[] n_in;
+  return;
+}
+
+void wrap_fun_rho(double * n, int dimN, set_const * C, double * out, int dim_Out){
+  double *n_in = new double[dimN-2];
+  for (int i = 0; i < dimN-2; i++){
+    n_in[i] = n[i+2];
+  //  printf("%.6f ", n_in[i]);
+  }
+  //printf("\n");
+  double ntot = 0;
+  for (int i = 1; i < dimN-1; i++){
+    ntot += n[i];
+  }
+  //printf("ntot = %.6f \n", ntot);
+  double finit[1] = {n[0]};
+  calc::fun_n_eq_params p = {C, ntot, finit, 1,  0.};
+  calc::fun_n_eq_rho_anal(n_in, out, dimN-2, dimN-2, &p);
+  delete[] n_in;
+  return;
 }

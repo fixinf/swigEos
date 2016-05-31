@@ -97,11 +97,17 @@ public:
 	virtual double eta_r(double) = 0;
 	virtual double eta_p(double) = 0;
 	double chi_prime(double f){
-		if (chi_r_prime == 1){
-			return phi_n(1, f) / sqrt(eta_r(f));
-		}	
-    else{
-      return 1.;
+    switch (chi_r_prime){
+      case 1:
+        return phi_n(1, f) / sqrt(eta_r(f));
+        break;
+      case 2:
+        return phi_n(1, f);
+        break;
+      default:
+        return 1.;
+        break;
+
     }
 	}
 	
@@ -144,7 +150,7 @@ public:
 	bool muons;
 	double fmax;
 	bool hyper_sigma_kind;
-	bool chi_r_prime;
+	int chi_r_prime;
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;

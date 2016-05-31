@@ -17,6 +17,7 @@
 #include "constants.h"
 
 
+
 extern void stepE(double n, double * init, int dimInit, double * f_init, int dimF_init, double * out, int dimOut, int iter, set_const *);
 
 extern void stepE_rho(double n, double * init, int dimInit, double * f_init, int dimF_init,
@@ -43,4 +44,8 @@ namespace calc{
 extern float sumTest(double * in, int n);
 extern float sumTest2(double * in, int n, double * in2, int n2);
 extern void solveF(double n, double E, double P, double * init, int dimInit, double * out, int dimOut, set_const * C);
+
+extern void wrap_fun(double * n, int dimN, set_const * C, double * out, int dimOut);
+
+extern void wrap_fun_rho(double * n, int dimN, set_const * C, double * out, int dimOut);
 #endif /* EOS_H_ */
