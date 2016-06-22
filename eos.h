@@ -48,4 +48,5 @@ extern void solveF(double n, double E, double P, double * init, int dimInit, dou
 extern void wrap_fun(double * n, int dimN, set_const * C, double * out, int dimOut);
 
 extern void wrap_fun_rho(double * n, int dimN, set_const * C, double * out, int dimOut);
+extern void fun_rho_F_anal(double * p, double * hx, int m, int n, void * adata);
 #endif /* EOS_H_ */
