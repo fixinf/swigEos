@@ -1,7 +1,14 @@
 import Models2
 
-wr = Models2.MKVOR2final()
+# wr = Models2.MKVOR2final()
+wr = Models2.MKVOR_d()
 
+
+for m in [wr.rcond_hyper_phi, wr.rcond_hyper_phi_sigma]:
+    m.dumpEos()
+    m.dumpDensities()
+    m.dumpNR()
+exit()
 
 
 for m in [wr.nucl, wr.hyper_phi, wr.hyper_phi_sigma,

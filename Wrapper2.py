@@ -18,7 +18,7 @@ import six
 # import ipdb
 import inspect
 
-BASEFOLDER = '/home/const/MKVdelta_local/data_new/'
+BASEFOLDER = '/home/const/MKVdelta_local/data_new_sign/'
 
 class Wrapper(object):
     def __init__(self, Ctype, basefolder_suffix=''):
@@ -40,8 +40,8 @@ class Wrapper(object):
         self.mpi4_2_mevfm3 = self.m_pi * (self.m_pi / 197.33) ** 3
         self.mpi3tofmm3 = (self.m_pi/197.33)**3
         self.nmin = 0.
-        self.nmax = 8.*self.n0
-        self.npoints = 200
+        self.nmax = 10.*self.n0
+        self.npoints = 500
         gamma = 1
         self.nrange = np.linspace(self.nmin, self.nmax**gamma, self.npoints,
                                   endpoint=False)**(1/gamma)
@@ -159,8 +159,11 @@ class Wrapper(object):
         n_S = [sum([self.C.X_p[i] * r[i+1]/self.n0 for i in range(self.n_baryon)]) 
                 for r in self.rho]
 
+        n_Q = [sum([self.C.Q[i] * r[i+1]/self.n0 for i in range(self.n_baryon)]) 
+                for r in self.rho]
+
         np.savetxt(join(self.foldername, self.filenames['density']), 
-            np.array([self.nrange/self.n0, n_V, n_I, n_S]).transpose())
+            np.array([self.nrange/self.n0, n_V, n_I, n_S, n_Q]).transpose())
 
 
     def getFnBranches(self):
@@ -1060,6 +1063,40 @@ class Wrapper(object):
         ax.set_ylim([-20, 7])
         plt.show()
 
+    def inspect_f_indep(self):
+        self.check()
+
+        frange = np.linspace(0, 1, 500)
+        fig, ax = plt.subplots()
+
+        # func = list(map(
+        #     lambda z: func(z, swArr(self.rho[0, 1:])), frange
+        # ))
+
+        l, = ax.plot(frange, list(map(
+            lambda z: self.func_f(z, self.swArr(self.rho[0, 1:]), self.mu_e[0]), frange
+        )))
+
+        ax.plot(frange, [0. for f in frange])
+
+        plt.subplots_adjust(left=0.25, bottom=0.25)
+        axn = plt.axes([0.25, 0.1, 0.65, 0.03])
+        sn = Slider(axn, 'N', 0, self.rho.shape[0]-1, valinit=0)
+
+        axi = plt.axes([0.25, 0.1, 0.65, 0.03])
+        si = Slider(axi, 'i', 0, self.rho.shape[0]-1, valinit=0)
+
+        def update_i(val):
+            l.set_ydata(list(map(
+            lambda z: self.func_f(z, self.swArr(self.rho[sn.val, 1:]), self.mu_e[sn.val]), frange
+        )))
+
+        def update_n(val):
+            pass
+            fig.canvas.draw_idle()
+        si.on_changed(update_i)
+        ax.set_ylim([-20, 7])
+        plt.show()
 
 class MassDriver():
     def __init__(self):
@@ -1468,7 +1505,6 @@ class HyperonPhiSigma(HyperonPhi):
 
 class DeltaBase(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
-        print("init delta")
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.foldername = join(self.foldername, 'Delta')
         self.basefoldername = self.foldername
@@ -1744,7 +1780,6 @@ class Delta(DeltaBase, Hyperon):
 
 class Rho(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
-        print("init rho")
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.nc = np.array([])
         self.foldername = join(self.foldername, 'rcond')
@@ -1753,6 +1788,31 @@ class Rho(Wrapper):
         self.filenames['rcond'] = 'rcond.dat'
         self.filenames['n_rho'] = 'n_rho.dat'
         self.C.chi_r_prime = 0
+
+    def regen_mue(self):
+        mu = self.mu()
+        mu_e = mu[:, 0] - mu[:, 1]
+        n_e = []
+        n_mu = []
+        for i, r in enumerate(self.rho):
+            # print(r)
+            # print(eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C))
+            # _mue = eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C)
+            # mu_e.append(_mue)
+            _mue = mu_e[i]
+            if _mue > self.m_e:
+                n_e.append((_mue**2 - self.m_e**2)**(3./2) / (3 * pi **2))
+            else:
+                n_e.append(0.)
+            if _mue > self.m_mu:
+                n_mu.append((_mue**2 - self.m_mu**2)**(3./2) / (3*pi**2))
+            else:
+                n_mu.append(0.)
+
+        self.n_e = np.array(n_e)
+        self.n_mu = np.array(n_mu)
+        self.mu_e = mu_e
+
 
     def dumpNR(self):
         self.check()
@@ -1842,6 +1902,7 @@ class Rho(Wrapper):
 
 
     def loadEos(self):
+        print('rho loadEos')
         super().loadEos()
 
         rcond = np.loadtxt(join(self.foldername, self.filenames['rcond']))
@@ -1936,7 +1997,7 @@ class Rho(Wrapper):
                 init = queue.get(timeout=None)
 
                 # print init
-            print(init)
+            # print(init)
             if i % (len(self.nrange) / 20) == 0:
                 print('.', end=' ')
 
@@ -2320,6 +2381,19 @@ class RhoDeltaPhi(DeltaPhi, Rho):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_hyper_phi.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hp.dat'
+        self.filenames['n_rho'] = 'nr_dp.dat'
+
+
+    def mu(self, nrange=None):
+        if nrange is None:
+            nrange = self.nrange
+        self.check()
+        print("mu dpr")
+        conc = self.rho
+        mu = []
+        for j, n in enumerate(conc):
+            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+        return arr(mu)
 
     def dumpEos(self):
         super().dumpEos()   
@@ -2327,6 +2401,14 @@ class RhoDeltaPhi(DeltaPhi, Rho):
         rcond = arr([self.nrange/self.n0, self.nc/self.nrange]).transpose()
         np.savetxt(join(self.foldername, self.filenames['rcond'])
                    ,rcond, fmt='%.8f')
+
+    def checkEq(self):
+        params = eos.fun_n_eq_params()
+        params.C = self.C
+        params.dimF_init = 1
+        params.misc = 0.
+        for i, r in enumerate(self.rho):
+            params
 
     def loadEos(self):
         super().loadEos()
@@ -2384,6 +2466,17 @@ class RhoDeltaOnly(DeltaOnly, Rho):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_donly.dat'
         self.filenames['mass_crust'] = 'rc_masses_donly.dat'
+        self.filenames['n_rho'] = 'nr_do.dat'
+
+    def mu(self, nrange=None):
+        if nrange is None:
+            nrange = self.nrange
+        self.check()
+        conc = self.rho
+        mu = []
+        for j, n in enumerate(conc):
+            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+        return arr(mu)
 
     def dumpEos(self):
         super().dumpEos()   
@@ -2448,6 +2541,17 @@ class RhoDeltaPhiSigma(DeltaPhiSigma, Rho):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_hyper_phi_sigma.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hps.dat'
+        self.filenames['n_rho'] = 'nr_dps.dat'
+
+    def mu(self, nrange=None):
+        if nrange is None:
+            nrange = self.nrange
+        self.check()
+        conc = self.rho
+        mu = []
+        for j, n in enumerate(conc):
+            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+        return arr(mu)
 
     def dumpEos(self):
         super().dumpEos()   

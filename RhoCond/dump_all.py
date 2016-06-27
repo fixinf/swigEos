@@ -3,21 +3,13 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 # wr = Models2.MKVOR_d()
+wr = Models2.MKVOR2final()
+# for m in [wr.rcond_nucl, wr.rcond_hyper_phi, wr.rcond_hyper_phi_sigma,
+#           wr.rcond_delta_phi, wr.rcond_delta_phi_sigma]:
 
-
-
-# wr1 = Models2.MKVOR2final()
-# wr2 = Models2.MKVOR_d()
-wr3 = Models2.KVORcut03()
-# wr4 = Models2.KVORcut02()
-# wr1.dumpUofE()
-# wr1.sym.dumpJ()
-# exit()
-m = wr3.rcond_hyper_phi_sigma
-# wr1.rcond_delta_phi.dumpEos()
-m.loadEos()
-m.dumpDensities()
-m.dumpNR()
+for m in [wr.rcond_delta_phi_sigma]:
+      m.dumpEos()
+      m.dumpMassesCrust() 
 exit()
 
 for wr in [wr1, wr2, wr3]:
