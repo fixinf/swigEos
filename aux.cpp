@@ -289,9 +289,46 @@ void f_eq_rho(double * n, int dimN, double * init, int dimInit, double * res, in
 	ub[1] = 1.;
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-24;
 		opts[4]= -1e-5;
-	int iter = 300;
-	dlevmar_bc_dif(func_f_eq_rho, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
-
+	int iter = 100;
+  bool bother = 1;
+  double x_sos = x[0]; //save our soul
+  //info[6] = 0.;)
+  //while (info[6] < 6.){
+  //  printf("info = %i \n", info[6]);
+  //  if (info[6] > 0.)
+  //    if 
+   //   x[0] += 0.1;
+    //dlevmar_bc_dif(func_f_eq_rho, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+    if (bother)
+    printf("--------------------------\n");
+    if (bother){
+    while (pow(wrap_func_feq_rho(x[0], n, dimN, mu_c, C), 2) > opts[1]){  
+    dlevmar_bc_dif(func_f_eq_rho, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+    if (pow(wrap_func_feq_rho(x[0], n, dimN, mu_c, C), 2) > opts[1]){
+      printf("no zero. info[6] = %.2f, x_sos = %.6f", info[6], x_sos);
+      printf("step. x[0] = %.6f, fun = %.8e \n", x[0], pow(wrap_func_feq_rho(x[0], n, dimN, mu_c, C), 2));
+      x_sos += 0.01;
+      x_sos = 0.5 * (1. + x_sos);
+      if (x_sos > 0.7){
+        printf("n[0] = %.6f, n[1] = %.6f, mu_c = %.6f \n", n[0], n[1], mu_c);
+      }
+      if (x_sos > 1.){
+//      x_sos = x[0] - 0.1;
+        throw 20;
+      }
+      x[0] = x_sos;
+    }
+    }
+    }
+    else{
+      
+    dlevmar_bc_dif(func_f_eq_rho, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+    }
+    if (bother){
+    printf("info = %.6f \n", info[6]);
+    printf("x = %.6f \n", x[0]);
+    }
+  //}
 	if (debug){
 		printf("info: ");
 		for (int i = 0; i < LM_INFO_SZ; i++){
