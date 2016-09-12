@@ -7,8 +7,8 @@ from matplotlib.widgets import Slider
 import matplotlib as mpl
 mpl.rcParams['lines.linewidth'] = 3
 
-def getParts(n, m, mu_e):
-    f = np.linspace(0, 1, 100)
+def getParts(n, m, mu_e, rcond = 1):
+    f = np.linspace(0, 1, 500)
     C = m.C
     mn = C.M[0]
     dx = 1e-5
@@ -28,82 +28,107 @@ def getParts(n, m, mu_e):
     # plt.show()
     n_I = np.sum([C.X_r[i] * C.T[i] * _n for i, _n in enumerate(n)])
     res_rho = -np.array([derivative(lambda z: C.eta_r(z), _f, dx=dx, order=order) for _f in f]) *np.array([1.0/C.eta_r(_f)**2 for _f in f]) * n_I**2 * C.Cr / (2 * C.M[0]**2)
-    
-    parts_rcond = []
+    if rcond:
+        parts_rcond = []
 
-    mu_e = np.float64(mu_e)
+        mu_e = np.float64(mu_e)
 
-    m_rho = np.float64(C.m_rho)
+        m_rho = np.float64(C.m_rho)
 
-    n_rho = (2 * mn**2 * m_rho / C.Cr)  * np.array([
-            C.eta_r(_f)**0.5 * C.phi_n(0, _f)**2 / np.float64(C.chi_prime(_f)) * (
-                1 - mu_e / (m_rho * np.float64(C.phi_n(0, _f))) ) for _f in f
-        ])
+        n_rho = (2 * mn**2 * m_rho / C.Cr)  * np.array([
+                C.eta_r(_f)**0.5 * C.phi_n(0, _f)**2 / np.float64(C.chi_prime(_f)) * (
+                    1 - mu_e / (m_rho * np.float64(C.phi_n(0, _f))) ) for _f in f
+            ])
 
-    eta_rp = lambda z: C.phi_n(0, z)**2 / C.chi_prime(z)**2
+        eta_rp = lambda z: C.phi_n(0, z)**2 / C.chi_prime(z)**2
 
-    n_rho_f = lambda z: (2 * mn**2 * m_rho / 
-        C.Cr) * C.eta_r(z)**0.5 * C.phi_n(0, z)**2 / C.chi_prime(z) * (
-                1 - mu_e / (m_rho * C.phi_n(0, z)))
+        n_rho_f = lambda z: (2 * mn**2 * m_rho / 
+            C.Cr) * C.eta_r(z)**0.5 * C.phi_n(0, z)**2 / C.chi_prime(z) * (
+                    1 - mu_e / (m_rho * C.phi_n(0, z)))
 
-    pr_1 = C.Cr * abs(n_I)/ (2 * mn**2) * np.array([derivative(
-        lambda z: n_rho_f(z) / C.eta_r(z), _f, dx=dx, order=order) for _f in f])
+        pr_1 = C.Cr * abs(n_I)/ (2 * mn**2) * np.array([derivative(
+            lambda z: n_rho_f(z) / C.eta_r(z), _f, dx=dx, order=order) for _f in f])
 
-    pr_2 = -C.Cr / (8 * mn**2 ) * np.array([derivative(
-        lambda z: n_rho_f(z)**2 / C.eta_r(z), _f, dx=dx, order=order) for _f in f])
+        pr_2 = -C.Cr / (8 * mn**2 ) * np.array([derivative(
+            lambda z: n_rho_f(z)**2 / C.eta_r(z), _f, dx=dx, order=order) for _f in f])
 
-    for i, _n in enumerate(n_rho):
-        if n_rho[i]/2 > abs(n_I):
-            pr_1[i] = 0.
-            pr_2[i] = 0.
+        for i, _n in enumerate(n_rho):
+            if n_rho[i]/2 > abs(n_I):
+                pr_1[i] = 0.
+                pr_2[i] = 0.
 
-    for i, _f in enumerate(f):
-        if n_rho[i]/2 < abs(n_I):
-            parts_rcond.append([
-                m_rho * abs(n_I) * (1 - mu_e / (m_rho * C.phi_n(0, _f))) * (
-                    - eta_rp(_f)**.5 / C.eta_r(_f)**.5), 
+        for i, _f in enumerate(f):
+            if n_rho[i]/2 < abs(n_I):
+                parts_rcond.append([
+                    m_rho * abs(n_I) * (1 - mu_e / (m_rho * C.phi_n(0, _f))) * (
+                        - eta_rp(_f)**.5 / C.eta_r(_f)**.5), 
 
-                m_rho * abs(n_I) * (1 - mu_e / (m_rho * C.phi_n(0, _f))) * (
-                    C.phi_n(0, _f) * derivative(lambda z: eta_rp(z)**.5 / C.eta_r(z)**.5, _f, dx=dx, order=order)),
+                    m_rho * abs(n_I) * (1 - mu_e / (m_rho * C.phi_n(0, _f))) * (
+                        C.phi_n(0, _f) * derivative(lambda z: eta_rp(z)**.5 / C.eta_r(z)**.5, _f, dx=dx, order=order)),
 
-                - m_rho * abs(n_I) * mu_e / (m_rho * C.phi_n(0, _f)) * (eta_rp(_f)**.5 / C.eta_r(_f)**.5),
+                    - m_rho * abs(n_I) * mu_e / (m_rho * C.phi_n(0, _f)) * (eta_rp(_f)**.5 / C.eta_r(_f)**.5),
 
-                - m_rho**2 * mn**2 * C.phi_n(0, _f)**2/ (2 * C.Cr) * (1 - mu_e / (m_rho * C.phi_n(0, _f)))**2 * derivative(
-                    eta_rp, _f, dx=dx, order=order),
+                    - m_rho**2 * mn**2 * C.phi_n(0, _f)**2/ (2 * C.Cr) * (1 - mu_e / (m_rho * C.phi_n(0, _f)))**2 * derivative(
+                        eta_rp, _f, dx=dx, order=order),
 
-                2*m_rho**2 * mn**2 * eta_rp(_f) / (2 * C.Cr) * (1 - mu_e / (m_rho * C.phi_n(0, _f))) * (mu_e / (m_rho)),
+                    2*m_rho**2 * mn**2 * eta_rp(_f) / (2 * C.Cr) * (1 - mu_e / (m_rho * C.phi_n(0, _f))) * (mu_e / (m_rho)),
 
-                +m_rho**2 * mn**2 * eta_rp(_f) * C.phi_n(0, _f)/ ( C.Cr) * (1 - mu_e / (m_rho * C.phi_n(0, _f)))**2
+                    +m_rho**2 * mn**2 * eta_rp(_f) * C.phi_n(0, _f)/ ( C.Cr) * (1 - mu_e / (m_rho * C.phi_n(0, _f)))**2
 
-                ])
-            res_rho[i] = 0.
-        else:
-            parts_rcond.append([0., 0., 0., 0., 0., 0.])
-
-
+                    ])
+                res_rho[i] = 0.
+            else:
+                parts_rcond.append([0., 0., 0., 0., 0., 0.])
 
 
-    return f, part_f, part_kin, res_om, res_rho, parts_rcond, pr_1, pr_2, n_rho
+
+    if rcond:
+        return f, part_f, part_kin, res_om, res_rho, parts_rcond, pr_1, pr_2, n_rho
+    else:
+        return f, part_f, part_kin, res_om, res_rho
 
 
-wr = Models2.myMod()
+# wr = Models2.MKVOR2final()
+wr = Models2.MKVOR2_exp()
+# wr = Models2.myMod()
 m = wr.rcond_nucl
-m.dumpEos()
+# m = wr.nucl
+# m.dumpEos()
+m.loadEos()
 f = m.rho[:, 0]
-plt.plot(m.nrange/m.n0, m.mu_e)
-plt.plot(m.nrange/m.n0, m.C.m_rho*(1 - f))
-plt.show()
+# plt.plot(m.nrange/m.n0, m.mu_e)
+# plt.plot(m.nrange/m.n0, m.C.m_rho*(1 - f))
+# plt.show()
 # m.inspect_f()
 # m.loadEos()
 
-n = [0.808321 * 7.48*wr.n0,  (1-0.808321)*7.48*wr.n0]
+# n = [0.808321 * 7.48*wr.n0,  (1-0.808321)*7.48*wr.n0]
+i = 650
+print(m.nrange[i]/m.n0)
+# exit()
+n = m.rho[i, 1:]
 # n = np.array([4., 0])
 # mu_e = 1.
-mu_e = 232.452920 / m.m_pi
+mu_e = m.mu_e[i]
 
 f, part_f, kin, om, rho, rcond, pr_1, pr_2, n_rho = getParts(n, m, mu_e)
-rcond = np.array(rcond)
 
+# f, part_f, kin, om, rho = getParts(n, m, mu_e, rcond = 0)
+# res = np.nan_to_num(np.array([f, part_f, kin[0], kin[1], om, rho]))
+# np.savetxt(m.foldername + "/eq_parts_%i.dat"%(i), np.array(res).transpose(), fmt='%.6f')
+# exit()
+# for i, part in enumerate([f, part_f, kin[0], kin[1], om, rho, rcond, pr_1, pr_2, n_rho]):
+#     print(i)
+#     print(part)
+
+# exit()
+total = sum([f, part_f, kin[0], kin[1], om, rho, pr_1, pr_2])
+res = np.nan_to_num(np.array([f, part_f, kin[0], kin[1], om, rho, pr_1, pr_2, n_rho, total]))
+rcond = np.array(rcond)
+print(res)
+print(res.shape)
+np.savetxt(m.foldername + "/eq_parts_%i.dat"%(i), np.array(res).transpose(), fmt='%.6f')
+# exit()
 # plt.plot(f, part_f, label='f')
 # for i, k in enumerate(kin):
 #     plt.plot(f, kin[i], label='kin[%i]'%i)

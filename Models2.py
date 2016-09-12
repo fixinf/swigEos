@@ -349,6 +349,52 @@ def _MKVOR2_fom_a_exp(f, a):
 
     return C
 
+def _MKVOR_pole(f, a, b):
+    C = eos.MKVOR_pole()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.bcut_rho = b
+    C.fcut_rho = f
+    C.acut_rho = a
+
+    return C
+
+def MKVOR_pole(f, a, b):
+    __MKVOR_pole = lambda: _MKVOR_pole(f, a, b)
+    __MKVOR_pole.__name__ = _MKVOR_pole.__name__ + '%.2f%.2f%.2f'%(f, a, b)
+    M = Model(__MKVOR_pole)
+    U = -50.
+    xs_d = M.getDeltaXs(U)
+    print(xs_d)
+    M.setDeltaConst(np.array([xs_d for i in range(4)]),
+             np.array([1. for i in range(4)]),
+             np.array([1., 1., 1., 1.]),
+             's = %.2f U = %.0f' % (xs_d, U))
+    return M
+
+
 def _MKVOR2final():
     return _MKVOR2_fom_a_exp(0.78, 0.00)
 
@@ -369,6 +415,7 @@ def MKVOR2final():
 
     return M
 
+
 def MKVOR2_fom_a(f, a):
     __MKVOR2_fom_a = lambda: _MKVOR2_fom_a(f, a)
     __MKVOR2_fom_a.__name__ = _MKVOR2_fom_a.__name__ + '%.2f_%.2f'%(f, a)
@@ -382,10 +429,13 @@ def MKVOR2_fom_a(f, a):
              's = %.2f U = %.0f' % (xs_d, U))
     return M
 
-def _MKVOR2_exp():
+def _MKVOR2_exp(fcut_rho=None, bcut_rho=None):
     C = _MKVOR2final()
     C.fcut_om = 100500.
     #back to MKVOR
+    if (fcut_rho is not None and bcut_rho is not None):
+        C.fcut_rho = fcut_rho
+        C.bcut_rho = bcut_rho
     C.Cs = 234.1472066994
     C.Co = 134.8845385898
     C.Cr = 81.8421168107
@@ -394,8 +444,13 @@ def _MKVOR2_exp():
     C.alpha = 0.4
     return C
 
-def MKVOR2_exp():
-    return Model(_MKVOR2_exp)
+def MKVOR2_exp(fcut_rho=None, bcut_rho=None):
+    if fcut_rho is not None and bcut_rho is not None:
+        __MKVOR2_exp = lambda: _MKVOR2_exp(fcut_rho, bcut_rho)
+        __MKVOR2_exp.__name__ = _MKVOR2_exp.__name__ + '%.2e %.2e' %(fcut_rho, bcut_rho)
+        return Model(__MKVOR2_exp)
+    else:
+        return Model(_MKVOR2_exp)
 
 def MKVOR2_fom_a_exp(f, a):
     __MKVOR2_fom_a_exp = lambda: _MKVOR2_fom_a_exp(f, a)
@@ -770,3 +825,81 @@ def _Wal_d():
 
 def Wal_d(J0=None, f0=0.2):
     return Model(_Wal_d, K0=250., J0=J0, f0=f0, basefolder_suffix='Walecka_Delta')
+
+
+def _MKVOR_tail1():
+    C = eos.MKVOR3_tail()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.acut_rho = 2.
+    C.bcut_rho = 1/0.02 
+    C.fcut_rho = 0.64
+    C.tail_mult_rho = 1./12
+
+    C.tail_mult_om = 0.
+    return C
+
+def MKVOR_tail1():
+    return Model(_MKVOR_tail1)
+
+
+def _MKVOR_tail2():
+    C = _MKVOR_tail1()
+    C.fcut_rho = 0.64
+    C.acut_rho = 4
+    C.tail_mult_rho = 1/5
+    return C
+
+def MKVOR_tail2():
+    return Model(_MKVOR_tail2)
+
+
+def _MKVOR_tail1_om():
+    C = _MKVOR_tail1()
+    C.fcut_om = 0.95
+    C.acut_om = 4
+    C.bcut_om = 100
+    C.tail_mult_om = 0.1    
+    return C
+
+def MKVOR_tail1_om():
+    return Model(_MKVOR_tail1_om)
+
+
+def _MKVOR_tail2_om():
+    C = _MKVOR_tail2()
+    C.fcut_om = 0.95
+    C.acut_om = 4
+    C.bcut_om = 100
+    C.tail_mult_om = 0.1    
+    return C
+
+def MKVOR_tail2_om():
+    return Model(_MKVOR_tail2_om)
+
+
+
+
+
