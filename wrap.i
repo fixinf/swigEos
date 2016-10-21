@@ -16,6 +16,8 @@
 #include "InterpolatedScalings.h"
 #include "SCDelta.h"
 #include "MKVOR.h"
+//#include "easylogging.h"
+//INITIALIZE_EASYLOGGINGPP
 %}
 
 %include "std_vector.i"

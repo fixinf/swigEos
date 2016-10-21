@@ -13,7 +13,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 
-class InterpolatedScalings: public set_const {
+class InterpolatedScalings: virtual public set_const {
 public:
 	InterpolatedScalings();
 	virtual ~InterpolatedScalings();

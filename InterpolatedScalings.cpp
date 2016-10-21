@@ -17,10 +17,10 @@ InterpolatedScalings::InterpolatedScalings() : set_const() {
 	this->splineS = 0;
 	this->accS = 0;
 	this->rho_akima = 0;
+  this->debug = 0;
 }
 
 InterpolatedScalings::~InterpolatedScalings() {
-
 }
 
 double InterpolatedScalings::U(double f) {
@@ -98,8 +98,9 @@ void InterpolatedScalings::set_eta_s(double* f_in, int dimF_in, double* y_in,
 void InterpolatedScalings::set_eta_o(double* f_in, int dimF_in, double* y_in,
 		int dimY_in) {
 	if (this->splineO != 0){
-		printf("Omega spline is already set!");
-		return;
+//		printf("Omega spline is already set!");
+//		return;
+      delete splineO;
 	}
 
 	if (dimF_in != dimY_in){

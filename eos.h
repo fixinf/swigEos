@@ -19,9 +19,18 @@
 
 
 extern void stepE(double n, double * init, int dimInit, double * f_init, int dimF_init, double * out, int dimOut, int iter, set_const *);
+extern void stepE_dsym(double n, double * init, int dimInit, double * f_init, int dimF_init, double * out, int dimOut, int iter, set_const *);
+
+extern void stepE_f(double f, double * init, int dimInit, double * out, int dimOut, int iter, set_const* C);
+
 
 extern void stepE_rho(double n, double * init, int dimInit, double * f_init, int dimF_init,
 		double * out, int dimOut, int iter, double mu_init, set_const *);
+
+extern void stepE_rho2(double n, double * init, int dimInit, double * f_init, int dimF_init,
+		double * out, int dimOut, int iter, double mu_init, set_const *);
+
+void stepE_rho_f(double f, double * init, int dimInit, double * out, int dimOut, int iter, set_const* C);
 
 
 void potentials(double * n, int dimN, double * out, int dimOut, set_const * C);
@@ -39,6 +48,9 @@ namespace calc{
 	extern double mu_deriv(double *n, int dimN, int i, double mu_c, set_const *C);
 	extern double mu_rho(double * n,  int dimN, int i, double mu_c, set_const * C);
 	extern void fun_n_eq_rho_anal(double * p, double * hx, int m, int n, void * adata);
+	extern void fun_n_eq_rho_anal2(double * p, double * hx, int m, int n, void * adata);
+	extern void fun_n_eq_f(double * p, double * hx, int m, int n, void * adata);
+
 }
 
 extern float sumTest(double * in, int n);
@@ -46,6 +58,9 @@ extern float sumTest2(double * in, int n, double * in2, int n2);
 extern void solveF(double n, double E, double P, double * init, int dimInit, double * out, int dimOut, set_const * C);
 
 extern void wrap_fun(double * n, int dimN, set_const * C, double * out, int dimOut);
-
+extern void wrap_fun_np_f(double nn, double np, double f, set_const * C, double * out, int dimOut);
 extern void wrap_fun_rho(double * n, int dimN, set_const * C, double * out, int dimOut);
+extern double wrap_fun_dsym_f(double n, double nd, double f_init, set_const * C);
+extern double wrap_fun_dsym(double n, double nd, double f_init, set_const * C);
+
 #endif /* EOS_H_ */

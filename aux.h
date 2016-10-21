@@ -39,5 +39,7 @@ extern double EBind(double * n, int dimN, set_const *C);
 extern double J(double n, set_const * C);
 extern double J(double n, set_const * C, double f);
 
+extern double J_asym(double n, double asym, set_const * C);
+extern double J_an(double n, set_const * C);
 
 #endif /* AUX_H_ */

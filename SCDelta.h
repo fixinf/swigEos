@@ -11,6 +11,7 @@
 #include "Walecka.h"
 #include "KVORmod2.h"
 #include "MKVOR.h"
+#include "InterpolatedScalings.h"
 
 class SCDelta: virtual public set_const {
 public:
@@ -68,6 +69,13 @@ public:
     }
 };
 
+class InterScDelta: public InterpolatedScalings, public SCDelta{
+  public:
+  InterScDelta() : InterpolatedScalings(), SCDelta(){
+  
+  }
+};
+
 class KVORcut_d: public KVOR_cut, public SCDelta{
 public:
     KVORcut_d() : KVOR_cut(), SCDelta(){
@@ -118,5 +126,169 @@ public:
     double fcut_rho;
     double acut_rho;
     double bcut_rho;
+};
+
+class MKVOR_pole: public MKVOR2{
+public:
+    MKVOR_pole(): MKVOR2(){
+    }
+        double eta_r(double f){
+            return MKVOR::eta_r(f) + acut_rho / pow(fabs(f - fcut_rho), bcut_rho);
+        }
+    
+};
+
+class MKVOR3_tail : public MKVOR2{
+  public:
+  MKVOR3_tail() : MKVOR2(){
+    tail_mult_rho = 1.;
+    tail_mult_om = 1.;
+  }
+
+  double eta_r(double f){
+    return 0.5 * MKVOR::eta_r(f) * (1 + tanh(bcut_rho * (fcut_rho - f))) + 
+           0.5 * tail_mult_rho/(pow(f, acut_rho)) * (1 - tanh(bcut_rho * (fcut_rho - f)));
+  }
+
+
+  double eta_o(double f){
+    return 0.5 * MKVOR::eta_o(f) * (1 + tanh(bcut_om * (fcut_om - f))) + 
+           0.5 * tail_mult_om/(pow(f, acut_om)) * (1 - tanh(bcut_om * (fcut_om - f)));
+  }
+  
+  double tail_mult_rho;
+  double tail_mult_om;
+
+};
+
+class MKVOR_tail1: public MKVOR2{
+public:
+	MKVOR_tail1(): MKVOR2(){
+		tail_mult_om = 1;
+		tail_mult_rho = 1;
+	}
+	double eta_r(double f){
+		return 0.5 * MKVOR::eta_r(f) * (1 + tanh(bcut_rho * (fcut_rho - f))) +
+		           0.5 * tail_mult_rho/(1 + pow(fabs(f)/fcut_rho, acut_rho)) * (1 - tanh(bcut_rho * (fcut_rho - f)));
+	}
+
+	double eta_o(double f){
+	    return 0.5 * MKVOR::eta_o(f) * (1 + tanh(bcut_om * (fcut_om - f))) +
+	           0.5 * tail_mult_om/(1 + pow(fabs(f)/fcut_om, acut_om)) * (1 - tanh(bcut_om * (fcut_om - f)));
+	  }
+
+	double tail_mult_rho;
+	double tail_mult_om;
+};
+
+class MKVOR_tail3: public MKVOR2{
+public:
+	MKVOR_tail3(): MKVOR2(){
+		tail_mult_om = 1;
+		tail_mult_rho = 1;
+	}
+	double eta_r(double f){
+		return 0.5 * MKVOR::eta_r(f) * (1 + tanh(bcut_rho * pow(fcut_rho - f, 3))) +
+		           0.5 * tail_mult_rho/(1 + pow(fabs(f)/fcut_rho, acut_rho)) * (1 - tanh(bcut_rho * pow(fcut_rho - f, 3)));
+	}
+
+	double eta_o(double f){
+	    return 0.5 * MKVOR::eta_o(f) * (1 + tanh(bcut_om * pow(fcut_om - f, 3))) +
+	           0.5 * tail_mult_om/(1 + pow(fabs(f)/fcut_om, acut_om)) * (1 - tanh(bcut_om * pow(fcut_om - f, 3)));
+	  }
+
+	double tail_mult_rho;
+	double tail_mult_om;
+};
+
+class MKVOR_tail_poly: public MKVOR2{
+public:
+	MKVOR_tail_poly(): MKVOR2(){
+		tail_mult_om = 1;
+	}
+	double eta_r(double f){
+		if (f < fcut_rho){
+			return MKVOR::eta_r(f);
+		}
+		else{
+			return eta_r_new(f);
+		}
+	}
+
+	double eta_r_new(double f){
+		return 1./(acut_rho + bcut_rho * (f - fcut_rho) + c_cut_rho * pow(f - fcut_rho, 2) +
+							d_cut_rho * pow(f-fcut_rho, 3));
+	}
+
+	double eta_o(double f){
+	    return 0.5 * MKVOR::eta_o(f) * (1 + tanh(bcut_om * (fcut_om - f))) +
+	           0.5 * tail_mult_om/(1 + pow(fabs(f)/fcut_om, acut_om)) * (1 - tanh(bcut_om *(fcut_om - f)));
+	  }
+
+	double c_cut_rho;
+	double d_cut_rho;
+	double tail_mult_om;
+};
+
+class MKVOR_tail_poly_exp: public MKVOR2{
+public:
+	MKVOR_tail_poly_exp(): MKVOR2(){
+		tail_mult_om = 1;
+	}
+	double eta_r(double f){
+		if (f < fcut_rho){
+			return MKVOR::eta_r(f);
+		}
+		else{
+			return eta_r_new(f);
+		}
+	}
+
+	double eta_r_new(double f){
+		return 1./(acut_rho + bcut_rho * (f - fcut_rho) + c_cut_rho * pow(f - fcut_rho, 2) +
+							e_cut_rho * exp(d_cut_rho * pow(f-fcut_rho, 3)));
+	}
+
+	double eta_o(double f){
+	    return 0.5 * MKVOR::eta_o(f) * (1 + tanh(bcut_om * (fcut_om - f))) +
+	           0.5 * tail_mult_om/(1 + pow(fabs(f)/fcut_om, acut_om)) * (1 - tanh(bcut_om *(fcut_om - f)));
+	  }
+
+	double c_cut_rho;
+	double d_cut_rho;
+	double e_cut_rho;
+	double tail_mult_om;
+};
+
+class MKVOR_tail_poly4: public MKVOR2{
+public:
+	MKVOR_tail_poly4(): MKVOR2(){
+		tail_mult_om = 1;
+	}
+	double eta_r(double f){
+		if (f < fcut_rho){
+			return MKVOR::eta_r(f);
+		}
+		else{
+			return eta_r_new(f);
+		}
+	}
+
+	double eta_r_new(double f){
+		return 1./(acut_rho + bcut_rho * (f/fcut_rho - 1) +
+							c_cut_rho * pow(f/fcut_rho - 1, 2) +
+							d_cut_rho * pow(f/fcut_rho - 1, 3) +
+							e_cut_rho * pow(f/fcut_rho - 1, 4));
+	}
+
+	double eta_o(double f){
+	    return 0.5 * MKVOR::eta_o(f) * (1 + tanh(bcut_om * (fcut_om - f))) +
+	           0.5 * tail_mult_om/(1 + pow(fabs(f)/fcut_om, acut_om)) * (1 - tanh(bcut_om *(fcut_om - f)));
+	  }
+
+	double c_cut_rho;
+	double d_cut_rho;
+	double e_cut_rho;
+	double tail_mult_om;
 };
 #endif //EOSWRAP_SCDELTA_H

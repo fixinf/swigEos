@@ -278,6 +278,7 @@ void star2(double rho_init, double * result, int dimResult, DriverBase* D) {
 }
 
 void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, double nmin) {
+  printf("r_init = %.6f \n", rho_init);
 	printf("Hey\n");
 	gsl_odeiv2_system sys = { eq_volkov2, NULL, 3, NULL};
 	double delta = 0.;
@@ -341,7 +342,7 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 	D->lastPstar = new double[n_points-1];
 	printf(" done.\n");
 	for (i = 1; i <= n_points; i++) {
-//			printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
+//		printf("%f %f %f %f \n \r", t, y[0], y[1], y[2]);
 		double ti = i * t1 / n_points;
 		if ((y[0] > delta * P_init)&&(D->NofP(y[0]) > nmin)) {
 			status = gsl_odeiv2_driver_apply(d, &t, ti, y);

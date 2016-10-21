@@ -290,7 +290,7 @@ void f_eq_rho(double * n, int dimN, double * init, int dimInit, double * res, in
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-24;
 		opts[4]= -1e-5;
 	int iter = 100;
-  bool bother = 1;
+  bool bother = 0;
   double x_sos = x[0]; //save our soul
   //info[6] = 0.;)
   //while (info[6] < 6.){
@@ -462,6 +462,62 @@ double J(double n, set_const * C){
 	return 135.0*n*d2E/8;
 }
 
+double J_asym(double n, double asym, set_const * C){
+	double dn = 1e-3;
+	int old_sprime = C->sprime;
+	C->sprime = 0;
+  double n_n = (0.5 + asym) * n;
+  double n_p = (0.5 - asym) * n;
+//	double _n[2] = {(n-2*dn)/2, (n+2*dn)/2};
+  double _n[2] = {n_n - dn, n_p + dn};
+	double out[1];
+	double init[1] = {C->f0};
+	f_eq(_n, 2, init, 1, out, 1, C);
+	double n_E[3] = {out[0], (n - 2*dn)/2, (n + 2*dn)/2};
+	double d2E = -1.*_E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += 16*_E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += -30.*_E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += 16.*_E(n_E, 3, C);
+
+	_n[0] += dn/2;
+	_n[1] -= dn/2;
+	f_eq(_n, 2, init, 1, out, 1, C);
+	n_E[0] = out[0];
+	n_E[1] += dn/2;
+	n_E[2] -= dn/2;
+
+	d2E += -1.*_E(n_E, 3, C);
+
+	d2E /= 12*(dn/2)*(dn/2);
+	C->sprime = old_sprime;
+	return 135.0*n*d2E/8;
+}
+
 double J(double n, set_const * C, double f){
 	double dn = 1e-3;
 	int old_sprime = C->sprime;
@@ -495,4 +551,17 @@ double J(double n, set_const * C, double f){
 	C->sprime = old_sprime;
 	return 135.0*n*d2E/8;
 }
+
+double J_an(double n, set_const * C){
+	double p = p_f(n/2, 2);
+	double _n[2] = {n/2, n/2};
+	double out[1];
+	double init[1] = {C->f0};
+	f_eq(_n, 2, init, 1, out, 1, C);
+	double f = out[0];
+	double meff = C->M[0] * C->phi_n(0, f);
+	return C->Cr / (8 * pow(C->M[0],2) * C->eta_r(f)) * n +
+			pow(M_PI, 2) * n / (4 * p * sqrt(p*p + meff*meff));
+}
+
 

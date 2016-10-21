@@ -20,10 +20,10 @@ KVOR::KVOR() : set_const() {
 	c = 0.00034461786646922604;
 	this->f0 = 0.195;
 	this->z = 0.65;
+	this->phi_kind = 1;
 }
 
 KVOR::~KVOR() {
-	this->phi_kind = 1;
 }
 
 double KVOR::eta_o(double f){

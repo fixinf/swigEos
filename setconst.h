@@ -54,6 +54,9 @@
 
 #ifndef SET_CONST_H_
 #define SET_CONST_H_
+//#include "easylogging.h"
+
+//INITIALIZE_EASYLOGGINGPP
 
 typedef std::vector<double> vec;
 
@@ -80,6 +83,7 @@ public:
 		this->set_hs_z(alpha, 8);
 		this->m_rho = 770./135.;
 		this->chi_r_prime = 0;
+    this->f_branches = 0;
 	}
 	set_const(double, double, double, double, double);
 	//			Cs		Co		Cr		b		c		z 
@@ -121,6 +125,8 @@ public:
 	double f0;
 	double m_rho;
 	double exp_alpha;
+  bool f_branches;
+  std::string log_stepE;
 	std::vector<double> X_s;
 	std::vector<double> X_o;
 	std::vector<double> X_p;
