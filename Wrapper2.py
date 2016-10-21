@@ -50,7 +50,7 @@ class Wrapper(object):
         self.mpi3tofmm3 = (self.m_pi / 197.33)**3
         self.nmin = 0.
         self.nmax = 8 * self.n0
-        self.npoints = 500
+        self.npoints = 800
 
         gamma = 1
         self.nrange = np.linspace(self.nmin, self.nmax**gamma, self.npoints,
@@ -96,8 +96,8 @@ class Wrapper(object):
         
 
 
-    def processMaxw(self, mu_init=None, show=0, branch_3=0):
-        mu = self.mu(branch_3=branch_3)[:, 0]
+    def processMaxw(self, mu_init=None, show=0, branch_3=0, shift=0):
+        mu = np.nan_to_num(self.mu(branch_3=branch_3)[:, 0])
         if not branch_3:
             P = self._P
             E = self._E
@@ -107,12 +107,13 @@ class Wrapper(object):
             E = self._E2
             N = self.nrange
         i_break = np.where(np.diff(P) < 0)[0][-1]
-        i_break_mu = np.where(np.diff(mu) < 0)[0][0]
+        i_break_mu = shift + np.where(np.diff(mu[shift:]) < 0)[0][0]
         print(i_break, i_break_mu)
         b1 = np.array([mu[:i_break_mu], P[:i_break_mu], E[:i_break_mu], N[:i_break_mu]]).transpose()
         b2 = np.array([mu[i_break+1:], P[i_break+1:], E[i_break+1:], N[i_break+1:]]).transpose()
         # kind = 'cubic'
         kind = 'linear'
+        print(b1)
         ip1 = interp1d(b1[:, 0], b1[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ip2 = interp1d(b2[:, 0], b2[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ie1 = interp1d(b1[:, 0], b1[:, 2], bounds_error=0, fill_value=0., kind=kind)
@@ -167,9 +168,9 @@ class Wrapper(object):
         n_total = np.concatenate((n1, n2))
         e_total = np.concatenate((e1, e2))
 
-        self.nrange = n_total
-        self._P = p_total
-        self._E = e_total
+        self.nrange_maxw = n_total
+        self._P_maxw = p_total
+        self._E_maxw = e_total
 
 
 
@@ -657,7 +658,7 @@ class Wrapper(object):
         tabV = tabulate(tV, ['n/n_0'] + ['V [' + pname + ']' for pname in self.part_names],
             tablefmt='plain')
         tabI = tabulate(tR, ['n/n_0'] + ['I [' + pname + ']' for pname in self.part_names],
-            tablefmt='plain')
+            tablefmt='plain',   )
         # return tab
         # print(table)
         # print(join(self.foldername, 'pot_sym.dat'))
@@ -793,7 +794,7 @@ class Wrapper(object):
         return np.array(res) * self.mpi4_2_mevfm3
 
 
-    def E_gen(self, nlist, ret_f=False, f=0., dn=None):
+    def E_gen(self, nlist, solve_f=1, ret_f=False, f=0., dn=None):
         """Provides the energy density for given particle concentrations [n] 
         without leptons. DO NOT OVERRIDE.
         
@@ -812,9 +813,13 @@ class Wrapper(object):
         dEparts = []
         for n in nlist:
             epart = np.zeros(9, dtype='float')
-            f = eos.f_eq(arr(n), arr([f]), 1, self.C)[0]
-            flist.append(f)
-            elist.append(eos._E(np.insert(n, 0, f), self.C))
+            if not solve_f:
+                ret_f = 0
+                elist.append(eos._E(n, self.C))
+            else:
+                f = eos.f_eq(arr(n), arr([f]), 1, self.C)[0]
+                flist.append(f)
+                elist.append(eos._E(np.insert(n, 0, f), self.C))
             eparts.append(epart)
             self.Eparts = arr(eparts)
             if dn is not None:
@@ -1055,11 +1060,13 @@ class Wrapper(object):
     def mu(self, nrange=None, branch_3=0):
         if nrange is None:
             nrange = self.nrange
-        self.check()
+        
         if branch_3:
             conc = self.rho2
+
         else:
             conc = self.rho
+            self.check()
         mu = []
         for n in conc:
             mu.append([eos.mu(n, i+1, self.C) for i in range(self.n_baryon)])
@@ -1351,9 +1358,9 @@ class Nucleon(Wrapper):
         self._E = eos_tab[:, 1]
         self._P = eos_tab[:, 2]
         self.set = 1
-        rhos = self.nrange*eos_tab[:, -1-self.n_baryon : -1].transpose()
+        rhos = self.nrange*eos_tab[:, 3 : 3 + self.n_baryon].transpose()
         # print(rhos)
-        self.rho = np.insert(rhos.transpose(), 0, eos_tab[:,-1], axis=1)
+        self.rho = np.insert(rhos.transpose(), 0, eos_tab[:,3+self.n_baryon], axis=1)
 
         mu_e = []
         n_e = []
@@ -1397,9 +1404,10 @@ class Nucleon(Wrapper):
         conc = self.concentrations()
         tab += [conc[:,i] for i in range(self.n_baryon)]
         tab += [self.rho[:,0]]
+        tab += [self.m_pi*(E/n - self.C.M[0])]
         table = tabulate(arr(tab).transpose(), ['n/n0', 'E_NS[m_\pi^4]',
                                                 'P_NS[m_\pi^4]'] +
-        self.part_names[:self.n_baryon] + ['f'], tablefmt='plain'
+        self.part_names[:self.n_baryon] + ['f', 'Ebind'], tablefmt='plain'
         )
         with open(join(self.foldername, self.filenames['eos']), 'w') as f:
             f.write(table)
@@ -1420,6 +1428,85 @@ class Nucleon(Wrapper):
         with open(join(self.foldername, self.filenames['meff']), 'w') as f:
             f.write(table)
 
+
+    def get_upper_branch(self, alpha=0.75):
+        self.loadEos()
+        out = self.checkMultiSol()
+        if out == []:
+            print("No other branches found")
+            return
+        f_init = np.array([out[-1][-1]])
+        i_start = len(self.nrange) - 1
+        # Third solution with selfconsistent concentrations usually appears
+        # earlier than it was with "old" concentrations => factor alpha
+        if alpha > 1:
+            alpha = 1
+        i_end = int(alpha * out[0][1]) 
+        print(i_end)
+        n_tosolve = self.nrange[i_start:i_end:-1]
+        n_init = self.rho[i_start]
+        init = n_init[2:]
+
+        # Solving and populating concentrations
+        flist = []
+        rlist = []
+        mu_e = []
+        # self.nc2 = []
+        for i_solve, _n in enumerate(n_tosolve):
+        #     print(_n/m.n0)
+            res = eos.stepE(_n, init, f_init, len(init), 30, self.C)
+            n_S = np.array([_n - res[0], res[0]])
+            # self.nc2.append(res[-1])
+            f = eos.f_eq(n_S, f_init, 1, self.C)
+        #     f = eos.f_eq(n_S, f_init, 1, m.C)
+        #     print(res, f)
+            rlist.append([_n - res[0], res[0]])
+            flist.append(f[0])
+            f_init = f
+        
+        rlist = np.array(rlist)
+        flist = np.array(flist)
+        # self.nc2 = np.array(self.nc2)
+        self.rho_upper = np.insert(rlist, 0, flist.transpose(), axis=1)
+        mu_e =np.array([eos.mu(r, 0, self.C) - eos.mu(r, 1, self.C) for r in self.rho_upper])
+        self.mu_e_upper = mu_e
+        self.n_upper = n_tosolve
+ 
+        # print(self..checkMultiSol)
+
+        # Stripping the new concentrations for the actual solution
+
+    def refine_upper(self):
+        sols = self.checkMultiSol(nrange=self.n_upper, rho=self.rho_upper,
+            mu=self.mu_e_upper, npoints=len(self.n_upper), ret_3br=0)
+        print(sols)
+        i_break = sols[-1][1]
+        print(i_break)
+        self.rho_upper2 = self.rho_upper[:i_break]
+        self.mu_e_upper2 = self.mu_e_upper[:i_break]
+        self.n_upper2 = self.n_upper[:i_break]
+        # self.nc2 = self.nc2[:i_break]
+        # self.E_upper = np.array([eos.E_rho(n, self.mu_e_upper2[i], self.C) for i, n in enumerate(self.rho_upper2)])
+        self._E2 = self._E.copy()
+        self.rho2 = self.rho.copy()
+        self.mu_e2 = self.mu_e.copy()
+        self.E_upper = self.E_gen(self.rho_upper2, solve_f=0) 
+        self._P2 = self._P.copy()
+        # self.nclist2 = self.nc.copy()
+        self.P_upper = self.P_chem(self.rho_upper2)
+        shift = len(self._E2) - len(self.E_upper)
+        flag = 0 #VERY DIRTY!!!!!!!!!!!!!!!!!!!! assumes that third solution
+                                                #doesn't disappear and is energetically 
+                                                #favorable for all densities!
+        for i, e in enumerate(self.E_upper[::-1]):
+            if self._E2[shift + i] > e:
+                flag = 1
+            if flag:
+                self._E2[shift + i] = e
+                self.rho2[shift + i] = self.rho_upper2[::-1][i]
+                self.mu_e2[shift + i] = self.mu_e_upper2[::-1][i]
+                self._P2[shift + i] = self.P_upper[::-1][i]
+                # self.nclist2[shift + i] = self.nc2[::-1][i]
 
 
 class Sym(Nucleon):
@@ -1869,15 +1956,48 @@ class DeltaSym(DeltaBase, Sym):
     def eq2(self, x, n, lastf=0.):
         pass
 
+    def checkDeltaMultiSol(self, nrange=None, npoints=20, break_lost=0):
+        # if mu is None:
+        #     mu = self.mu
+        if nrange is None:
+            nrange = self.nrange
+        nd_res = []
+        out = []
+        i_check = range(0, len(nrange), len(nrange)//npoints)
+        for i in i_check:
+            nd, res, flist = self.get_fn(nrange[i], f_init=0.5)
+            # n_out = [] #densities at which more that 1 solution occurs
+            # f_out = [] #approximate values of the roots for these densities
+            sch_prev = 0
+            sign_changes = 0
+            r_prev = res[0]
+            for k, r in enumerate(res):
+                if r*r_prev < 0:
+                    sign_changes += 1
+                    print(i, sign_changes, nd[k])
+                    nd_res.append(nd[k])
+                    r_prev = r
+
+            if sign_changes > 1:
+                out.append([sign_changes, i, nrange[i]] + nd_res)
+                return out
+                
+            if sign_changes < sch_prev:
+                if break_lost:
+                    return out
+            sch_prev = sign_changes
+        return out
+
+
     def get_fn(self, n, f_init=0.):  
         fprev = f_init
         # global fprev
         # print(n)
         res = []
-        nrange = np.linspace(0, n, 100)
+        nrange = np.linspace(0, n, 500)
         flist = []
         for _n in nrange:
-            out, f = self.eq([4*_n], n, lastf=fprev)
+            out, f = self.eq([_n], n, lastf=fprev)
             fprev = f
             flist.append(f)
             res.append(out)
@@ -1905,7 +2025,7 @@ class DeltaSym(DeltaBase, Sym):
         def update(val):
             print('val=', val)
             _n = self.nrange[int(val)]
-            res = self.get_fn(_n, f_init=self.rho[int(val), 0])
+            res = self.get_fn(4*_n, f_init=self.rho[int(val), 0])
             l.set_ydata(res[1])
             l.set_xdata(res[0]/_n)
             fig.canvas.draw_idle()
@@ -1969,7 +2089,7 @@ class DeltaSym(DeltaBase, Sym):
         data = np.loadtxt(join(self.foldername, self.filenames['eos']), skiprows=1)
         self.nrange = self.n0 * data[:, 0]
         self._E = self.nrange * (data[:, 2]/self.m_pi + self.C.M[0])
-        self._P = data[:, 3] / self.mpi4_2_mevfm3
+        self._P = data[:, 3]# / self.mpi4_2_mevfm3
         z = np.array([0. for i in data[:, 1]])
         self.rho =(self.nrange * np.array([np.nan_to_num(data[:, 1]/self.nrange), data[:, 4] / 2, data[:, 4] / 2, 
                              z, z, z, z, z, z, data[:, 5] / 4, data[:, 5] / 4,
@@ -2124,17 +2244,22 @@ class Rho(Wrapper):
         eos.func_f_eq_rho(arg, out, 1, 1, params)
         return out[0]
 
-    def mu(self, nrange=None, branch_3=0):
+    def mu(self, nrange=None, branch_3=0, inv=0):
         if nrange is None:
             nrange = self.nrange
         self.check()
+        mu_e = self.mu_e
         if branch_3:
             conc = self.rho2
         else:
             conc = self.rho
+        if inv:
+            conc = self.rho_inv
+            mu_e = self.mu_e_inv
+
         mu = []
         for j, n in enumerate(conc):
-            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+            mu.append([eos.mu_rho(n, i+1, mu_e[j], self.C) for i in range(self.n_baryon)])
         return arr(mu)
 
     def getFnBranches(self):
@@ -2326,6 +2451,61 @@ class Rho(Wrapper):
         self._P = np.ascontiguousarray(self.P_chem())
         self.set = True
 
+    def reset_inv(self, iterations=30, timeout=None, kind=1, fmax=0.9, npoints=None):
+        if npoints is None:
+            npoints = self.npoints
+
+        print("Resetting " + self.__repr__() + " for model " + self.Ctype.__name__.strip('_'))
+        rho = []
+
+        mu_e = []
+        mu_c = []
+        mu_n = []
+        nc = []
+        nlist = []
+
+        self.frange_inv = np.linspace(0., fmax, npoints)
+        init = arr([0.1] * self.n_baryon + [0.]) #All particles + mu_ch
+        for i, f in enumerate(self.frange_inv):
+            if sum(init) < 1e-7:
+                init = arr([0.1] * self.n_baryon + [0.]) #All particles + mu_ch
+
+            out = eos.stepE_rho_f(f, init, len(init) + 1, iterations, self.C) 
+            #len(out) = len(init) + 1 [for n_rho]
+            
+            if i % (npoints / 20) == 0: print('.', end=' ')
+            rho.append(out.copy()[:-2]) ## 2 reserved for mu_c and n_c
+    
+            # rho contains all scalar fields as well
+            rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
+            mu_e.append(out[-2])
+            mu_c.append(out[-2])
+            mu_n.append(self.mu())
+            nc.append(out[-1])
+            init = out[:-1]
+            _n = sum(init[:-1])
+            # print(f, init, _n)
+            nlist.append(_n)
+
+
+
+        #Other things left the same as for the original reset()
+        self.nrange_inv = np.array(nlist)
+        self.mu_c_inv = np.array(mu_c)
+        self.nc_inv = np.nan_to_num(np.ascontiguousarray(arr(nc)))
+        self.rho_inv = np.ascontiguousarray(arr(rho))
+        self.mu_e_inv = np.ascontiguousarray(arr(mu_e))
+        self._E_inv = self.Efull(rlist=self.rho_inv,
+                                 nclist=self.nc_inv,
+                                 mu_list=self.mu_e_inv)
+
+        self._P_inv = np.ascontiguousarray(self.P_chem(rho=self.rho_inv,
+                                                       mu_e_list=self.mu_e_inv,
+                                                       nclist = self.nc_inv))
+
+        self.set = True
+
+
     def check_eq(self, n, C, f, init, mu=None):
         params = eos.fun_n_eq_params()
         params.C = C
@@ -2340,11 +2520,17 @@ class Rho(Wrapper):
             init[-2] = mu_e
             res.append(eos.func_f_eq_rho_anal())
 
-    def Efull(self, n=None, mu_e=None):
-        if (n is None) or (mu_e is None):
+    def Efull(self, n=None, nc=None, mu_e=None, rlist=None, mu_list=None, nclist=None):
+        if (n is None) or (mu_e is None) or (nc is None):
+            if rlist is None:
+                rlist = self.rho
+            if mu_list is None:
+                mu_list = self.mu_e
+            if nclist is None:
+                nclist = self.nc
             _E = []
-            for i, n in enumerate(self.rho):
-                mu_e = self.mu_e[i]
+            for i, n in enumerate(rlist):
+                mu_e = mu_list[i]
                 E = eos.E_rho(n, mu_e, self.C)
                 n_e = 0.
                 n_mu = 0.
@@ -2356,7 +2542,7 @@ class Rho(Wrapper):
 
                 E += eos.kineticInt(n_e, self.m_e, 2.)
                 E += eos.kineticInt(n_mu, self.m_mu, 2.)
-                E += self.nc[i] * mu_e
+                E += nclist[i] * mu_e
                 _E.append(E)
 
             return np.array(_E)
@@ -2372,7 +2558,7 @@ class Rho(Wrapper):
             if (mu_e ** 2 - self.m_mu ** 2 > 0):
                 n_mu += (mu_e ** 2 - self.m_mu ** 2) ** (1.5) / (3 * pi ** 2)
 
-            # E += self.nc[i] * mu_e
+            E += nc * mu_e
             E += eos.kineticInt(n_e, self.m_e, 2.)
             E += eos.kineticInt(n_mu, self.m_mu, 2.)
 
@@ -2448,13 +2634,18 @@ class Rho(Wrapper):
         return np.array(res) * self.mpi4_2_mevfm3
 
 
-    def P_chem(self, rho=None, mu_e_list=None, leptons=True):
+    def P_chem(self, rho=None, mu_e_list=None, leptons=True, nclist=None):
+        if nclist is None:
+            nclist = self.nc
         res = []
         sp = 1
         if rho is None:
             nlist = self.rho
         else:
             nlist = rho
+
+        if nclist is None:
+            nclist = self.nc
 
         if mu_e_list is None:
             mu_e_list = self.mu_e
@@ -2471,7 +2662,7 @@ class Rho(Wrapper):
                 n_mu += (mu_e ** 2 - self.m_mu ** 2) ** (1.5) / (3 * pi ** 2)
 
             if leptons:
-                E, epart = self.Efull(n=n, mu_e=mu_e_list[i])
+                E, epart = self.Efull(n=n, nc=nclist[i], mu_e=mu_e_list[i])
                 # E += self.nc[i] * mu_e
             else:
                 E = eos.E_rho(n, self.mu_e[i], self.C)
@@ -2508,10 +2699,12 @@ class Rho(Wrapper):
         flist = []
         rlist = []
         mu_e = []
+        self.nc2 = []
         for i_solve, _n in enumerate(n_tosolve):
         #     print(_n/m.n0)
             res = eos.stepE_rho(_n, init, f_init, len(init), 30, self.mu_e[i_solve], self.C)
             n_S = np.array([_n - res[0], res[0]])
+            self.nc2.append(res[-1])
             f = eos.f_eq_rho(n_S, f_init, 1, res[-2], self.C)
         #     f = eos.f_eq(n_S, f_init, 1, m.C)
         #     print(res, f)
@@ -2522,7 +2715,7 @@ class Rho(Wrapper):
         mu_e =np.array(mu_e)
         rlist = np.array(rlist)
         flist = np.array(flist)
-
+        self.nc2 = np.array(self.nc2)
         self.rho_upper = np.insert(rlist, 0, flist.transpose(), axis=1)
         self.mu_e_upper = mu_e
         self.n_upper = n_tosolve
@@ -2540,14 +2733,16 @@ class Rho(Wrapper):
         self.rho_upper2 = self.rho_upper[:i_break]
         self.mu_e_upper2 = self.mu_e_upper[:i_break]
         self.n_upper2 = self.n_upper[:i_break]
+        self.nc2 = self.nc2[:i_break]
         # self.E_upper = np.array([eos.E_rho(n, self.mu_e_upper2[i], self.C) for i, n in enumerate(self.rho_upper2)])
         self._E2 = self._E.copy()
         self.rho2 = self.rho.copy()
         self.mu_e2 = self.mu_e.copy()
-        self.E_upper = np.array([self.Efull(n=n, mu_e=self.mu_e2[i]) 
-            for i, n in enumerate(self.rho_upper2)])
+        self.E_upper = self.Efull(rlist=self.rho_upper2, 
+            mu_list=self.mu_e_upper2, nclist=self.nc2) 
         self._P2 = self._P.copy()
-        self.P_upper = self.P_chem(rho=self.rho2, mu_e_list=self.mu_e2)
+        self.nclist2 = self.nc.copy()
+        self.P_upper = self.P_chem(rho=self.rho_upper2, mu_e_list=self.mu_e_upper2, nclist=self.nc2)
         shift = len(self._E2) - len(self.E_upper)
         flag = 0 #VERY DIRTY!!!!!!!!!!!!!!!!!!!! assumes that third solution
                                                 #doesn't disappear and is energetically 
@@ -2560,6 +2755,8 @@ class Rho(Wrapper):
                 self.rho2[shift + i] = self.rho_upper2[::-1][i]
                 self.mu_e2[shift + i] = self.mu_e_upper2[::-1][i]
                 self._P2[shift + i] = self.P_upper[::-1][i]
+                self.nclist2[shift + i] = self.nc2[::-1][i]
+
 
 
 
@@ -2768,6 +2965,38 @@ class DeltaSym2(DeltaOnly):
         # self.filenames['var_xr'] = 'nc_do_xr.dat' 
 
 
+    def checkDeltaMultiSol(self, nrange=None, npoints=20, break_lost=0):
+        # if mu is None:
+        #     mu = self.mu
+        if nrange is None:
+            nrange = self.nrange
+        nd_res = []
+        out = []
+        i_check = range(0, len(nrange), len(nrange)//npoints)
+        for i in i_check:
+            nd, res = self.get_fn(nrange[i], f_init=0.5)
+            # n_out = [] #densities at which more that 1 solution occurs
+            # f_out = [] #approximate values of the roots for these densities
+            sch_prev = 0
+            sign_changes = 0
+            r_prev = res[1]
+            for k, r in enumerate(res):
+                if r*r_prev < 0:
+                    sign_changes += 1
+                    print(i, sign_changes, nd[k])
+                    nd_res.append(nd[k])
+                    r_prev = r
+
+            if sign_changes > 1:
+                out.append([sign_changes, i, nrange[i]] + nd_res)
+                return out
+                
+            if sign_changes < sch_prev:
+                if break_lost:
+                    return out
+            sch_prev = sign_changes
+        return out
+
     def reset(self, iterations=30, timeout=None):
 
         print("Resetting " + self.__repr__() + " for model " + self.Ctype.__name__.strip('_'))
@@ -2837,8 +3066,8 @@ class DeltaSym2(DeltaOnly):
         self._P = np.ascontiguousarray(self.P_chem(self.rho))
         self.set = True
 
-    def get_fn(self, n, f_init=0.):
-        nlist = np.linspace(0, n, 100)
+    def get_fn(self, n, f_init=0.5):
+        nlist = np.linspace(0, n, 500)
         res = []
         finit = f_init
         for _n in nlist:
@@ -2846,6 +3075,22 @@ class DeltaSym2(DeltaOnly):
             res.append(eq)
         return np.array(nlist), np.array(res)
 
+    def get_fn_nd(self, nd, nlist, f_init=0.5):
+        res = []
+        finit = f_init
+        for _n in nlist:
+            eq = eos.wrap_fun_dsym(_n, nd, finit, self.C)
+            res.append(eq)
+        return np.array(res)
+
+    def get_fn_f(self, n, f):
+        nlist = np.linspace(0, n, 100)
+        res = []
+        finit = f
+        for _n in nlist:
+            eq = eos.wrap_fun_dsym_f(n, _n, finit, self.C)
+            res.append(eq)
+        return np.array(nlist), np.array(res)
 
     def inspect_eq(self):
         self.check()
@@ -2876,6 +3121,37 @@ class DeltaSym2(DeltaOnly):
         sn.on_changed(update)
         ax.set_ylim([-5, 5])
         plt.show()
+
+    def get_proper_second_fucking_branch(self, i_start=0, init=0.5):
+        init = np.array([init])
+        f = np.array([self.rho[i_start, 0]])
+        rho = []
+        for n in self.nrange[i_start:]:
+        #     _res = m.getSymm(n, lastx=lastx, lastf=lastf)
+            _init = eos.stepE_dsym(n, init, f, 1, 30, self.C)
+            fun = eos.wrap_fun_dsym(n, _init[0], f[0], self.C)
+            if (abs(fun) < 1e-4) and (abs(fun) > 0.0):
+                init = _init
+            else:
+                _init[0] = 0.
+            
+            n_d = _init[0]
+            n_n = (n - n_d)/2
+            _rho = np.array([n_n, n_n, n_d/4, n_d/4, n_d/4, n_d/4])
+            # rho[i] = np.insert(rho[i], 0, _n - np.sum(init))
+            f = eos.f_eq(_rho, f, 1, self.C)
+            _rho = np.insert(_rho, 0, f) 
+            rho.append(np.ascontiguousarray(_rho))
+            print(n, init[0], n_d, f[0], fun)
+        self.rho = np.nan_to_num(np.ascontiguousarray(rho))
+        self._E = np.nan_to_num(np.array([eos.E(z, self.C) for z in self.rho]))
+        self._P = np.nan_to_num(self.P_chem(rho))
+        self.set = 1
+
+
+    def setSecondBranch():
+        pass
+
 
 
 class DeltaPhi(DeltaBase, HyperonPhi):
@@ -3224,8 +3500,8 @@ class Model(Wrapper):
         i = 8
         S, V = self.dumpPotentials()
         m = self.delta
-        iS = interp1d(m.nrange/m.n0, S)
-        iV = interp1d(m.nrange/m.n0, V)
+        iS = interp1d(m.nrange/m.n0, np.nan_to_num(S), kind='linear')
+        iV = interp1d(m.nrange/m.n0, np.nan_to_num(V), kind='linear')
         xs_d = (U - self.delta_phi.C.X_o[i]*iV(1.))/iS(1.)
 
         return xs_d
@@ -3311,9 +3587,10 @@ class Model(Wrapper):
         np.savetxt(join(self.foldername, m.filenames['var_u']), res, fmt='%.6f')
         return np.array(res)
 
-    def collectMbU(self, ulist):
+    def collectMbU(self, ulist, model='do'):
         res = []
-        m = self.delta_phi
+        m_dict = {'do': self.delta_only, 'dp': self.delta_phi, 'dps': self.delta_phi_sigma}
+        m = m_dict[model]
         for U in ulist:
             self.setDeltaPotential(U)
             mass = np.loadtxt(join(m.foldername, m.filenames['mass_crust']+'_linear'), skiprows=1)
@@ -3326,6 +3603,8 @@ class Model(Wrapper):
             out = iMb_M(1.249)
             res.append(out)
             print(U, iMb_M(1.249))
+        np.savetxt(join(self.foldername, 'mb_u_'+model+'.dat'),
+            np.array([ulist, res]).transpose())
         return np.array(ulist), np.array(res)
 
     def getSecondBranch(self, f_init):

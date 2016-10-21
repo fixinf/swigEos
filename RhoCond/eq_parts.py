@@ -89,9 +89,10 @@ def getParts(n, m, mu_e, rcond = 1):
 
 
 # wr = Models2.MKVOR2final()
-wr = Models2.MKVOR2_exp()
+wr = Models2.MKVOR_d()
+wr.setDeltaPotential(-100)
 # wr = Models2.myMod()
-m = wr.rcond_nucl
+m = wr.delta_only
 # m = wr.nucl
 # m.dumpEos()
 m.loadEos()
@@ -103,7 +104,7 @@ f = m.rho[:, 0]
 # m.loadEos()
 
 # n = [0.808321 * 7.48*wr.n0,  (1-0.808321)*7.48*wr.n0]
-i = 650
+i = 350
 print(m.nrange[i]/m.n0)
 # exit()
 n = m.rho[i, 1:]

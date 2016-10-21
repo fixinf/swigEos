@@ -881,11 +881,53 @@ def _MKVOR_tail1_om():
     C.fcut_om = 0.95
     C.acut_om = 4
     C.bcut_om = 100
-    C.tail_mult_om = 0.1    
+    C.tail_mult_om = 0.1  
+
     return C
 
 def MKVOR_tail1_om():
     return Model(_MKVOR_tail1_om)
+
+
+def _MKVOR_tail1_om_new():
+    C = eos.MKVOR_tail1()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.acut_rho = 3.045
+    C.bcut_rho = 1/0.02 
+    C.fcut_rho = 0.64
+    C.tail_mult_rho = 0.3934
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+    return C
+
+def MKVOR_tail1_om_new():
+    return Model(_MKVOR_tail1_om_new)
 
 
 def _MKVOR_tail2_om():
@@ -902,4 +944,192 @@ def MKVOR_tail2_om():
 
 
 
+def _MKVOR_tail1_om_cube():
+    C = eos.MKVOR_tail3()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
 
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.acut_rho = 3.045
+    C.bcut_rho = 1/0.02 
+    C.fcut_rho = 0.64
+    C.tail_mult_rho = 0.3934
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+    return C
+
+def MKVOR_tail1_om_cube():
+    return Model(_MKVOR_tail1_om_cube)
+
+def _MKVOR_tail_poly():
+    C = eos.MKVOR_tail_poly()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.fcut_rho - 0.62
+    C.acut_rho, C.bcut_rho, C.c_cut_rho = (0.5859623173610193, 7.628685744858428, 17.281257590402767)
+
+    C.d_cut_rho = 0
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+    return C
+
+def MKVOR_tail_poly():
+    return Model(_MKVOR_tail_poly)
+
+def _MKVOR_tail_poly_exp():
+    C = eos.MKVOR_tail_poly_exp()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.fcut_rho - 0.62
+    C.acut_rho, C.bcut_rho, C.c_cut_rho = (0.5859623173610193, 7.628685744858428, 17.281257590402767)
+
+    C.d_cut_rho = 0
+    C.e_cut_rho = 0
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+    return C
+
+def MKVOR_tail_poly_exp():
+    return Model(_MKVOR_tail_poly_exp)
+
+def _MKVOR_tail_poly4():
+    C = eos.MKVOR_tail_poly4()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.fcut_rho = 0.62
+    C.acut_rho, C.bcut_rho, C.c_cut_rho = (0.5859623173610193, 4.729785161812114, 6.642915417642516)
+
+    C.d_cut_rho = 0
+    C.e_cut_rho = 0
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+    return C
+
+
+def MKVOR_tail_poly4():
+    return Model(_MKVOR_tail_poly4)
+
+def _MKVOR_poly1():
+    C = _MKVOR_tail_poly4()
+    C.d_cut_rho = -10.
+    C.e_cut_rho = 0
+    return C
+
+def MKVOR_poly1():
+    return Model(_MKVOR_poly1)
+
+def _MKVOR_poly2():
+    C = _MKVOR_tail_poly4()
+    C.d_cut_rho = 0
+    C.e_cut_rho = 0
+    return C
+
+def MKVOR_poly2():
+    return Model(_MKVOR_poly2)
+
+def _MKVOR_poly3():
+    C = _MKVOR_tail_poly4()
+    C.d_cut_rho = 0.
+    C.e_cut_rho = 100
+    return C
+
+def MKVOR_poly3():
+    return Model(_MKVOR_poly3)
