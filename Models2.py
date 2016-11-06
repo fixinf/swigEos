@@ -11,7 +11,7 @@ from math import pi
 import Models
 
 def ret_fun(f):
-    return 
+    return
 
 
 
@@ -854,7 +854,7 @@ def _MKVOR_tail1():
     C.e_r = 6.
 
     C.acut_rho = 2.
-    C.bcut_rho = 1/0.02 
+    C.bcut_rho = 1/0.02
     C.fcut_rho = 0.64
     C.tail_mult_rho = 1./12
 
@@ -881,7 +881,7 @@ def _MKVOR_tail1_om():
     C.fcut_om = 0.95
     C.acut_om = 4
     C.bcut_om = 100
-    C.tail_mult_om = 0.1  
+    C.tail_mult_om = 0.1
 
     return C
 
@@ -916,7 +916,7 @@ def _MKVOR_tail1_om_new():
     C.e_r = 6.
 
     C.acut_rho = 3.045
-    C.bcut_rho = 1/0.02 
+    C.bcut_rho = 1/0.02
     C.fcut_rho = 0.64
     C.tail_mult_rho = 0.3934
 
@@ -935,7 +935,7 @@ def _MKVOR_tail2_om():
     C.fcut_om = 0.95
     C.acut_om = 4
     C.bcut_om = 100
-    C.tail_mult_om = 0.1    
+    C.tail_mult_om = 0.1
     return C
 
 def MKVOR_tail2_om():
@@ -971,7 +971,7 @@ def _MKVOR_tail1_om_cube():
     C.e_r = 6.
 
     C.acut_rho = 3.045
-    C.bcut_rho = 1/0.02 
+    C.bcut_rho = 1/0.02
     C.fcut_rho = 0.64
     C.tail_mult_rho = 0.3934
 
@@ -1101,6 +1101,8 @@ def _MKVOR_tail_poly4():
     C.acut_om = 5.515
     C.bcut_om = 100
     C.fcut_om = 0.95
+
+    C.SetHyperConstants(2)
     return C
 
 
