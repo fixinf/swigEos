@@ -168,3 +168,53 @@ class RNPlot(MassPlot):
         self.drawLines()
         if self.filename:
             self.SaveCheck(self.filename)
+
+class EosPlot(vszSimplePlot):
+    def __init__(self, models, labels, invs, plotMaxw=False, hidden=1,
+        template=None, filename=None):
+        print(hidden)
+        super(EosPlot, self).__init__(hidden=hidden,
+        filename=filename, template=template)
+
+        self.graph = self.Root['page1']['graph1']
+
+        self.models = models
+        self.labels = labels
+        self.invs = invs
+        self.xAttr = None
+        self.yAttr = None
+        self.plotMaxw = plotMaxw
+
+    def drawLines(self):
+        if self.xAttr is None or self.yAttr is None:
+            raise NotImplementedError('Proper x_row and y_row \
+            should be defined in the constructor!')
+
+        for model, label, inv in list(zip(self.models, self.labels, self.invs))[::-1]:
+            if inv:
+                model.loadEosInv()
+            else:
+                model.loadEos()
+            #Index of a maximum mass -- fixed row #2
+
+            if not self.plotMaxw:
+                self.drawLine(self.xscale*getattr(model, self.xAttr + inv*'_inv'),
+                            self.yscale*getattr(model, self.yAttr + inv*'_inv'),
+                            label, num_lines=len(self.models))
+
+
+class PNPlot(EosPlot):
+    """docstring for PNPlot."""
+    def __init__(self, models, labels, invs, plotMaxw=False, hidden=1,
+    template=None, filename=None):
+        print(hidden)
+        super(PNPlot, self).__init__(models, labels, invs, hidden=hidden,
+        filename=filename, template='pn')
+
+        self.xAttr = 'nrange'
+        self.yAttr = '_P'
+        self.xscale = 1./models[0].n0
+        self.yscale = 1.
+        self.drawLines()
+        if self.filename:
+            self.SaveCheck(self.filename)
