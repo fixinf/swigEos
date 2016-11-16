@@ -6,6 +6,7 @@ import uuid
 VSZ_TEMPLATE_DIR = '/home/const/Dropbox/vsz_templates/'
 _templates = {'mr' : 'mr.vsz',
               'mn' : 'mn.vsz',
+              'rn' : 'rn.vsz',
               'pn' : 'pn.vsz',
               'pods' : 'pods.vsz'}
 
@@ -115,11 +116,13 @@ class MassPlot(vszSimplePlot):
             self.drawLine(data[:imax, self.x_row], data[:imax, self.y_row],
              label, num_lines=len(self.models))
 
-            self.drawMaxEllipse(data[:, x_row], data[:, y_row],
-                self.colors[:len(self.models)][::-1][len(self.lines) - 1])
+            self.drawMaxEllipse(data[:, self.x_row], data[:, self.y_row],
+                self.colors[:len(self.models)][::-1][len(self.lines) - 1],
+                imax=imax)
 
-    def drawMaxEllipse(self, x, y, color):
-        imax = np.argmax(y)
+    def drawMaxEllipse(self, x, y, color, imax=None):
+        if not imax:
+            imax = np.argmax(y)
         xmax, ymax = x[imax], y[imax]
         e = self.graph.Add('ellipse', index=0)
         e.width.val = 0.03
@@ -131,9 +134,9 @@ class MassPlot(vszSimplePlot):
         e.xPos.val = xmax
         e.yPos.val = ymax
 
-class MRPlot2(MassPlot):
+class MRPlot(MassPlot):
     def __init__(self, models, labels, hidden=1, filename=None):
-        super(MRPlot2, self).__init__(models, labels, hidden=hidden,
+        super(MRPlot, self).__init__(models, labels, hidden=hidden,
                         template='mr', filename=filename)
 
         self.y_row = 1
@@ -142,125 +145,26 @@ class MRPlot2(MassPlot):
         if self.filename:
             self.SaveCheck(self.filename)
 
-class MRPlot(vszSimplePlot):
-    """docstring for MRPlot."""
+
+class MNPlot(MassPlot):
     def __init__(self, models, labels, hidden=1, filename=None):
-        super(MRPlot, self).__init__(hidden=hidden, template='mr',
-                                    filename=filename)
-        self.graph = self.Root['page1']['graph1']
-        for model, label in zip(models[::-1], labels[::-1]):
-            try:
-                data = np.loadtxt(join(model.foldername,
-                                   model.filenames['mass_crust']+'_linear'),
-                                   skiprows=1)
-            except FileNotFoundError:
-                print('no data')
-                return
+        super(MNPlot, self).__init__(models, labels, hidden=hidden,
+                        template='mn', filename=filename)
 
-            imax = np.argmax(data[:, 1])
-
-            self.drawLine(data[:imax, 2], data[:imax, 1], label,
-                num_lines=len(models))
-            self.drawMaxEllipse(data[:, 2], data[:, 1],
-                self.colors[:len(models)][::-1][len(self.lines) - 1])
-
+        self.y_row = 1
+        self.x_row = 0
+        self.drawLines()
         if self.filename:
             self.SaveCheck(self.filename)
 
-    def drawMaxEllipse(self, x, y, color):
-        imax = np.argmax(y)
-        xmax, ymax = x[imax], y[imax]
-        e = self.graph.Add('ellipse', index=0)
-        e.width.val = 0.03
-        e.height.val = 0.03
-        e.Border.hide.val = True
-        e.Fill.hide.val = False
-        e.Fill.color.val = color
-        e.positioning.val = 'axes'
-        e.xPos.val = xmax
-        e.yPos.val = ymax
 
-class MNPlot(vszSimplePlot):
-    """docstring for MRPlot."""
+class RNPlot(MassPlot):
     def __init__(self, models, labels, hidden=1, filename=None):
-        super(MNPlot, self).__init__(hidden=hidden, template='mn',
-                                    filename=filename)
-        self.graph = self.Root['page1']['graph1']
-        for model, label in zip(models[::-1], labels[::-1]):
-            try:
-                data = np.loadtxt(join(model.foldername,
-                                   model.filenames['mass_crust']+'_linear'),
-                                   skiprows=1)
-            except FileNotFoundError:
-                print('no data')
-                return
+        super(RNPlot, self).__init__(models, labels, hidden=hidden,
+                        template='rn', filename=filename)
 
-            imax = np.argmax(data[:, 1])
-            self.drawLine(data[:imax, 0], data[:imax, 1], label,
-                num_lines=len(models))
-            self.drawMaxEllipse(data[:, 0], data[:, 1],
-                self.colors[:len(models)][::-1][len(self.lines) - 1])
-
+        self.y_row = 2
+        self.x_row = 0
+        self.drawLines()
         if self.filename:
-            self.Save(join(VSZ_EXPORT_DIR, self.filename), mode='vsz')
-
-    def drawMaxEllipse(self, x, y, color):
-        return MRPlot.drawMaxEllipse(self, x, y, color)
-
-
-class RNPlot(vszSimplePlot):
-    def __init__(self, models, labels, hidden=1, filename=None):
-        super(RNPlot, self).__init__(hidden=hidden, template='rn',
-                                    filename=filename)
-        self.graph = self.Root['page1']['graph1']
-        for model, label in zip(models[::-1], labels[::-1]):
-            try:
-                data = np.loadtxt(join(model.foldername,
-                                   model.filenames['mass_crust']+'_linear'),
-                                   skiprows=1)
-            except FileNotFoundError:
-                print('no data')
-                return
-
-            imax = np.argmax(data[:, 1])
-            self.drawLine(data[:imax, 0], data[:imax, 1], label,
-                num_lines=len(models))
-            self.drawMaxEllipse(data[:, 0], data[:, 1],
-                self.colors[:len(models)][::-1][len(self.lines) - 1])
-
-        if self.filename:
-            self.Save(join(VSZ_EXPORT_DIR, self.filename), mode='vsz')
-
-
-class PNPlot(vszSimplePlot):
-    def __init__(self, models, invs, labels, hidden=1, filename=None,
-        xlim=None, ylim=None):
-        super(PNPlot, self).__init__(hidden=hidden, template='pn',
-                                    filename=filename)
-        self.graph = self.Root['page1']['graph1']
-        for model, label, inv in list(zip(models, labels, invs))[::-1]:
-            try:
-                if inv:
-                    model.loadEosInv()
-                    self.drawLine(model.nrange_inv/model.n0,
-                                model._P_inv, label,
-                                num_lines=len(models), cycle=1)
-                    #
-                    if model.needsMaxwInv():
-                        model.processMaxwInv(shift=200)
-                        lmaxw = self.drawLine(model.nrange_maxw/model.n0,
-                        model._P_maxw, '', cycle=0)
-                        self.ls_Thin(lmaxw,
-                        color=self.lines[-1].PlotLine.color.val,
-                        style=self.lines[-1].PlotLine.style.val)
-
-
-
-                else:
-                    model.loadEos()
-                    self.drawLine(model.nrange/model.n0,
-                                model._P, label,
-                        num_lines=len(models))
-            except FileNotFoundError:
-                print('No data for model ' + label)
-                # return
+            self.SaveCheck(self.filename)

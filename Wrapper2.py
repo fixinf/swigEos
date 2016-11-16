@@ -2537,16 +2537,16 @@ class Rho(Wrapper):
         self.nrange_inv = self.n0 * data[:, 0]
         self._E_inv = data[:, 1]
         self._P_inv = data[:, 2]
-        self.rho_inv = data[:, 3:3 + self.n_baryon]
+        self.rho_inv = data[:, 3:3 + self.n_baryon + 1]
         self.rho_inv[:, 1:] = arr([
                         r * self.nrange_inv
                         for r in self.rho_inv[:, 1:].transpose()
                     ]).transpose()
-        self.nc_inv = data[:, 3+self.n_baryon + 1]
-        self.mu_e_inv = data[:, 3+self.n_baryon + 2] / self.m_pi
+        self.nc_inv = data[:, 3+self.n_baryon + 2]
+        self.mu_e_inv = data[:, 3+self.n_baryon + 3] / self.m_pi
         self.set = 1
 
-    def processMaxwInv(self, mu_init=None, show=0, shift=0):
+    def processMaxwInv(self, mu_init=None, show=0, shift=0, save=0):
         mu = np.nan_to_num(self.mu(inv=1)[:, 0])
 
         P = self._P_inv
@@ -2555,12 +2555,12 @@ class Rho(Wrapper):
 
         i_break = np.where(np.diff(P) < 0)[0][-1]
         i_break_mu = shift + np.where(np.diff(mu[shift:]) < 0)[0][0]
-        print(i_break, i_break_mu)
+        # print(i_break, i_break_mu)
         b1 = np.array([mu[:i_break_mu], P[:i_break_mu], E[:i_break_mu], N[:i_break_mu]]).transpose()
         b2 = np.array([mu[i_break+1:], P[i_break+1:], E[i_break+1:], N[i_break+1:]]).transpose()
         # kind = 'cubic'
         kind = 'linear'
-        print(b1)
+        # print(b1)
         ip1 = interp1d(b1[:, 0], b1[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ip2 = interp1d(b2[:, 0], b2[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ie1 = interp1d(b1[:, 0], b1[:, 2], bounds_error=0, fill_value=0., kind=kind)
@@ -2572,7 +2572,7 @@ class Rho(Wrapper):
 
         # mu_inter = np.intersect1d(b1[:, 0], b2[:, 0])
         mu_inter = np.linspace(min(b2[:, 0]), max(b1[:, 0]))
-        print(mu_inter)
+        # print(mu_inter)
         i_eq = np.argmin(abs(ip1(mu_inter) - ip2(mu_inter)))
 
         # print('i_eq = ', i_eq)
@@ -2619,11 +2619,12 @@ class Rho(Wrapper):
         self._P_maxw = p_total
         self._E_maxw = e_total
 
-        np.savetxt(join(self.foldername, self.filenames['eos']+'_maxw'),
-                np.array([self.nrange_maxw/self.n0, self._E_maxw, self._P_maxw,
-                        self.m_pi * (self._E_maxw/self.nrange_maxw
-                        - self.C.M[0]) ]).transpose(),
-                        fmt='%.8f')
+        if save:
+            np.savetxt(join(self.foldername, self.filenames['eos']+'_maxw'),
+                    np.array([self.nrange_maxw/self.n0, self._E_maxw, self._P_maxw,
+                            self.m_pi * (self._E_maxw/self.nrange_maxw
+                            - self.C.M[0]) ]).transpose(),
+                            fmt='%.8f')
 
     def check_eq(self, n, C, f, init, mu=None):
         params = eos.fun_n_eq_params()
