@@ -356,7 +356,7 @@ class Wrapper(object):
 
 
     def dumpMassesCrust(self, nmin=0.4, nmax=None, npoints=100, write=True, fname=None, ret_frac=False):
-        self.check()
+        # self.check()
         inter = 'linear'
         if nmax == None:
             nmax = 10.5*self.n0
@@ -1088,12 +1088,6 @@ class Wrapper(object):
 
     def needsMaxw(self):
         self.check()
-        # for i, p in enumerate(self.P):
-        #     if p < self.P[i-1]:
-        #         return 1
-        # return 0
-        E, P, n = self.EPN()
-        # return not all([x < y for x, y in list(zip(P, P[1:]))])
         return any(np.diff(self._P)<0)
 
     def dumpPf(self, write=1):
@@ -2458,7 +2452,11 @@ class Rho(Wrapper):
         self._P = np.ascontiguousarray(self.P_chem())
         self.set = True
 
-    def reset_inv(self, iterations=30, timeout=None, kind=1, fmax=0.95, npoints=None):
+    def needsMaxwInv(self):
+        self.check()
+        return any(np.diff(self._P_inv)<0)
+
+    def reset_inv(self, iterations=100, timeout=None, kind=1, fmax=0.95, npoints=None):
         if npoints is None:
             npoints = self.npoints
 
@@ -2472,7 +2470,7 @@ class Rho(Wrapper):
         nlist = []
 
         self.frange_inv = np.linspace(0., fmax, npoints)
-        init = arr([0.1] * self.n_baryon + [0.]) #All particles + mu_ch
+        init = arr([0.001] * self.n_baryon + [0.]) #All particles + mu_ch
         for i, f in enumerate(self.frange_inv):
             if sum(init) < 1e-7:
                 init = arr([0.1] * self.n_baryon + [0.]) #All particles + mu_ch
@@ -2493,6 +2491,10 @@ class Rho(Wrapper):
             _n = sum(init[:-1])
             # print(f, init, _n)
             nlist.append(_n)
+            if (_n > 10 * self.n0):
+                break
+
+        self.frange_inv = self.frange_inv[:len(self.nrange)]
 
 
 
@@ -2516,7 +2518,7 @@ class Rho(Wrapper):
     def dumpEosInv(self):
         filename = self.filenames['eos'] + '_inv'
         conc_inv = [self.rho_inv[:, i]/self.nrange_inv for i in range(1,
-            self.n_baryon)]
+            self.n_baryon + 1)]
         data = np.array([
                             self.nrange_inv/self.n0,
                             self._E_inv,
@@ -2527,7 +2529,7 @@ class Rho(Wrapper):
                             self.m_pi*(self._E_inv/self.nrange_inv - self.C.M[0]),
                             self.m_pi * self.mu_e_inv
                         ]).transpose()
-        np.savetxt(join(self.foldername, filename), data)
+        np.savetxt(join(self.foldername, filename), data, fmt='%.6f')
 
     def loadEosInv(self):
         filename = self.filenames['eos'] + '_inv'
@@ -2542,6 +2544,7 @@ class Rho(Wrapper):
                     ]).transpose()
         self.nc_inv = data[:, 3+self.n_baryon + 1]
         self.mu_e_inv = data[:, 3+self.n_baryon + 2] / self.m_pi
+        self.set = 1
 
     def processMaxwInv(self, mu_init=None, show=0, shift=0):
         mu = np.nan_to_num(self.mu(inv=1)[:, 0])
@@ -2615,6 +2618,12 @@ class Rho(Wrapper):
         self.nrange_maxw = n_total
         self._P_maxw = p_total
         self._E_maxw = e_total
+
+        np.savetxt(join(self.foldername, self.filenames['eos']+'_maxw'),
+                np.array([self.nrange_maxw/self.n0, self._E_maxw, self._P_maxw,
+                        self.m_pi * (self._E_maxw/self.nrange_maxw
+                        - self.C.M[0]) ]).transpose(),
+                        fmt='%.8f')
 
     def check_eq(self, n, C, f, init, mu=None):
         params = eos.fun_n_eq_params()
@@ -3290,16 +3299,30 @@ class RhoDeltaPhi(DeltaPhi, Rho):
         self.filenames['n_rho'] = 'nr_dp.dat'
 
 
-    def mu(self, nrange=None):
+    def mu(self, nrange=None, branch_3=0, inv=0):
         if nrange is None:
             nrange = self.nrange
-        self.check()
-        print("mu dpr")
-        conc = self.rho
+
+        if not inv:
+            self.check()
+
+        if inv:
+            conc = self.rho_inv
+            mu_e = self.mu_e_inv
+        else:
+            if branch_3:
+                conc = self.rho2
+                mu_e = self.mu_e
+            else:
+                conc = self.rho
+                mu_e = self.mu_e
+
+
         mu = []
         for j, n in enumerate(conc):
-            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+            mu.append([eos.mu_rho(n, i+1, mu_e[j], self.C) for i in range(self.n_baryon)])
         return arr(mu)
+
 
     def dumpEos(self):
         super().dumpEos()
@@ -3374,15 +3397,29 @@ class RhoDeltaOnly(DeltaOnly, Rho):
         self.filenames['mass_crust'] = 'rc_masses_donly.dat'
         self.filenames['n_rho'] = 'nr_do.dat'
 
-    def mu(self, nrange=None):
+    def mu(self, nrange=None, branch_3=0, inv=0):
         if nrange is None:
             nrange = self.nrange
-        self.check()
-        conc = self.rho
+
+        if not inv:
+            self.check()
+
+        if inv:
+            conc = self.rho_inv
+            mu_e = self.mu_e_inv
+        else:
+            if branch_3:
+                conc = self.rho2
+                mu_e = self.mu_e
+            else:
+                conc = self.rho
+                mu_e = self.mu_e
+
         mu = []
         for j, n in enumerate(conc):
-            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+            mu.append([eos.mu_rho(n, i+1, mu_e[j], self.C) for i in range(self.n_baryon)])
         return arr(mu)
+
 
     def dumpEos(self):
         super().dumpEos()
@@ -3449,15 +3486,30 @@ class RhoDeltaPhiSigma(DeltaPhiSigma, Rho):
         self.filenames['mass_crust'] = 'rc_masses_Hps.dat'
         self.filenames['n_rho'] = 'nr_dps.dat'
 
-    def mu(self, nrange=None):
+    def mu(self, nrange=None, branch_3=0, inv=0):
         if nrange is None:
             nrange = self.nrange
-        self.check()
-        conc = self.rho
+
+        if not inv:
+            self.check()
+
+        if inv:
+            conc = self.rho_inv
+            mu_e = self.mu_e_inv
+        else:
+            if branch_3:
+                conc = self.rho2
+                mu_e = self.mu_e
+            else:
+                conc = self.rho
+                mu_e = self.mu_e
+
+
         mu = []
         for j, n in enumerate(conc):
-            mu.append([eos.mu_rho(n, i+1, self.mu_e[j], self.C) for i in range(self.n_baryon)])
+            mu.append([eos.mu_rho(n, i+1, mu_e[j], self.C) for i in range(self.n_baryon)])
         return arr(mu)
+
 
     def dumpEos(self):
         super().dumpEos()
