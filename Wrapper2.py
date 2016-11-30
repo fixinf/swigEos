@@ -407,7 +407,7 @@ class Wrapper(object):
         return [nstars, MR[:, 0], MR[:, 1]]
 
     def stars_crust(self, ncut_crust=0.45, ncut_eos=0.7, inter='linear',
-                    n_stars=None, nmin=.6, nmax=5.0, npoints=50,
+            n_stars=None, nmin=.6, nmax=5.0, npoints=50,
                     crust="crust.dat", show=False, crustName=None,
                     ret_frac=False, fasthyp=False, neutron=0, ret_i=0, force_reset=0):
         neos = self.npoints
@@ -840,7 +840,6 @@ class Wrapper(object):
             return [arr(elist), arr(flist)]
         else:
             return arr(elist)
-
 
     def E(self, nlist, ret_f=False, f=0.):
         """A stub. Descendants should provide their energy density through
@@ -2394,7 +2393,7 @@ class Rho(Wrapper):
                 init = eos.stepE_rho(_n, init, f, len(init)+1, iterations, 0., self.C)
             else:
                 queue = Queue()
-                p = Process(target=self.stepE_rho, args=(_n, init, f, len(init)+1,
+                p = Process(target=eos.stepE_rho, args=(_n, init, f, len(init)+1,
                                                   iterations, 0., self.C, queue))
                 p.start()
                 p.join(timeout)
@@ -2456,7 +2455,8 @@ class Rho(Wrapper):
         self.check()
         return any(np.diff(self._P_inv)<0)
 
-    def reset_inv(self, iterations=100, timeout=None, kind=1, fmax=0.95, npoints=None):
+    def reset_inv(self, iterations=100, timeout=None, kind=1, fmax=0.95,
+                  npoints=None, nmax=8):
         if npoints is None:
             npoints = self.npoints
 
@@ -2491,11 +2491,12 @@ class Rho(Wrapper):
             _n = sum(init[:-1])
             # print(f, init, _n)
             nlist.append(_n)
-            if (_n > 10 * self.n0):
+            if (_n > nmax * self.n0):
                 break
 
-        self.frange_inv = self.frange_inv[:len(self.nrange)]
-
+# Nafiga?
+        #self.frange_inv = self.frange_inv[:len(self.nrange)]
+        self.frange_inv = self.frange_inv[:len(nlist)]
 
 
         #Other things left the same as for the original reset()
@@ -3586,9 +3587,7 @@ class Model(Wrapper):
         self.rcond_hyper = RhoHyper(C, basefolder_suffix=basefolder_suffix)
         self.rcond_hyper_phi = RhoHyperPhi(C, basefolder_suffix=basefolder_suffix)
         self.rcond_hyper_phi_sigma = RhoHyperPhiSigma(C, basefolder_suffix=basefolder_suffix)
-        print("create rdp")
         self.rcond_delta_phi = RhoDeltaPhi(C, basefolder_suffix=basefolder_suffix)
-        print("create rdps")
         self.rcond_delta_phi_sigma = RhoDeltaPhiSigma(C, basefolder_suffix=basefolder_suffix)
         self.rcond_delta_only = RhoDeltaOnly(C, basefolder_suffix=basefolder_suffix)
 

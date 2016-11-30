@@ -4,15 +4,16 @@ import numpy as np
 import uuid
 
 VSZ_TEMPLATE_DIR = '/home/const/Dropbox/vsz_templates/'
-_templates = {'mr' : 'mr.vsz',
-              'mn' : 'mn.vsz',
-              'rn' : 'rn.vsz',
-              'pn' : 'pn.vsz',
-              'pods' : 'pods.vsz'}
+_templates = {'mr': 'mr.vsz',
+              'mn': 'mn.vsz',
+              'rn': 'rn.vsz',
+              'pn': 'pn.vsz',
+              'pods': 'pods.vsz'}
 
 VSZ_EXPORT_DIR = '/home/const/Dropbox/vsz_export/'
 
-templates = {t : join(VSZ_TEMPLATE_DIR, _templates[t]) for t in _templates}
+templates = {t: join(VSZ_TEMPLATE_DIR, _templates[t]) for t in _templates}
+
 
 class vszSimplePlot(vsz.Embedded):
     def __init__(self, hidden=1, template=None, filename=None):
@@ -69,8 +70,9 @@ class vszSimplePlot(vsz.Embedded):
             self.lines.append(l)
             self.drawn_labels.append(label)
 
-        self.ls_Main(l, color=self.colors[:num_lines][::-1][len(self.lines) - 1],
-                        style=self.styles[:num_lines][::-1][len(self.lines) - 1])
+        self.ls_Main(
+            l, color=self.colors[:num_lines][::-1][len(self.lines) - 1],
+            style=self.styles[:num_lines][::-1][len(self.lines) - 1])
 
         return l
 
@@ -87,7 +89,7 @@ class vszSimplePlot(vsz.Embedded):
 class MassPlot(vszSimplePlot):
     def __init__(self, models, labels, template=None, hidden=1, filename=None):
         super(MassPlot, self).__init__(hidden=hidden, template=template,
-                                    filename=filename)
+                                       filename=filename)
         self.graph = self.Root['page1']['graph1']
         self.models = models
         self.labels = labels
@@ -95,30 +97,31 @@ class MassPlot(vszSimplePlot):
         self.y_row = None
 
     def drawLines(self):
-        #Check what to plot
+        # Check what to plot
         if self.x_row is None or self.y_row is None:
             raise NotImplementedError('Proper x_row and y_row \
             should be defined in the constructor!')
 
-        #Plot in inverse order for conventional line overlap
+        # Plot in inverse order for conventional line overlap
         for model, label in list(zip(self.models, self.labels))[::-1]:
             try:
                 data = np.loadtxt(join(model.foldername,
-                                   model.filenames['mass_crust']+'_linear'),
-                                   skiprows=1)
+                                  model.filenames['mass_crust']+'_linear'),
+                                  skiprows=1)
             except FileNotFoundError:
                 raise FileNotFoundError('No data found for model ' + label)
                 return
 
-            #Index of a maximum mass -- fixed row #2
+            # Index of a maximum mass -- fixed row #2
             imax = np.argmax(data[:, 1])
 
             self.drawLine(data[:imax, self.x_row], data[:imax, self.y_row],
-             label, num_lines=len(self.models))
+                          label, num_lines=len(self.models))
 
             self.drawMaxEllipse(data[:, self.x_row], data[:, self.y_row],
-                self.colors[:len(self.models)][::-1][len(self.lines) - 1],
-                imax=imax)
+                                self.colors[:len(self.models)]
+                                [::-1][len(self.lines) - 1],
+                                imax=imax)
 
     def drawMaxEllipse(self, x, y, color, imax=None):
         if not imax:
@@ -134,10 +137,11 @@ class MassPlot(vszSimplePlot):
         e.xPos.val = xmax
         e.yPos.val = ymax
 
+
 class MRPlot(MassPlot):
     def __init__(self, models, labels, hidden=1, filename=None):
         super(MRPlot, self).__init__(models, labels, hidden=hidden,
-                        template='mr', filename=filename)
+                                     template='mr', filename=filename)
 
         self.y_row = 1
         self.x_row = 2
@@ -149,7 +153,7 @@ class MRPlot(MassPlot):
 class MNPlot(MassPlot):
     def __init__(self, models, labels, hidden=1, filename=None):
         super(MNPlot, self).__init__(models, labels, hidden=hidden,
-                        template='mn', filename=filename)
+                                     template='mn', filename=filename)
 
         self.y_row = 1
         self.x_row = 0
@@ -161,7 +165,7 @@ class MNPlot(MassPlot):
 class RNPlot(MassPlot):
     def __init__(self, models, labels, hidden=1, filename=None):
         super(RNPlot, self).__init__(models, labels, hidden=hidden,
-                        template='rn', filename=filename)
+                                     template='rn', filename=filename)
 
         self.y_row = 2
         self.x_row = 0
@@ -169,12 +173,13 @@ class RNPlot(MassPlot):
         if self.filename:
             self.SaveCheck(self.filename)
 
+
 class EosPlot(vszSimplePlot):
     def __init__(self, models, labels, invs, plotMaxw=False, hidden=1,
-        template=None, filename=None):
+                 template=None, filename=None):
         print(hidden)
         super(EosPlot, self).__init__(hidden=hidden,
-        filename=filename, template=template)
+                                      filename=filename, template=template)
 
         self.graph = self.Root['page1']['graph1']
 
@@ -190,31 +195,55 @@ class EosPlot(vszSimplePlot):
             raise NotImplementedError('Proper x_row and y_row \
             should be defined in the constructor!')
 
-        for model, label, inv in list(zip(self.models, self.labels, self.invs))[::-1]:
+        for model, label, inv in list(zip(self.models,
+                                          self.labels, self.invs))[::-1]:
             if inv:
                 model.loadEosInv()
             else:
                 model.loadEos()
-            #Index of a maximum mass -- fixed row #2
+            # Index of a maximum mass -- fixed row #2
 
             if not self.plotMaxw:
-                self.drawLine(self.xscale*getattr(model, self.xAttr + inv*'_inv'),
-                            self.yscale*getattr(model, self.yAttr + inv*'_inv'),
-                            label, num_lines=len(self.models))
+                self.drawLine(self.xscale*getattr(model,
+                                                  self.xAttr + inv*'_inv'),
+                              self.yscale*getattr(model,
+                                                  self.yAttr + inv*'_inv'),
+                              label, num_lines=len(self.models))
+
+            else:
+                self.drawLineThin(self.xscale*getattr(model,
+                                                  self.xAttr + inv*'_inv'),
+                              self.yscale*getattr(model,
+                                                  self.yAttr + inv*'_inv'),
+                              label, num_lines=len(self.models))
 
 
 class PNPlot(EosPlot):
     """docstring for PNPlot."""
     def __init__(self, models, labels, invs, plotMaxw=False, hidden=1,
-    template=None, filename=None):
+                 template=None, filename=None):
         print(hidden)
         super(PNPlot, self).__init__(models, labels, invs, hidden=hidden,
-        filename=filename, template='pn')
+                                     filename=filename, template='pn')
 
         self.xAttr = 'nrange'
         self.yAttr = '_P'
         self.xscale = 1./models[0].n0
         self.yscale = 1.
         self.drawLines()
+
         if self.filename:
             self.SaveCheck(self.filename)
+
+
+# class XNPlot(vszSimplePlot):
+#     def __init__(self, models, labels, invs, hidden=1, template=None,
+#                  filename=None):
+#         super(XNPlot, self).__init__(hidden=hidden, template=template,
+#                                      filename=filename)
+#
+#     def drawMultilines(self, x_data, y_data, ls='solid'):
+#         if x_data.shape != y_data.shape:
+#             raise ValueError('X and Y shapes must coincide!')
+#
+#         for x, y in list(zip(xdata, ydata))[::-1]:

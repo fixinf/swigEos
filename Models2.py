@@ -1135,3 +1135,25 @@ def _MKVOR_poly3():
 
 def MKVOR_poly3():
     return Model(_MKVOR_poly3)
+
+def _MKVOR1_2():
+    C = _MKVOR_tail_poly4()
+    C.alpha = 0.
+    C.acut_om = 0.5
+    C.bcut_om = 29.970520823304785
+    C.fcut_om = 0.7751265874179302
+    C.tail_mult_om = 0.5
+
+    C.Cs = 243.0809159785
+    C.Co = 134.8845428202
+    C.Cr = 81.8421192575
+    C.b = 0.0050770283
+    C.c = -0.0009275959
+
+    C.d_cut_rho = 0
+    C.e_cut_rho = 0
+
+    return C
+
+def MKVOR1_2():
+    return Model(_MKVOR1_2)
