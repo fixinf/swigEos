@@ -61,19 +61,6 @@ void potentials(double * n, int dimN, double * result, int dimResult, set_const 
 }
 
 namespace calc{
-	struct fun_n_eq_params{
-		set_const * C;
-		double n;
-		double * f_init;
-		int dimF_init;
-		double misc;
-	};
-
-	struct fun_n_eq_f_params{
-			set_const * C;
-			double f;
-			double misc;
-		};
 
     double mu_deriv(double *n, int dimN, int i, double mu_c, set_const *C){
 	    bool debug = false;
@@ -1687,10 +1674,17 @@ void stepE_rho_f(double f, double * init, int initN, double * out, int dim_Out, 
 	x[m-1] = init[m-1];
 	scale[m-1] = 1.;
 
-	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
+	opts[0]= 1e-2*LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
 		opts[4]= -1e-5;
   info[6] = 3;
 
+  	if (debug){
+  		printf("f = %f ", f);
+		for (int i = 0; i < m; i++){
+			printf("x_in[%i] = %.6f ", i, x[i]);
+		}
+		printf("\n");
+  	}
 	dlevmar_bc_dif(calc::fun_n_eq_f_rho, x, NULL, m, m, lb, NULL, scale, iter, opts, info, NULL, NULL, &p);
 
 	if (debug) {
@@ -1700,9 +1694,10 @@ void stepE_rho_f(double f, double * init, int initN, double * out, int dim_Out, 
 		}
 		printf("\n");
 
-		printf("f = %f, n_n = %e", f, x[0]);
-		printf(",n_p = %e ", x[1]);
-		printf(",mu = %e ", x[2]);
+		printf("f = %f ", f);
+		for (int i = 0; i < m; i++){
+			printf("x[%i] = %.6f ", i, x[i]);
+		}
 		printf("\n");
 
 		calc::fun_n_eq_f_rho(x, fun, m, m, &p);

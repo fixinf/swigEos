@@ -91,6 +91,34 @@ void func_f_eq(double * p, double * hx, int m, int _n, void * adata){
 	}
 }
 
+void func_f_eq_an(double * p, double * hx, int m, int _n, void * adata){
+	bool debug = 0;
+	func_f_eq_params * params = (func_f_eq_params *) adata;
+	bool sprime = (params->C->sprime and (m > 1));
+	set_const * C= params->C;
+	double * n = new double[params->dimN + m];
+	if (debug){
+		printf("sprime = %i \n", sprime);
+	}
+	for (int i = 0; i < m; i++){
+		n[i] = p[i];
+	}
+	for (int i = m; i < m + params->dimN; i++){
+		n[i] = params->n[i-m];
+	}
+	if (debug) {
+		printf("f_eq: n = ");
+		for (int i = 0; i < params->dimN + m; i++){
+			printf("%f ", n[i]);
+		}
+		printf("\n");
+	}
+	double mn = C->M[0];
+	double f = p[0];
+	double res = pow(mn, 4.) * f / (C->Cs);
+
+}
+
 double f_eq(double * n, int dimN, set_const * C, double init){
 	double opts[5];
 	printf("I'm in \n");

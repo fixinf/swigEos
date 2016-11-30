@@ -44,12 +44,26 @@ extern double kineticInt(double n, double m, double f);
 extern double p_f(double n, double gamma);
 
 namespace calc{
+	struct fun_n_eq_params{
+		set_const * C;
+		double n;
+		double * f_init;
+		int dimF_init;
+		double misc;
+	};
+
+	struct fun_n_eq_f_params{
+		set_const * C;
+		double f;
+		double misc;
+	};
 	extern double mu(double * n, int dimN, int i, set_const * C);
 	extern double mu_deriv(double *n, int dimN, int i, double mu_c, set_const *C);
 	extern double mu_rho(double * n,  int dimN, int i, double mu_c, set_const * C);
 	extern void fun_n_eq_rho_anal(double * p, double * hx, int m, int n, void * adata);
 	extern void fun_n_eq_rho_anal2(double * p, double * hx, int m, int n, void * adata);
 	extern void fun_n_eq_f(double * p, double * hx, int m, int n, void * adata);
+	extern void fun_n_eq_f_rho(double * p, double * hx, int m, int n, void * adata);
 
 }
 

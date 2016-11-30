@@ -198,6 +198,22 @@ void testStepRhoInv(){
 	double init[3] = {C->n0, 0.1, 0.5};
 	double res[3];
 	for (int j = 0; j < 10; j++){
+		stepE_rho_f(C->f0 + 0.01*j, init, 3, res, 3, 30, C);
+		for (int i = 0; i < 3; i++){
+			printf("res[%i] = %.6f, ", i, res[i]);
+		}
+		printf("\n");
+	}
+}
+
+void testRangeRhoInvHyper(){
+	set_const * C = new KVOR();
+	C->SetHyperConstants(2);
+	printf("%.6f\n", C->M[0]);
+	double f_init = C->f0;
+	double init[3] = {C->n0, 0.1, 0.5};
+	double res[3];
+	for (int j = 0; j < 10; j++){
 	stepE_rho_f(C->f0 + 0.01*j, init, 3, res, 3, 30, C);
 	for (int i = 0; i < 3; i++){
 		printf("res[%i] = %.6f, ", i, res[i]);
@@ -206,6 +222,23 @@ void testStepRhoInv(){
 	}
 }
 
+void testFuncRhoInv(){
+	set_const * C = new KVOR();
+	double f = 0.07708;
+	C->SetHyperConstants(2);
+
+	calc::fun_n_eq_f_params p = {C, f, 0.0};
+	double init[3] = {0.011169, 0.000005, 0.053887};
+	double hx[3];
+	for (int j = 0; j < 1000; j++){
+		calc::fun_n_eq_f_rho(init, hx, 3, 3, &p);
+		for (int i = 0; i < 3; i++){
+			printf("hx[%i] = %.6e", i, hx[i]);
+		}
+		printf("\n");
+	}
+}
+
 int main(){
-    testStepRhoInv();
+    testFuncRhoInv();
 }
