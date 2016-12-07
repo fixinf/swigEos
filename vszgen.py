@@ -139,7 +139,7 @@ class MassPlot(vszSimplePlot):
 
 
 class MRPlot(MassPlot):
-    def __init__(self, models, labels, hidden=1, filename=None):
+    def __init__(self, models, labels, hidden=1, filename=None, force=0):
         super(MRPlot, self).__init__(models, labels, hidden=hidden,
                                      template='mr', filename=filename)
 
@@ -147,7 +147,7 @@ class MRPlot(MassPlot):
         self.x_row = 2
         self.drawLines()
         if self.filename:
-            self.SaveCheck(self.filename)
+            self.SaveCheck(self.filename, force=force)
 
 
 class MNPlot(MassPlot):

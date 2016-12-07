@@ -113,7 +113,7 @@ class Wrapper(object):
         b2 = np.array([mu[i_break+1:], P[i_break+1:], E[i_break+1:], N[i_break+1:]]).transpose()
         # kind = 'cubic'
         kind = 'linear'
-        print(b1)
+        # print(b1)
         ip1 = interp1d(b1[:, 0], b1[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ip2 = interp1d(b2[:, 0], b2[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ie1 = interp1d(b1[:, 0], b1[:, 2], bounds_error=0, fill_value=0., kind=kind)
@@ -125,7 +125,7 @@ class Wrapper(object):
 
         # mu_inter = np.intersect1d(b1[:, 0], b2[:, 0])
         mu_inter = np.linspace(min(b2[:, 0]), max(b1[:, 0]))
-        print(mu_inter)
+        # print(mu_inter)
         i_eq = np.argmin(abs(ip1(mu_inter) - ip2(mu_inter)))
 
         # print('i_eq = ', i_eq)
@@ -812,6 +812,7 @@ class Wrapper(object):
         elist = []
         eparts = []
         dEparts = []
+        print(ret_f)
         for n in nlist:
             epart = np.zeros(9, dtype='float')
             if not solve_f:
@@ -836,6 +837,8 @@ class Wrapper(object):
 
             p1 = np.sum(nlist, axis=1) * dEparts.transpose()
             self.Pparts = p1.transpose() - self.Eparts
+
+        print(ret_f)
         if ret_f:
             return [arr(elist), arr(flist)]
         else:
@@ -1520,7 +1523,9 @@ class Sym(Nucleon):
 
 
     def reset(self):
-        self._E, flist = self.E(self.nrange, ret_f=1)
+        res = self.E(self.nrange, ret_f=1)
+        # print(res.shape)
+        self._E, flist = res
         self._P = self.P(self.nrange)
         nlist = arr([ [n/2, n/2] for n in self.nrange]).transpose()
         # f = arr([0.])
@@ -1539,7 +1544,8 @@ class Sym(Nucleon):
         nlist = [[n / 2, n / 2] for n in nrange]
         dn = 1e-4
         dn = arr([dn, dn])
-        return Wrapper.E_gen(self, nlist, ret_f, f, dn=dn)
+        return Wrapper.E_gen(self, nlist, solve_f=1, ret_f=ret_f, f=f, dn=dn)
+        # return Wrapper.E_gen(self, nlist, ret_f, f, dn=dn)
 
     def P(self, nrange):
         nlist = []
@@ -1798,7 +1804,8 @@ class DeltaBase(Wrapper):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.foldername = join(self.foldername, 'Delta')
-        self.basefoldername = self.foldername
+        if not hasattr(self, 'basefoldername'):
+            self.basefoldername = self.foldername
         if not os.path.exists(self.foldername):
             os.makedirs(self.foldername)
         if hasattr(self.C, 'setDeltaConstants'):
@@ -2177,6 +2184,7 @@ class Rho(Wrapper):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.nc = np.array([])
         self.foldername = join(self.foldername, 'rcond')
+        self.basefoldername = self.foldername
         if not os.path.exists(self.foldername):
             os.makedirs(self.foldername)
         self.filenames['rcond'] = 'rcond.dat'
@@ -2450,6 +2458,86 @@ class Rho(Wrapper):
         self._E = np.ascontiguousarray(self._E)
         self._P = np.ascontiguousarray(self.P_chem())
         self.set = True
+
+
+    def reset_from_init(self, n_init, f_init, init_vals, npoints=100, nmax=8., iterations=30, timeout=None, kind=1):
+        print("Resetting from init " + self.__repr__() + " for model " + self.Ctype.__name__.strip('_'))
+        rho = []
+        mu_e = []
+        mu_c = []
+        nc = []
+
+        nmax *= self.n0
+
+        stepper = eos.stepE_rho
+        init = arr([0. for i in range(self.n_baryon - 1)] + [0.])
+
+        n_tosolve = n_init
+        if nmax > n_init[-1]:
+            n_tosolve = np.append(n_init[:-1], np.linspace(n_init[-1], nmax,
+                                                      npoints))
+            init_vals = np.append(init_vals[:-1], np.array([init_vals[-1]]*npoints),
+                                  axis=0)
+
+            f_init = np.append(f_init[:-1], np.array([f_init[-1]]*npoints), axis=0)
+
+            print(n_tosolve.shape)
+            print(init_vals.shape)
+
+
+
+        for i, res in enumerate(zip(n_tosolve, f_init, init_vals)):
+            _n, f, init = res
+            f = np.array([f])
+            if timeout is None:
+                # print('before ', init)
+                init = eos.stepE_rho(_n, init, f, len(init)+1, iterations, 0., self.C)
+                # print('after ', init)
+            else:
+                raise NotImplementedError()
+                # print init
+            # print(init)
+            # if i % (len(self.nrange) / 20) == 0:
+            #     print('.', end=' ')
+
+            rho.append(init.copy()[:-2]) ## 2 reserved for mu_c and n_c
+            rho[-1] = np.insert(rho[-1], 0, _n - np.sum(rho[-1]))
+            f = eos.f_eq_rho(rho[-1], f, 1, init[-2], self.C)  # sp omitted
+            # rho contains all scalar fields as well
+            rho[-1] = np.insert(rho[-1], 0, f)  #and again sp omitted
+            mu_e.append(init[-2])
+            mu_c.append(init[-2])
+            nc.append(init.copy()[-1])
+            if i >= len(n_init) and i < len(n_tosolve)-1:
+                init_vals[i+1] = init[:-1]
+                f_init[i+1] = f[0]
+
+        self.nrange = n_tosolve
+        self.mu_c = np.array(mu_c)
+        self.nc = np.nan_to_num(np.ascontiguousarray(arr(nc)))
+        self.rho = np.ascontiguousarray(arr(rho))
+        self.mu_e = np.ascontiguousarray(arr(mu_e))
+        eparts = []
+        # _E = []
+        # for i, z in enumerate(self.rho):
+        #     eitem, epart = self.Efull(z, self.mu_e[i])
+        #     _E.append(eitem)
+        #     eparts.append(epart)
+        # self._E = np.array(_E)
+        self._E = self.Efull()
+        self.Eparts = arr(eparts)
+        dEparts = []
+        for part in self.Eparts.transpose():
+            dEparts.append(np.gradient(part, self.nrange[1]-self.nrange[0]))
+        dEparts = arr(dEparts)
+        # p1 = self.nrange * dEparts
+        # self.Pparts = p1.transpose() - self.Eparts
+        # self._E = np.array(map(lambda z: eos.E(z, self.C), self.rho))
+        self._E = np.ascontiguousarray(self._E)
+        self._P = np.ascontiguousarray(self.P_chem())
+        self.set = True
+
+
 
     def needsMaxwInv(self):
         self.check()
@@ -2891,6 +2979,7 @@ class Rcc(Rho):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.foldername = self.foldername + '_chi'
+        self.basefoldername = self.foldername
         if not os.path.exists(self.foldername):
             os.makedirs(self.foldername)
         self.C.chi_r_prime = 1
@@ -2899,6 +2988,7 @@ class Rcp(Rho):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.foldername = self.foldername + '_phi'
+        self.basefoldername = self.foldername
         if not os.path.exists(self.foldername):
             os.makedirs(self.foldername)
         self.C.chi_r_prime = 2
@@ -3296,6 +3386,7 @@ class DeltaPhiSigma(DeltaBase, HyperonPhiSigma):
 class RhoDeltaPhi(DeltaPhi, Rho):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.basefoldername = join(self.basefoldername, 'rcond')
         self.filenames['rcond'] = 'rcond_hyper_phi.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hp.dat'
         self.filenames['n_rho'] = 'nr_dp.dat'
