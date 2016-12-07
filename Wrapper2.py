@@ -837,8 +837,6 @@ class Wrapper(object):
 
             p1 = np.sum(nlist, axis=1) * dEparts.transpose()
             self.Pparts = p1.transpose() - self.Eparts
-
-        print(ret_f)
         if ret_f:
             return [arr(elist), arr(flist)]
         else:
@@ -1523,9 +1521,7 @@ class Sym(Nucleon):
 
 
     def reset(self):
-        res = self.E(self.nrange, ret_f=1)
-        # print(res.shape)
-        self._E, flist = res
+        self._E, flist = self.E(self.nrange, ret_f=1)
         self._P = self.P(self.nrange)
         nlist = arr([ [n/2, n/2] for n in self.nrange]).transpose()
         # f = arr([0.])
@@ -1544,8 +1540,7 @@ class Sym(Nucleon):
         nlist = [[n / 2, n / 2] for n in nrange]
         dn = 1e-4
         dn = arr([dn, dn])
-        return Wrapper.E_gen(self, nlist, solve_f=1, ret_f=ret_f, f=f, dn=dn)
-        # return Wrapper.E_gen(self, nlist, ret_f, f, dn=dn)
+        return Wrapper.E_gen(self, nlist, ret_f, f, dn=dn)
 
     def P(self, nrange):
         nlist = []

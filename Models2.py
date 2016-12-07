@@ -1157,3 +1157,14 @@ def _MKVOR1_2():
 
 def MKVOR1_2():
     return Model(_MKVOR1_2)
+
+def _MKVOR1_tail3():
+    C = _MKVOR1_2()
+
+    C.d_cut_rho = 0.
+    C.e_cut_rho = 100
+    
+    return C
+
+def MKVOR1_tail3():
+    return Model(_MKVOR1_2)
