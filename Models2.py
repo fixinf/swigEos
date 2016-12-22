@@ -616,7 +616,7 @@ def MKValpha00(omega_f):
 
 def myMod_L(beta, gamma):
     def _myMod_L():
-        return __myMod_L(beta, gamma)
+        return __myMgod_L(beta, gamma)
     _myMod_L.__name__ = '_myMod_Lb=%1.2f g=%1.2f'%(beta, gamma)
     return Model(_myMod_L)
 
@@ -1163,8 +1163,61 @@ def _MKVOR1_tail3():
 
     C.d_cut_rho = 0.
     C.e_cut_rho = 100
-    
+
     return C
 
 def MKVOR1_tail3():
     return Model(_MKVOR1_2)
+
+
+def __MKVOR_noRcut(gamma, beta, power, params=None):
+    C = eos.MKVOR_noRcut()
+    C.rho_kind = 1
+    C.rho_a = 0.
+    C.rho_power = power
+    C.gamma = gamma
+    C.beta = beta
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+    
+    if params:
+        for p in params.items():
+            C.__setattr__(p[0], p[1])
+    else:
+        # C.Cs = 234.1472110441
+        # C.Co = 134.8845431378
+        # C.Cr = 81.7485399957
+        # C.b = 0.0046749523
+        # C.c = -0.0029742083
+        C.Cs, C.Co, C.Cr, C.b, C.c = (234.1472106518033,
+                                     134.88454280495634,
+                                     81.74854036883208,
+                                     0.004674952279404008,
+                                     -0.0029742083230390086)
+    C.SetHyperConstants(2)
+    # Wrapper(C).solve(f0=C.f0, K0=240., J0=30.)
+    return C
+
+
+def MKVOR_noRcut(gamma=4.08636008, beta=2.62913719, power=2.00684846, params=None):
+    def _MKVOR_noRcut():
+        return __MKVOR_noRcut(gamma, beta, power, params=params)
+    _MKVOR_noRcut.__name__ = _MKVOR_noRcut.__name__ + '%.2f %.2f'%(gamma, beta)
+    M = Model(_MKVOR_noRcut)
+    return M

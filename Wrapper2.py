@@ -1540,7 +1540,7 @@ class Sym(Nucleon):
         nlist = [[n / 2, n / 2] for n in nrange]
         dn = 1e-4
         dn = arr([dn, dn])
-        return Wrapper.E_gen(self, nlist, ret_f, f, dn=dn)
+        return Wrapper.E_gen(self, nlist, solve_f=1, ret_f=ret_f, f=f, dn=dn)
 
     def P(self, nrange):
         nlist = []
@@ -1551,15 +1551,21 @@ class Sym(Nucleon):
         res = self.P_chem(nlist, leptons=False)
         return res
 
-    def Jtilde(self, nrange=None):
+    def Jtilde(self, nrange=None, f=None):
         if nrange is None:
             nrange = self.nrange
         return arr([eos.J(z, self.C) for z in nrange])
 
     def dumpJ(self):
-        tab = arr([self.nrange/self.n0, self.Jtilde(self.nrange)]).transpose()
+        self.check()
+        res = [[n/self.n0, eos.J(n, self.C, f)] for n, f in zip(self.nrange, self.rho[:, 0])]
+        tab = arr(
+                  res
+                  )
         with open(join(self.foldername, self.filenames['J']), 'w') as f:
             f.write(tabulate(tab, ['n/n0', 'J\tilde[MeV]'], tablefmt='plain'))
+
+        return res
 
     def K(self):
         return eos.K(self.n0, self.C)
@@ -1587,6 +1593,7 @@ class Neutr(Nucleon):
     def __init__(self, C, basefolder_suffix=''):
         super(Neutr, self).__init__(C, basefolder_suffix=basefolder_suffix)
         self.C.Hyper = 0
+        self.filenames['eos'] = 'neutr.dat'
         self.filenames['mass_crust'] = 'masses_crust_neutron.dat'
         self.filenames['mass_nocrust'] = 'masses_neutron.dat'
         self.filenames['meff'] = 'meff_neutr.dat'
@@ -1600,15 +1607,17 @@ class Neutr(Nucleon):
 
 
     def reset(self):
-        self._E = self.E(self.nrange)
+        self._E, flist = self.E(self.nrange, ret_f=1)
         self._P = self.P(self.nrange)
+        self.rho = np.array([[f, n, 0.] for n, f in zip(self.nrange, flist)])
+        self.mu_e = np.array([-1. for n in self.nrange])
         self.set = 1
 
     def E(self, nrange, ret_f=False, f=0.):
         nlist = [[n, 0] for n in nrange]
         dn = 1e-4
         dn = arr([dn, 0])
-        return Wrapper.E_gen(self, nlist, ret_f, f, dn=dn)
+        return Wrapper.E_gen(self, nlist, solve_f=1, ret_f=ret_f, f=f, dn=dn)
 
     def P(self, nrange):
         nlist = []
