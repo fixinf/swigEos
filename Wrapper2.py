@@ -19,7 +19,8 @@ import six
 from scipy.optimize import minimize
 # import ipdb
 import inspect
-workfolder = '/home/const/MKVdelta_local/'
+from copy import copy
+workfolder = '/home/const/MEGA/'
 
 BASEFOLDER = join(workfolder, 'data2/')
 
@@ -2192,6 +2193,17 @@ class Rho(Wrapper):
         self.filenames['rcond'] = 'rcond.dat'
         self.filenames['n_rho'] = 'n_rho.dat'
         self.C.chi_r_prime = 0
+
+    def set_eos_names(self, suffix):
+        #keylist = ['eos', 'grig', 'rcond', 'n_rho', 'density']
+        if not hasattr(self, 'olddict'):
+            self.olddict = copy(self.filenames)
+        for k in self.filenames.keys():
+            try:
+                self.filenames[k] = self.olddict[k] + suffix
+            except TypeError:
+                pass
+
 
     def switch_inv(self):
         self.mu_e = self.mu_e_inv
