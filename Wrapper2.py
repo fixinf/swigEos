@@ -375,7 +375,7 @@ class Wrapper(object):
                 fname = self.filenames['mass_crust']+'_'+inter
             with open(join(self.foldername, fname), 'w') as f:
                 f.write(table)
-        return out
+        # return out
 
     def dumpMasses(self, nmin=.4, nmax=5., npoints=100, write=True, fname=None, ret_frac=True):
         self.check()
@@ -408,7 +408,7 @@ class Wrapper(object):
 
     def stars_crust(self, ncut_crust=0.45, ncut_eos=0.7, inter='linear',
             n_stars=None, nmin=.6, nmax=5.0, npoints=50,
-                    crust="crust.dat", show=False, crustName=None,
+                    crust="crust.вутыdat", show=False, crustName=None,
                     ret_frac=False, fasthyp=False, neutron=0, ret_i=0, force_reset=0):
         neos = self.npoints
         if nmax > max(self.nrange):
@@ -1409,8 +1409,6 @@ class Nucleon(Wrapper):
         n_e, n_mu = self.lepton_concentrations().transpose()
         self.dumpGrig(E, P, conc, n_e, n_mu)
 
-        return tab
-
 
     def dumpMeff(self):
         print([self.C.Xs(i, 2*self.n0) for i in range(8)])
@@ -1565,7 +1563,7 @@ class Sym(Nucleon):
         with open(join(self.foldername, self.filenames['J']), 'w') as f:
             f.write(tabulate(tab, ['n/n0', 'J\tilde[MeV]'], tablefmt='plain'))
 
-        return res
+        # return res
 
     def K(self):
         return eos.K(self.n0, self.C)
@@ -2195,6 +2193,20 @@ class Rho(Wrapper):
         self.filenames['n_rho'] = 'n_rho.dat'
         self.C.chi_r_prime = 0
 
+    def switch_inv(self):
+        self.mu_e = self.mu_e_inv
+        self.rho = self.rho_inv
+        self._P = self._P_inv
+        self._E = self._E_inv
+        self.nrange = self.nrange_inv
+
+    def switch_maxw(self):
+        self.nrange = self.nrange_maxw
+        self._P = self._P_maxw
+        self._E = self._E_maxw
+        if self.rho is None:
+            self.rho = self.rho_inv
+
     def regen_mue(self):
         mu = self.mu()
         mu_e = mu[:, 0] - mu[:, 1]
@@ -2231,8 +2243,11 @@ class Rho(Wrapper):
             nr.append((2 * mn**2 * C.m_rho / C.Cr) * C.eta_r(_f)**0.5 * C.phi_n(0, _f)**2 /
              np.float64(C.chi_prime(_f)) * (1 - mu_e / (C.m_rho * np.float64(C.phi_n(0, _f)))))
 
-        np.savetxt(join(self.foldername, self.filenames['n_rho']),
-            np.array([self.nrange/self.n0, np.array(nr)/self.n0]).transpose())
+        nr = arr(nr)
+
+        out = np.array([self.nrange/self.n0, nr/self.n0]).transpose()
+
+        np.savetxt(join(self.foldername, self.filenames['n_rho']), out)
 
 
     def func_f(self, f, n, mu_c):
@@ -2648,7 +2663,7 @@ class Rho(Wrapper):
 
         i_break = np.where(np.diff(P) < 0)[0][-1]
         i_break_mu = shift + np.where(np.diff(mu[shift:]) < 0)[0][0]
-        # print(i_break, i_break_mu)
+        print(i_break, i_break_mu)
         b1 = np.array([mu[:i_break_mu], P[:i_break_mu], E[:i_break_mu], N[:i_break_mu]]).transpose()
         b2 = np.array([mu[i_break+1:], P[i_break+1:], E[i_break+1:], N[i_break+1:]]).transpose()
         # kind = 'cubic'
@@ -2969,16 +2984,6 @@ class Rho(Wrapper):
                 self._P2[shift + i] = self.P_upper[::-1][i]
                 self.nclist2[shift + i] = self.nc2[::-1][i]
 
-
-
-
-
-
-
-
-
-
-
 class Rcc(Rho):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
@@ -3035,6 +3040,7 @@ class RccNucleon(Rcc, Nucleon):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_nucl.dat'
         self.filenames['mass_crust'] = 'rc_masses_N.dat'
+        self.filenames['n_rho'] = 'nr_nucl.dat'
 
 
 class RccHyper(Rcc, Hyperon):
@@ -3042,13 +3048,14 @@ class RccHyper(Rcc, Hyperon):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_hyper.dat'
         self.filenames['mass_crust'] = 'rc_masses_H.dat'
-
+        self.filenames['n_rho'] = 'nr_hyper.dat'
 
 class RccHyperPhi(Rcc, HyperonPhi):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_hyper_phi.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hp.dat'
+        self.filenames['n_rho'] = 'nr_hyper_phi.dat'
 
 
 class RccHyperPhiSigma(Rcc, HyperonPhiSigma):
@@ -3056,6 +3063,7 @@ class RccHyperPhiSigma(Rcc, HyperonPhiSigma):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_hyper_phi_sigma.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hps.dat'
+        self.filenames['n_rho'] = 'nr_hyper_phi_sigma.dat'
 
 class RcpNucleon(Rcp, Nucleon):
     def __init__(self, C, basefolder_suffix=''):
@@ -3616,17 +3624,26 @@ class RhoDeltaPhiSigma(DeltaPhiSigma, Rho):
                    ,rcond, fmt='%.8f')
 
 
+class RccDeltaOnly(Rcc, DeltaOnly):
+    def __init__(self, C, basefolder_suffix=''):
+        super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.filenames['rcond'] = 'rcond_donly.dat'
+        self.filenames['mass_crust'] = 'rc_masses_donly.dat'
+        self.filenames['n_rho'] = 'nr_do.dat'
+
 class RccDeltaPhi(Rcc, DeltaPhi):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_hyper_phi.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hp.dat'
+        self.filenames['n_rho'] = 'nr_dp.dat'
 
 class RccDeltaPhiSigma(Rcc, DeltaPhiSigma):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
         self.filenames['rcond'] = 'rcond_hyper_phi_sigma.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hps.dat'
+        self.filenames['n_rho'] = 'nr_dps.dat'
 
 class RcpDeltaPhi(Rcp, DeltaPhi):
     def __init__(self, C, basefolder_suffix=''):
@@ -3690,6 +3707,7 @@ class Model(Wrapper):
         self.rcc_hyper = RccHyper(C, basefolder_suffix=basefolder_suffix)
         self.rcc_hyper_phi = RccHyperPhi(C, basefolder_suffix=basefolder_suffix)
         self.rcc_hyper_phi_sigma = RccHyperPhiSigma(C, basefolder_suffix=basefolder_suffix)
+        self.rcc_delta_only = RccDeltaOnly(C, basefolder_suffix=basefolder_suffix)
         self.rcc_delta_phi = RccDeltaPhi(C, basefolder_suffix=basefolder_suffix)
         self.rcc_delta_phi_sigma = RccDeltaPhiSigma(C, basefolder_suffix=basefolder_suffix)
 
@@ -3768,6 +3786,7 @@ class Model(Wrapper):
                   self.delta_asym,
                   self.rcond_delta_phi, self.rcond_delta_phi_sigma,
                   self.rcond_delta_only,
+                  self.rcc_delta_only,
                   self.rcc_delta_phi, self.rcc_delta_phi_sigma,
                   self.rcp_delta_phi, self.rcp_delta_phi_sigma]:
             m.C.setDeltaRho(Xr)
