@@ -291,4 +291,62 @@ public:
 	double e_cut_rho;
 	double tail_mult_om;
 };
+
+class MKVOR_noRcut : public MKVOR_tail_poly4{
+public:
+        MKVOR_noRcut(): MKVOR_tail_poly4(){
+                beta = 0.;
+                gamma = 0.;
+                rho_power = 0;
+        }
+
+        double beta;
+        double gamma;
+        double rho_power;
+
+        double eta_r(double f){
+                return pow((1 + beta * pow(fabs(f), rho_power))/(1 + beta*pow(f0, rho_power)), gamma);
+        }
+};
+
+class MKVOR_tanh: public MKVOR_tail_poly4{
+public:
+	MKVOR_tanh():MKVOR_tail_poly4(){
+		shift = 0;
+		amp = 0;
+	}
+
+	double eta_r(double f){
+		return shift + amp*tanh(acut_rho*(1 - f/fcut_rho) + bcut_rho * pow(1- f/fcut_rho, 2) + c_cut_rho * pow(1-f/fcut_rho, 3));
+	}
+
+	double shift;
+	double amp;
+};
+
+class MKVOR_tanh_join : public MKVOR_tail_poly4{
+public:
+	MKVOR_tanh_join() : MKVOR_tail_poly4(){
+		tan_a = 0;
+		tan_b = 0;
+		tan_c = 0;
+		amp = 0;
+		shift = 0;
+		join = 0;
+	}
+
+	double eta_r(double f){
+		double etar = shift + amp*tanh(tan_a*(1 - f/tan_f) + tan_b * pow(1- f/tan_f, 2) + tan_c * pow(1-f/tan_f, 3));
+		return join * etar + (1 - join) * MKVOR_tail_poly4::eta_r(f);
+	}
+
+
+	double tan_a;
+	double tan_b;
+	double tan_c;
+	double tan_f;
+	double amp;
+	double shift;
+	double join;
+};
 #endif //EOSWRAP_SCDELTA_H

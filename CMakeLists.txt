@@ -48,10 +48,11 @@ set(SOURCE_FILES
 )
 
 
-include_directories("/usr/include/levmar")
+include_directories("/home/const/source/levmar-2.6")
+include_directories("/usr/local/lib/python3.5/dist-packages/numpy/core/include")
 include_directories("/usr/include/python3.5m")
-include_directories("/usr/lib/python3.5/site-packages/numpy/core/include/")
-#link_directories("/usr/include/levmar")
+link_directories("/home/const/source/levmar-2.6")
+link_directories("/usr/lib/x86_64-linux-gnu/")
 set(LIBRARY_OUTPUT_PATH ${eosWrap_SOURCE_DIR}/lib)
 
 add_library(wrapper OBJECT ${eosWrap_SOURCE_DIR}/wrap.cpp)
@@ -61,7 +62,7 @@ add_library(eosWrap SHARED ${SOURCE_FILES} $<TARGET_OBJECTS:wrapper> SCDelta.cpp
 #add_dependencies(wrapper wrapper_src)
 set_target_properties( eosWrap PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${eosWrap_SOURCE_DIR}/bin")
 add_dependencies(eosWrap wrapper)
-target_link_libraries(eosWrap gsl gslcblas levmar lapack)
+target_link_libraries(eosWrap gsl gslcblas levmar lapack python3.5m)
 
 #add_custom_target(
 #wrapper_src
@@ -77,4 +78,4 @@ DEPENDS ${eosWrap_SOURCE_DIR}/wrap.i
 
 add_executable(DirectUse DirectUse.cpp KVOR.h)
 
-target_link_libraries(DirectUse gsl gslcblas levmar lapack eosWrap python3)
+target_link_libraries(DirectUse gsl gslcblas levmar lapack eosWrap python3.5m)
