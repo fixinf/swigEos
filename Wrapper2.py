@@ -96,6 +96,46 @@ class Wrapper(object):
 
 
 
+    def getParams(self, inv=0):
+        try:
+            if not inv:
+                self.loadEos()
+            else:
+                self.loadEosInv()
+                self.switch_inv()
+
+        except FileNotFoundError:
+            print('EoS file not found; Aborting.')
+            return
+        try:
+            mass_data = np.loadtxt(join(self.foldername,
+                                        self.filenames['mass_crust']+'_linear'), skiprows=1)
+        except FileNotFoundError:
+            print('Mass data file not found; Aborting.')
+            return
+        conc = self.concentrations()
+        arg_crit = [np.where(c > 1e-6)[0][0] if np.where(c > 1e-6)[0].size > 0
+        else len(c)-1 for c in conc.transpose()]
+        n_crit = self.nrange[arg_crit]/self.n0
+
+        n_cr = self.nrange[np.where(self.nc/self.nrange > 1e-6)[0][0]]/self.n0
+
+        n_DU, m_DU = self.getDuCrit()
+        iM = interp1d(mass_data[:, 0], mass_data[:, 1], kind='cubic')
+        iR = interp1d(mass_data[:, 0], mass_data[:, 2], kind='cubic')
+        
+        nmax = minimize(lambda z: -iM(z), 6.).x[0]
+        mmax = iM(nmax)
+        rmax = iR(nmax)
+
+        n15 = root(lambda z: iM(z)-1.5, [3.]).x[0]
+        m15 = iM(n15)
+        r15 = iR(n15)
+
+        
+
+        return n_crit, n_cr, n_DU/self.n0, m_DU, [nmax, mmax, rmax], [n15, m15, r15]
+        
 
     def processMaxw(self, mu_init=None, show=0, branch_3=0, shift=0):
         mu = np.nan_to_num(self.mu(branch_3=branch_3)[:, 0])
@@ -2211,6 +2251,9 @@ class Rho(Wrapper):
         self._P = self._P_inv
         self._E = self._E_inv
         self.nrange = self.nrange_inv
+        self.n_e = self.n_e_inv
+        self.n_mu = self.n_mu_inv
+        self.nc = self.nc_inv
 
     def switch_maxw(self):
         self.nrange = self.nrange_maxw
@@ -2548,6 +2591,26 @@ class Rho(Wrapper):
         self.nc = np.nan_to_num(np.ascontiguousarray(arr(nc)))
         self.rho = np.ascontiguousarray(arr(rho))
         self.mu_e = np.ascontiguousarray(arr(mu_e))
+
+        n_e = []
+        n_mu = []
+        for i, r in enumerate(self.rho):
+            # print(r)
+            # print(eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C))
+            # _mue = eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C)
+            # mu_e.append(_mue)
+            _mue = self.mu_e[i]
+            if _mue > self.m_e:
+                n_e.append((_mue**2 - self.m_e**2)**(3./2) / (3 * pi **2))
+            else:
+                n_e.append(0.)
+            if _mue > self.m_mu:
+                n_mu.append((_mue**2 - self.m_mu**2)**(3./2) / (3*pi**2))
+            else:
+                n_mu.append(0.)
+
+        self.n_e = np.array(n_e)
+        self.n_mu = np.array(n_mu)
         eparts = []
         # _E = []
         # for i, z in enumerate(self.rho):
@@ -2662,8 +2725,28 @@ class Rho(Wrapper):
                         r * self.nrange_inv
                         for r in self.rho_inv[:, 1:].transpose()
                     ]).transpose()
-        self.nc_inv = data[:, 3+self.n_baryon + 2]
-        self.mu_e_inv = data[:, 3+self.n_baryon + 3] / self.m_pi
+        self.nc_inv = data[:, 3+self.n_baryon + 1]
+        self.mu_e_inv = data[:, 3+self.n_baryon + 2] / self.m_pi
+        n_e = []
+        n_mu = []
+        for i, r in enumerate(self.rho_inv):
+            # print(r)
+            # print(eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C))
+            # _mue = eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C)
+            # mu_e.append(_mue)
+            _mue = self.mu_e_inv[i]
+            if _mue > self.m_e:
+                n_e.append((_mue**2 - self.m_e**2)**(3./2) / (3 * pi **2))
+            else:
+                n_e.append(0.)
+            if _mue > self.m_mu:
+                n_mu.append((_mue**2 - self.m_mu**2)**(3./2) / (3*pi**2))
+            else:
+                n_mu.append(0.)
+
+        self.n_e_inv = np.array(n_e)
+        self.n_mu_inv = np.array(n_mu)
+
         self.set = 1
 
     def processMaxwInv(self, mu_init=None, show=0, shift=0, save=0):

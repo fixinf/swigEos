@@ -9,6 +9,8 @@ from scipy.misc.common import derivative
 from scipy import optimize
 from math import pi
 import Models
+from scipy.optimize import leastsq
+from os.path import join
 
 def ret_fun(f):
     return
@@ -1221,3 +1223,119 @@ def MKVOR_noRcut(gamma=4.08636008, beta=2.62913719, power=2.00684846, params=Non
     _MKVOR_noRcut.__name__ = _MKVOR_noRcut.__name__ + '%.2f %.2f'%(gamma, beta)
     M = Model(_MKVOR_noRcut)
     return M
+
+def __MKVOR_tanh(amp):
+    C = eos.MKVOR_tanh()
+    C.rho_kind = 1
+    C.rho_a = 0.
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+    
+    C.Cs, C.Co, C.Cr, C.b, C.c = (234.1472106518033,
+                            134.88454280495634,
+                            81.74854036883208,
+                            0.004674952279404008,
+                            -0.0029742083230390086)
+    C.SetHyperConstants(2)
+
+    Cref = _MKVOR_poly1()
+    
+    fmax = 0.5
+    f_fit = np.linspace(0, fmax, 100)
+    def func_fit(x, amp):
+        C.amp = amp
+        C.fcut_rho, C.shift, C.acut_rho, C.bcut_rho, C.c_cut_rho = x
+        return np.array([C.eta_r(f) - Cref.eta_r(f) for f in f_fit])
+    leastsq(lambda z: func_fit(z, amp), [0.5, 0., 0., 0., 0.])
+
+    # Wrapper(C).solve(f0=C.f0, K0=240., J0=30.)
+    return C
+
+def MKVOR_tanh(amp):
+    def _MKVOR_tanh():
+        return __MKVOR_tanh(amp)
+    _MKVOR_tanh.__name__ = _MKVOR_tanh.__name__ + '%.2f'%(amp)
+    M = Model(_MKVOR_tanh)
+    np.savetxt(join(M.foldername, 'fit_params.dat'), np.array([M.C.fcut_rho, M.C.shift, M.C.acut_rho, M.C.bcut_rho, M.C.c_cut_rho]))
+    return M
+    
+def __MKVOR_tanh_join(amp, join):
+    C = eos.MKVOR_tanh_join()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.fcut_rho = 0.62
+    C.acut_rho, C.bcut_rho, C.c_cut_rho = (0.5859623173610193, 4.729785161812114, 6.642915417642516)
+
+    C.d_cut_rho = 0
+    C.e_cut_rho = 0
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+
+    C.SetHyperConstants(2)
+    C.d_cut_rho = -10.
+    C.e_cut_rho = 0
+
+
+    Cref = _MKVOR_poly1()
+    fmax = 0.5
+    f_fit = np.linspace(0, fmax, 100)
+    C.join = 1.
+    def func_fit(x, amp):
+        C.amp = amp
+        C.tan_f, C.shift, C.tan_a, C.tan_b, C.tan_c = x
+        return np.array([C.eta_r(f) - Cref.eta_r(f) for f in f_fit])
+    leastsq(lambda z: func_fit(z, amp), [0.5, 0., 0., 0., 0.])  
+     
+    C.join = join
+    return C
+
+def MKVOR_tanh_join(amp, _join):
+    def _MKVOR_tanh_join():
+        return __MKVOR_tanh_join(amp, _join)
+    _MKVOR_tanh_join.__name__ = _MKVOR_tanh_join.__name__ + '%.2f %.2f' % (amp, _join)
+    M = Model(_MKVOR_tanh_join)
+    np.savetxt(join(M.foldername, 'fit_params.dat'), np.array([M.C.tan_f, M.C.shift, M.C.tan_a, M.C.tan_b, M.C.tan_c]))
+    return M
+
+ 
