@@ -49,7 +49,7 @@ set(SOURCE_FILES
 
 
 include_directories("/home/const/source/levmar-2.6")
-include_directories("/usr/local/lib/python3.5/dist-packages/numpy/core/include")
+include_directories("/home/const/.local/lib/python3.5/site-packages/numpy/core/include")
 include_directories("/usr/include/python3.5m")
 link_directories("/home/const/source/levmar-2.6")
 link_directories("/usr/lib/x86_64-linux-gnu/")

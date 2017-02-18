@@ -691,7 +691,7 @@ namespace calc{
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;
-    int num_part = m - 1; //actual num. of particles. p = [n_1, n_2, ..., n_num, mu_c]
+    	int num_part = m - 1; //actual num. of particles. p = [n_1, n_2, ..., n_num, mu_c]
 		double n_sum = 0.0;
 		double n_n = par->n;
 		double * n_in = new double [m+sc]; //input set for _E and mu
@@ -834,6 +834,152 @@ namespace calc{
 				hx[i] -= sqrt(res);
 			}
 		}
+
+		hx[m-1] = mu_c - mu_e;
+		if (debug)
+		printf("mu_c: %.6f \n", mu_c);
+
+		if (debug){
+		for (int i = 0; i < m; i++){
+			printf("hx[%i] = %.6e ", i, hx[i]);
+		}
+		printf("\n");
+		}
+
+		delete[] n_in;
+		delete[] n_f;
+	}
+
+void fun_n_eq_rho_withf(double * p, double * hx, int m, int n, void * adata){
+	//input: {n_0, ..., n_numpart, f, mu_c}
+		bool debug = 1;
+		fun_n_eq_params * par = (fun_n_eq_params *) adata;
+		set_const * C = par->C;
+		int sc = 1 + C->sprime;
+	    int num_part = m - 2; //actual num. of particles. p = [n_1, n_2, ..., n_num, mu_c]
+		printf("%i \n", num_part);
+		double n_sum = 0.0;
+		double n_n = par->n;
+		double * n_in = new double [num_part+2]; //input set for _E and mu
+		double * n_f = new double [num_part+1]; //input set for f_eq; actually is {n_n,n_p,...,n_X0}
+		for (int i = 0; i < num_part; i++){
+			n_n -= p[i];
+			n_in[i + 2] = p[i]; //scalar + neutron(1) offset
+			n_f[i+1] = p[i];
+		}
+
+		n_f[0] = n_n;
+		
+		if (debug){
+			for (int i = 0; i < m; i++){
+				printf("p[%i]=%.6f,", i, p[i]);
+			}
+			printf("\n");
+		}
+
+		double mu_c = p[m-1];
+
+		double f = p[m-2];
+		n_in[0] = f;
+		n_in[1] = n_n;
+
+		func_f_eq_params_rho f_par = {n_f, num_part+1, 1e-5, C, mu_c};
+
+		double func_out[1];
+		double func_in[1] = {f};
+		func_f_eq_rho(func_in, func_out, 1, 1, &f_par);
+
+		n_f[0] = n_n;
+		if (debug) {
+			printf("n_f = ");
+			for (int i = 0; i < num_part+1; i++){
+				printf("%e ", n_f[i]);
+			}
+			printf("\n");
+		}
+		if (debug) printf("\n");
+
+        if (debug){
+            printf("n_in = [");
+            for (int i = 0; i < num_part + 1 + sc; i++){
+                printf("%.6f ", n_in[i]);
+            }
+            printf("] \n");
+        }
+		double sum=0, sum_ch=0, sum_o = 0.0, sum_rho = 0.0, sum_p = 0;
+		for (int i = 0; i < num_part + 1; i++){
+			sum += n_f[i];
+			sum_ch += n_f[i]*C->Q[i];
+			sum_o += n_f[i]*C->X_o[i];
+			sum_rho += n_f[i]*C->X_r[i]*C->T[i];
+			if (C->phi_meson){
+				sum_p += n_f[i]*C->X_p[i];
+			}
+		}
+
+		double mu_n = mu_rho(n_in, num_part + 1 + sc, sc + 0, mu_c, C);
+		double mu_p = mu_rho(n_in, num_part + 1 + sc, sc + 1, mu_c, C);
+		double mu_e = mu_n - mu_p;
+
+		if (debug)
+		printf("mu_n = %.3f, mu_p = %.3f, mu_e = %.3f \n", mu_n, mu_p, mu_e);
+
+		double n_e = 0, n_mu = 0;
+		if (mu_e > m_e){
+			n_e += pow(mu_e*mu_e - m_e*m_e,1.5)/(3*M_PI*M_PI);
+		}
+		if (mu_e > m_mu){
+			n_mu += pow(mu_e*mu_e - m_mu*m_mu,1.5)/(3*M_PI*M_PI);
+		}
+
+		double fp = 0;
+		
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+      (f)) * (1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+    	par->misc = 0.;
+
+    	if (debug)
+    	printf("n_rho = %.6f, sum_rho = %.6f \n", n_rho, sum_rho);
+
+		hx[0] = sum_ch - n_e - n_mu;
+		double  n_c = 0.;
+
+		if(fabs(sum_rho) > n_rho/2){
+			double r_c2 = (fabs(sum_rho) - n_rho/2) / (2 * C->m_rho * C->chi_prime(f) * sqrt(C->eta_r(f)));
+			n_c = 2 * C->m_rho * C->phi_n(0, f) * r_c2;
+			hx[0] -= n_c;
+			par->misc = n_c;
+		}
+
+		for (int i = 1; i < num_part; i++){
+			hx[i] = p_f(p[i], 2*C->S[i+1]+1);
+			double xs = 0.;
+			if (C->sigma_kind == 0){
+				xs = C->X_s[i+1];
+			}
+			else{
+				xs = C->Xs(i+1, f);
+			}
+			double m_eff = C->M[i+1]*C->phi_n(i+1, xs * (C->M[0]/C->M[i+1]) * f  + C->X_sp[i+1] * (C->M[0]/C->M[i+1]) * fp);
+
+			double res = mu_n - C->Q[i+1]*mu_e - C->Co/pow(C->M[0],2) * C->X_o[i+1] * sum_o / C->eta_o(f)
+					- C->Cr/pow(C->M[0],2) * C->X_r[i+1]*C->T[i+1] * sum_rho / C->eta_r(f)
+					- C->Co/pow(C->M[0], 2) * C->X_p[i+1] * sum_p * pow(m_o / m_p,2.0) / C->eta_p(f);
+
+	    	if (fabs(sum_rho) > n_rho/2){
+	    		res += C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_rho) - n_rho/2) * C->X_r[i+1] * C->T[i+1] *
+	    				((sum_rho > 0) - (sum_rho < 0));
+	    	}
+	    	res = pow(res, 2.0);
+
+			res -= m_eff*m_eff;
+
+			if (res > 0){
+				hx[i] -= sqrt(res);
+			}
+		}
+
+		hx[m-2] = func_out[0];
 
 		hx[m-1] = mu_c - mu_e;
 		if (debug)
@@ -1350,6 +1496,8 @@ void stepE(double n, double * init, int initN, double * f_init, int dimF_init, d
 	delete[] lb;
 }
 
+
+
 void stepE_f(double f, double * init, int initN, double * out, int dim_Out, int iter, set_const* C) {
 	double opts[5];
 	bool debug = 1;
@@ -1637,6 +1785,85 @@ void stepE_rho(double n, double * init, int initN, double * f_init, int dimF_ini
 		printf("\n");
 
 		calc::fun_n_eq_rho_anal(x, fun, m, m, &p);
+		for (int i = 0; i < m; i++){
+			printf("f%i = %e  ", i, fun[i]);
+		}
+		printf("\n");
+	}
+	for (int i = 0; i < m; i++){
+		out[i] = x[i];
+	}
+
+	out[m] = p.misc;
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
+}
+
+void stepE_rho_withf(double n, double * init, int initN, double * f_init, int dimF_init,
+					 double * out, int dim_Out, int iter, double mu_init, set_const* C) {
+	double opts[5];
+	bool debug = 1;
+	calc::fun_n_eq_params p = {C, n, f_init, dimF_init, 0.0};
+	int m = initN+1;
+	double * x = new double[m];
+	double * lb = new double[m];
+	double * ub = new double[m];
+	double * fun = new double[m];
+	double * scale = new double [m];
+  	double * D = new double[m]; //linear inequality constraints matrix
+  	double * b = new double[1]; //linear inequality rhs
+  	for (int i = 0; i < m; i++){
+		D[i] = -1;
+	}
+	D[m-1] = 0;
+	
+	b[0] = -n;
+
+	double info[LM_INFO_SZ];
+
+	//boundaries for all particle variables
+  	for (int i = 0; i < m-2; i++){
+		x[i] = init[i];
+		lb[i] = 0.0;
+    	ub[i] = n;
+		scale[i] = 0.1;
+	}
+	//boundaries for the f variables
+	lb[m-2] = 0;
+	ub[m-2] = 1.;
+	x[m-2] = f_init[0];
+	scale[m-2] = 0.1;
+
+	//boundaries for the chem. potential
+	lb[m-1] = 0.;
+  	ub[m-1] = C->M[0]/2;
+	x[m-1] = init[m-1];
+	scale[m-1] = 1.;
+
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
+		opts[4]= -1e-5;
+  	info[6] = 3;
+
+	dlevmar_bc_dif(calc::fun_n_eq_rho_withf, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
+
+	if (debug) {
+		printf("info: ");
+		for (int i = 0; i < LM_INFO_SZ; i++){
+			printf(" %i : %f ", i, info[i]);
+		}
+		printf("\n");
+
+		printf("n = %f, n_p = %e", n, x[0]);
+		printf(",n_L = %e ", x[1]);
+		printf(",n_S- = %e ", x[2]);
+		printf(",n_S0 = %e ", x[3]);
+		printf(",n_S+ = %e ", x[4]);
+		printf(",n_X- = %e ", x[5]);
+		printf(",n_X0 = %e ", x[6]);
+		printf("\n");
+
+		calc::fun_n_eq_rho_withf(x, fun, m, m, &p);
 		for (int i = 0; i < m; i++){
 			printf("f%i = %e  ", i, fun[i]);
 		}

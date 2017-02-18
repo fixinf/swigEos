@@ -27,6 +27,9 @@ extern void stepE_f(double f, double * init, int dimInit, double * out, int dimO
 extern void stepE_rho(double n, double * init, int dimInit, double * f_init, int dimF_init,
 		double * out, int dimOut, int iter, double mu_init, set_const *);
 
+extern void stepE_rho_withf(double n, double * init, int dimInit, double * f_init, int dimF_init,
+		double * out, int dimOut, int iter, double mu_init, set_const *);
+
 extern void stepE_rho2(double n, double * init, int dimInit, double * f_init, int dimF_init,
 		double * out, int dimOut, int iter, double mu_init, set_const *);
 
@@ -61,6 +64,8 @@ namespace calc{
 	extern double mu_deriv(double *n, int dimN, int i, double mu_c, set_const *C);
 	extern double mu_rho(double * n,  int dimN, int i, double mu_c, set_const * C);
 	extern void fun_n_eq_rho_anal(double * p, double * hx, int m, int n, void * adata);
+	extern void fun_n_eq_rho_withf(double * p, double * hx, int m, int n, void * adata);
+
 	extern void fun_n_eq_rho_anal2(double * p, double * hx, int m, int n, void * adata);
 	extern void fun_n_eq_f(double * p, double * hx, int m, int n, void * adata);
 	extern void fun_n_eq_f_rho(double * p, double * hx, int m, int n, void * adata);
