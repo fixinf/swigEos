@@ -124,7 +124,7 @@ class Wrapper(object):
         iM = interp1d(mass_data[:, 0], mass_data[:, 1], kind='cubic')
         iR = interp1d(mass_data[:, 0], mass_data[:, 2], kind='cubic')
         
-        nmax = minimize(lambda z: -iM(z), 6.).x[0]
+        nmax = minimize(lambda z: -iM(z), 7.).x[0]
         mmax = iM(nmax)
         rmax = iR(nmax)
 
@@ -2465,14 +2465,12 @@ class Rho(Wrapper):
             stepper = eos.stepE_rho
             init = arr([0. for i in range(self.n_baryon - 1)] + [0.])
 
-        if kind > 1:
-            stepper = eos.stepE_rho2
-            init = arr([0. for i in range(self.n_baryon - 1)] + [0., 0.])
-
         f = arr([0.])  # sp omitted
         for i, _n in enumerate(self.nrange):
             if timeout is None:
-                init = eos.stepE_rho(_n, init, f, len(init)+1, iterations, 0., self.C)
+                print('init= ', init)
+                init = eos.stepE_rho_withf(_n, init, f, len(init)+2, iterations, 0., self.C)
+                print('init -> ', init)
             else:
                 queue = Queue()
                 p = Process(target=eos.stepE_rho, args=(_n, init, f, len(init)+1,
@@ -2497,9 +2495,9 @@ class Rho(Wrapper):
             if i % (len(self.nrange) / 20) == 0:
                 print('.', end=' ')
 
-            rho.append(init.copy()[:-2]) ## 2 reserved for mu_c and n_c
+            rho.append(init.copy()[:-3]) ## 3 reserved for f, mu_c and n_c
             rho[i] = np.insert(rho[i], 0, _n - np.sum(rho[i]))
-            f = eos.f_eq_rho(rho[i], f, 1, init[-2], self.C)  # sp omitted
+            f = np.array([init[-3]])
             if self.verbose:
                 pass  # TODO: some verbose output
             # rho contains all scalar fields as well
@@ -2507,7 +2505,7 @@ class Rho(Wrapper):
             mu_e.append(init[-2])
             mu_c.append(init[-2])
             nc.append(init.copy()[-1])
-            init = init[:-1]
+            init = np.delete(init[:-1], -2)
 
         self.mu_c = np.array(mu_c)
         self.nc = np.nan_to_num(np.ascontiguousarray(arr(nc)))
@@ -2565,7 +2563,7 @@ class Rho(Wrapper):
             f = np.array([f])
             if timeout is None:
                 # print('before ', init)
-                init = eos.stepE_rho(_n, init, f, len(init)+1, iterations, 0., self.C)
+                init = eos.stepE_rho_withf(_n, init, f, len(init)+2, iterations, 0., self.C)
                 # print('after ', init)
             else:
                 raise NotImplementedError()
@@ -2574,16 +2572,19 @@ class Rho(Wrapper):
             # if i % (len(self.nrange) / 20) == 0:
             #     print('.', end=' ')
 
-            rho.append(init.copy()[:-2]) ## 2 reserved for mu_c and n_c
-            rho[-1] = np.insert(rho[-1], 0, _n - np.sum(rho[-1]))
-            f = eos.f_eq_rho(rho[-1], f, 1, init[-2], self.C)  # sp omitted
+            rho.append(init.copy()[:-3]) ## 3 reserved for f, mu_c and n_c
+            rho[i] = np.insert(rho[i], 0, _n - np.sum(rho[i]))
+            f = np.array([init[-3]])
+            if self.verbose:
+                pass  # TODO: some verbose output
             # rho contains all scalar fields as well
-            rho[-1] = np.insert(rho[-1], 0, f)  #and again sp omitted
+            rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
             mu_e.append(init[-2])
             mu_c.append(init[-2])
             nc.append(init.copy()[-1])
+            init = np.delete(init[:-1], -2)
             if i >= len(n_init) and i < len(n_tosolve)-1:
-                init_vals[i+1] = init[:-1]
+                init_vals[i+1] = init
                 f_init[i+1] = f[0]
 
         self.nrange = n_tosolve
@@ -2638,7 +2639,7 @@ class Rho(Wrapper):
         return any(np.diff(self._P_inv)<0)
 
     def reset_inv(self, iterations=100, timeout=None, kind=1, fmax=0.95,
-                  npoints=None, nmax=8):
+                  npoints=None, nmax=8, adaptive=0):
         if npoints is None:
             npoints = self.npoints
 
@@ -2651,30 +2652,58 @@ class Rho(Wrapper):
         nc = []
         nlist = []
 
-        self.frange_inv = np.linspace(0., fmax, npoints)
-        init = arr([0.001] * self.n_baryon + [0.]) #All particles + mu_ch
-        for i, f in enumerate(self.frange_inv):
-            if sum(init) < 1e-7:
-                init = arr([0.1] * self.n_baryon + [0.]) #All particles + mu_ch
+        if not adaptive:
+            self.frange_inv = np.linspace(0., fmax, npoints)
+            init = arr([0.001] + [0.00] * (self.n_baryon - 1) + [0.]) #All particles + mu_ch
+            for i, f in enumerate(self.frange_inv):
+                if sum(init) < 1e-7:
+                    init = arr([1e-7] + [0.]* (self.n_baryon-1) + [0.]) #All particles + mu_ch
 
-            out = eos.stepE_rho_f(f, init, len(init) + 1, iterations, self.C)
-            #len(out) = len(init) + 1 [for n_rho]
+                out = eos.stepE_rho_f(f, init, len(init) + 1, iterations, self.C)
+                #len(out) = len(init) + 1 [for n_rho]
 
-            if i % (npoints / 20) == 0: print('.', end=' ')
-            rho.append(out.copy()[:-2]) ## 2 reserved for mu_c and n_c
+                if i % (npoints / 20) == 0: print('.', end=' ')
+                rho.append(out.copy()[:-2]) ## 2 reserved for mu_c and n_c
 
-            # rho contains all scalar fields as well
-            rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
-            mu_e.append(out[-2])
-            mu_c.append(out[-2])
-            nc.append(out[-1])
-            # mu_n.append(self.mu(inv=1))
-            init = out[:-1]
-            _n = sum(init[:-1])
-            # print(f, init, _n)
-            nlist.append(_n)
-            if (_n > nmax * self.n0):
-                break
+                # rho contains all scalar fields as well
+                rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
+                mu_e.append(out[-2])
+                mu_c.append(out[-2])
+                nc.append(out[-1])
+                # mu_n.append(self.mu(inv=1))
+                init = out[:-1]
+                _n = sum(init[:-1])
+                # print(f, init, _n)
+                nlist.append(_n)
+                if (_n > nmax * self.n0):
+                    break
+        else:
+            self.frange_inv = []
+            f = 0.
+            df = 0.01
+            init = arr([0.001] + [0.00] * (self.n_baryon - 1) + [0.]) #All particles + mu_ch
+            while f < fmax:
+                if sum(init) < 1e-7:
+                    init = arr([1e-7] + [0.]* (self.n_baryon-1) + [0.]) #All particles + mu_ch
+
+                out = eos.stepE_rho_f(f, init, len(init) + 1, iterations, self.C)
+                #len(out) = len(init) + 1 [for n_rho]
+
+                if i % (npoints / 20) == 0: print('.', end=' ')
+                rho.append(out.copy()[:-2]) ## 2 reserved for mu_c and n_c
+
+                # rho contains all scalar fields as well
+                rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
+                mu_e.append(out[-2])
+                mu_c.append(out[-2])
+                nc.append(out[-1])
+                # mu_n.append(self.mu(inv=1))
+                init = out[:-1]
+                _n = sum(init[:-1])
+                # print(f, init, _n)
+                nlist.append(_n)
+                if (_n > nmax * self.n0):
+                    break
 
 # Nafiga?
         #self.frange_inv = self.frange_inv[:len(self.nrange)]
@@ -3682,6 +3711,7 @@ class RhoDeltaOnly(DeltaOnly, Rho):
 class RhoDeltaPhiSigma(DeltaPhiSigma, Rho):
     def __init__(self, C, basefolder_suffix=''):
         super().__init__(C, basefolder_suffix=basefolder_suffix)
+        self.basefoldername = join(self.basefoldername, 'rcond')
         self.filenames['rcond'] = 'rcond_hyper_phi_sigma.dat'
         self.filenames['mass_crust'] = 'rc_masses_Hps.dat'
         self.filenames['n_rho'] = 'nr_dps.dat'
@@ -3717,6 +3747,57 @@ class RhoDeltaPhiSigma(DeltaPhiSigma, Rho):
         rcond = arr([self.nrange/self.n0, self.nc/self.nrange]).transpose()
         np.savetxt(join(self.foldername, self.filenames['rcond'])
                    ,rcond, fmt='%.8f')
+
+    def loadEos(self):
+        super().loadEos()
+
+        rcond = np.loadtxt(join(self.foldername, self.filenames['rcond']))
+        self.nc = self.nrange * rcond[:, 1]
+
+        mu_e = []
+        n_e = []
+        n_mu = []
+
+        grig = np.loadtxt(join(self.foldername, self.filenames['grig']),
+            skiprows=1)
+        mu_e = grig[:, 13]/self.m_pi
+        # print(mu_e)
+        # exit()
+
+        n_e = []
+        n_mu = []
+        for i, r in enumerate(self.rho):
+            # print(r)
+            # print(eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C))
+            # _mue = eos.mu(r, 1, self.C) - eos.mu(r, 2, self.C)
+            # mu_e.append(_mue)
+            _mue = mu_e[i]
+            if _mue > self.m_e:
+                n_e.append((_mue**2 - self.m_e**2)**(3./2) / (3 * pi **2))
+            else:
+                n_e.append(0.)
+            if _mue > self.m_mu:
+                n_mu.append((_mue**2 - self.m_mu**2)**(3./2) / (3*pi**2))
+            else:
+                n_mu.append(0.)
+
+        self.n_e = np.array(n_e)
+        self.n_mu = np.array(n_mu)
+
+        # print(self.n_e +self.n_mu - self.rho[:,2])
+        # exit()
+
+        self.mu_e = np.array(mu_e)
+        self.mu_c = np.array(mu_e)
+        self.n_e = np.array(n_e)
+        self.n_mu = np.array(n_mu)
+
+        # print(self.n_e +self.n_mu - self.rho[:,2])
+        # exit()
+
+        self.mu_e = np.array(mu_e)
+        self.mu_c = np.array(mu_e)
+
 
 
 class RccDeltaOnly(Rcc, DeltaOnly):
@@ -3867,11 +3948,11 @@ class Model(Wrapper):
 
     def getDeltaXs(self, U):
         i = 8
-        S, V = self.dumpPotentials()
+        S, V = self.getPots(self.n0)
         m = self.delta
-        iS = interp1d(m.nrange/m.n0, np.nan_to_num(S), kind='linear')
-        iV = interp1d(m.nrange/m.n0, np.nan_to_num(V), kind='linear')
-        xs_d = (U - self.delta_phi.C.X_o[i]*iV(1.))/iS(1.)
+        # iS = interp1d(m.nrange/m.n0, np.nan_to_num(S), kind='linear')
+        # iV = interp1d(m.nrange/m.n0, np.nan_to_num(V), kind='linear')
+        xs_d = (U - self.delta_phi.C.X_o[i]*V)/S
 
         return xs_d
 
@@ -4384,6 +4465,21 @@ class Model(Wrapper):
         with open(join(self.foldername, 'pot_sym.dat'), 'w') as f:
             f.write(table)
         return [arr(slist), arr(vlist)]
+
+    def getPots(self, n):
+        #We have to approach the density n from below gradually:
+        steps = 10
+        nrange = np.linspace(0, n, steps)
+        f = [0.]
+        for _n in nrange:
+            n_in = np.array([_n/2, _n/2])
+            f = eos.f_eq(n_in, np.array(f), 1, self.C)
+        
+        pots = eos.potentials(np.insert(n_in, 0, f), 5, self.C)
+        V = self.m_pi*self.C.X_o[0] * pots[2]
+        S = self.m_pi*(-self.C.M[0]) * (1 - self.C.phi_n(0, self.C.X_s[0]*self.C.M[0]/self.C.M[0]*f[0]))
+
+        return [S, V]
 
     def dumpUofE(self, show=False):
         nU = np.array([self.n0/2, self.n0/2])
