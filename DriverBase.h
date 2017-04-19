@@ -27,6 +27,7 @@ public:
 	virtual double EofP(double N) = 0;
 	virtual double EofN(double N) = 0;
 	virtual double PofN(double N) = 0;
+	virtual double PofE(double E) = 0;
 	double * lastNstar;
 	double * lastRstar;
 	double * lastMstar;

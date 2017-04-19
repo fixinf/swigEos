@@ -83,6 +83,8 @@ public:
 		this->set_hs_z(alpha, 8);
 		this->m_rho = 770./135.;
 		this->chi_r_prime = 0;
+		this->chi_r_prime_val = 1.;
+		this->phi_rho_alpha = 1.;
     this->f_branches = 0;
 	}
 	set_const(double, double, double, double, double);
@@ -109,12 +111,16 @@ public:
         return phi_n(1, f);
         break;
       default:
-        return 1.;
+        return chi_r_prime_val;
         break;
-
     }
 	}
 	
+	double phi_rho(double f){
+		return pow(1 - f, this->phi_rho_alpha);
+	}
+
+	double phi_rho_alpha;
 	double Cs;
 	double Co;
 	double Cr;
@@ -157,6 +163,7 @@ public:
 	double fmax;
 	bool hyper_sigma_kind;
 	int chi_r_prime;
+	double chi_r_prime_val;
 	//std::function<double(double)> phi_n;
 	//std::function<double(double)> eta_s;
 	//std::function<double(double)> eta_o;

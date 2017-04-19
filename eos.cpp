@@ -140,9 +140,9 @@ namespace calc{
 //		printf("mu[%i] res = %f \n", i, res);
 
 		///////////////Rho-condensate contribution//////////////
-    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_rho(f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
       (f)) *
-    		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+    		(1 - mu_c/(C->m_rho * C->phi_rho(f)));
 
     	if (fabs(sum_r) > n_rho/2){
     		res -= C->Cr / (pow(C->M[0],2.) * C->eta_r(f)) * (fabs(sum_r) - n_rho/2) * C->X_r[i] * C->T[i] *
@@ -446,9 +446,9 @@ namespace calc{
 		hx[1] = out[0];
 
 
-    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_rho(f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
       (f)) *
-    		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+    		(1 - mu_c/(C->m_rho * C->phi_rho(f)));
     	par->misc = 0.;
 
     	if (debug)
@@ -458,7 +458,7 @@ namespace calc{
 
 		if(fabs(sum_rho) > n_rho/2){
 			double r_c2 = (fabs(sum_rho) - n_rho/2) / (2 * C->m_rho * C->chi_prime(f) * sqrt(C->eta_r(f)));
-			n_c = 2 * C->m_rho * C->phi_n(0, f) * r_c2;
+			n_c = 2 * C->m_rho * C->phi_rho(f) * r_c2;
 
 			hx[0] -= n_c;
 
@@ -506,6 +506,8 @@ namespace calc{
 
 		delete[] n_in;
 	}
+
+
   
   void fun_n_eq_dsym(double * p, double * hx, int m, int k, void * adata){
       double n_d = p[0];
@@ -784,9 +786,9 @@ namespace calc{
 
 
 
-    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_rho(f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
       (f)) *
-    		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+    		(1 - mu_c/(C->m_rho * C->phi_rho(f)));
     	par->misc = 0.;
 
     	if (debug)
@@ -798,7 +800,7 @@ namespace calc{
 
 		if(fabs(sum_rho) > n_rho/2){
 			double r_c2 = (fabs(sum_rho) - n_rho/2) / (2 * C->m_rho * C->chi_prime(f) * sqrt(C->eta_r(f)));
-			n_c = 2 * C->m_rho * C->phi_n(0, f) * r_c2;
+			n_c = 2 * C->m_rho * C->phi_rho(f) * r_c2;
 
 			hx[0] -= n_c;
 
@@ -852,12 +854,12 @@ namespace calc{
 
 void fun_n_eq_rho_withf(double * p, double * hx, int m, int n, void * adata){
 	//input: {n_0, ..., n_numpart, f, mu_c}
-		bool debug = 1;
+		bool debug = 0;
 		fun_n_eq_params * par = (fun_n_eq_params *) adata;
 		set_const * C = par->C;
 		int sc = 1 + C->sprime;
 	    int num_part = m - 2; //actual num. of particles. p = [n_1, n_2, ..., n_num, mu_c]
-		printf("%i \n", num_part);
+		// printf("%i \n", num_part);
 		double n_sum = 0.0;
 		double n_n = par->n;
 		double * n_in = new double [num_part+2]; //input set for _E and mu
@@ -934,8 +936,8 @@ void fun_n_eq_rho_withf(double * p, double * hx, int m, int n, void * adata){
 
 		double fp = 0;
 		
-    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
-      (f)) * (1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_rho(f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+      (f)) * (1 - mu_c/(C->m_rho * C->phi_rho(f)));
     	par->misc = 0.;
 
     	if (debug)
@@ -946,7 +948,7 @@ void fun_n_eq_rho_withf(double * p, double * hx, int m, int n, void * adata){
 
 		if(fabs(sum_rho) > n_rho/2){
 			double r_c2 = (fabs(sum_rho) - n_rho/2) / (2 * C->m_rho * C->chi_prime(f) * sqrt(C->eta_r(f)));
-			n_c = 2 * C->m_rho * C->phi_n(0, f) * r_c2;
+			n_c = 2 * C->m_rho * C->phi_rho(f) * r_c2;
 			hx[0] -= n_c;
 			par->misc = n_c;
 		}
@@ -1097,9 +1099,9 @@ void fun_n_eq_rho_anal2(double * p, double * hx, int m, int n, void * adata){
 
 
 
-    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
+    	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_rho(f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime
       (f)) *
-    		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+    		(1 - mu_c/(C->m_rho * C->phi_rho(f)));
     	par->misc = 0.;
 
     	if (debug)
@@ -1111,7 +1113,7 @@ void fun_n_eq_rho_anal2(double * p, double * hx, int m, int n, void * adata){
 
 		if (fabs(sum_rho) > n_rho/2){
 			double r_c2 = (fabs(sum_rho) - n_rho/2) / (2 * C->m_rho * C->chi_prime(f) * sqrt(C->eta_r(f)));
-			n_c = 2 * C->m_rho * C->phi_n(0, f) * r_c2;
+			n_c = 2 * C->m_rho * C->phi_rho(f) * r_c2;
 
 			hx[0] -= n_c;
 
@@ -1365,9 +1367,9 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 		inplace[4] = part_om;
 	}
 	//rho
-	double gr = sqrt(C->Cr/C->eta_r((f)))*(C->m_rho* (1-f)) / C->M[0];
-	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_n(0, f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime(f)) *
-		(1 - mu_c/(C->m_rho * C->phi_n(0, f)));
+	// double gr = sqrt(C->Cr/C->eta_r((f)))*(C->m_rho* (1-f)) / C->M[0];
+	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_rho(f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime(f)) *
+		(1 - mu_c/(C->m_rho * C->phi_rho(f)));
 
 	double E_r =  C->Cr * sum_t3*sum_t3/(2.0*C->M[0]*C->M[0]*C->eta_r(f));
 	if (debug){
@@ -1811,14 +1813,6 @@ void stepE_rho_withf(double n, double * init, int initN, double * f_init, int di
 	double * ub = new double[m];
 	double * fun = new double[m];
 	double * scale = new double [m];
-  	double * D = new double[m]; //linear inequality constraints matrix
-  	double * b = new double[1]; //linear inequality rhs
-  	for (int i = 0; i < m; i++){
-		D[i] = -1;
-	}
-	D[m-1] = 0;
-	
-	b[0] = -n;
 
 	double info[LM_INFO_SZ];
 
@@ -1829,6 +1823,7 @@ void stepE_rho_withf(double n, double * init, int initN, double * f_init, int di
     	ub[i] = n;
 		scale[i] = 0.1;
 	}
+	
 	//boundaries for the f variables
 	lb[m-2] = 0;
 	ub[m-2] = 1.;
@@ -1838,13 +1833,17 @@ void stepE_rho_withf(double n, double * init, int initN, double * f_init, int di
 	//boundaries for the chem. potential
 	lb[m-1] = 0.;
   	ub[m-1] = C->M[0]/2;
-	x[m-1] = init[m-1];
+	x[m-1] = init[initN-1];
 	scale[m-1] = 1.;
 
 	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
 		opts[4]= -1e-5;
   	info[6] = 3;
-
+	printf("---------- %.2f \n", n);
+	for (int i = 0; i < m; i++){
+		printf("x[%i] = %.4f ", i, x[i]);
+	}
+	printf("\n");
 	dlevmar_bc_dif(calc::fun_n_eq_rho_withf, x, NULL, m, m, lb, ub, NULL, iter, opts, info, NULL, NULL, &p);
 
 	if (debug) {
@@ -1854,14 +1853,10 @@ void stepE_rho_withf(double n, double * init, int initN, double * f_init, int di
 		}
 		printf("\n");
 
-		printf("n = %f, n_p = %e", n, x[0]);
-		printf(",n_L = %e ", x[1]);
-		printf(",n_S- = %e ", x[2]);
-		printf(",n_S0 = %e ", x[3]);
-		printf(",n_S+ = %e ", x[4]);
-		printf(",n_X- = %e ", x[5]);
-		printf(",n_X0 = %e ", x[6]);
-		printf("\n");
+	for (int i = 0; i < m; i++){
+		printf("x[%i] = %.4f ", i, x[i]);
+	}
+	printf("\n");
 
 		calc::fun_n_eq_rho_withf(x, fun, m, m, &p);
 		for (int i = 0; i < m; i++){

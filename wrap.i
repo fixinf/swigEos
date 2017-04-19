@@ -3,6 +3,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include "KVOR.h"
+#include "fixedNF.h"
 #include "Walecka.h"
 #include "eos.h"
 #include "setconst.h"
@@ -45,6 +46,9 @@ namespace std{
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double * f_init, int dimF_init)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double * inplace, int dim_inplace)};
 %include "eos.h" 
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* init, int dimInit)};
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* out, int dimOut)};
+%include "fixedNF.h"
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* x, int dimX)};
 %include "setconst.h"
 %include "KVOR.h"

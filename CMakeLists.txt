@@ -29,6 +29,8 @@ set(SOURCE_FILES
     KVORmod.h
     KVORmod2.cpp
     KVORmod2.h
+    fixedNF.cpp
+    fixedNF.h
 #    KVORmodnos.cpp
 #    KVORmodnos.h
 #    linalg.cpp

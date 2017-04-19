@@ -24,7 +24,7 @@ int eq_volkov(double r, const double y[], double f[], void *params) {
 	double D = 2.9532;
 	double E1 = 1.479345850e-12;
 	if (debug)
-		printf("r :: %f P :: %f M :: %.e E :: %f \n", r, y[0], y[1], y[2]);
+		// printf("r :: %f P :: %f M :: %.e E :: %f \n", r, y[0], y[1], y[2]);
 	f[0] = -A * y[1] * y[2] / (r * r);
 	if (debug)
 		printf("f[0]:1 :: %f \n", f[0]);
@@ -346,7 +346,7 @@ void star_crust2(double rho_init, double* result, int dimResult, DriverBase* D, 
 		double ti = i * t1 / n_points;
 		if ((y[0] > delta * P_init)&&(D->NofP(y[0]) > nmin)) {
 			status = gsl_odeiv2_driver_apply(d, &t, ti, y);
-//				printf("r = %f n = %f nmin= %f P = %f \n", ti, D->NofP(y[0]), nmin, y[0]);
+				// printf("r = %f n = %f nmin= %f P = %f \n", ti, D->NofP(y[0]), nmin, y[0]);
 			if (status != GSL_SUCCESS) {
 				printf("error, return value=%d\n", status);
 				break;

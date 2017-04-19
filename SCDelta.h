@@ -309,6 +309,30 @@ public:
         }
 };
 
+
+class MKVOR_Rcut: public MKVOR_noRcut{
+public:
+	MKVOR_Rcut() : MKVOR_noRcut(){
+		bstar = 0;
+		fstar = 1.;
+		cstar = 0.2;
+	}
+
+	double fun_step(double x, double b){
+	return 0.5 * (1 + tanh(b * x));
+	}
+
+
+	double eta_r(double f){
+		return MKVOR_noRcut::eta_r(f) * 
+		(1 - fun_step(f - fstar, bstar)) + cstar * fun_step(f - fstar,bstar);
+	}
+
+	double bstar;
+	double fstar;
+	double cstar;
+};
+
 class MKVOR_tanh: public MKVOR_tail_poly4{
 public:
 	MKVOR_tanh():MKVOR_tail_poly4(){
