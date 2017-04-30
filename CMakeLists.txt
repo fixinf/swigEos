@@ -47,6 +47,8 @@ set(SOURCE_FILES
     Walecka.h
     MKVOR.cpp
     MKVOR.h
+    rc_free.cpp
+    rc_free.h
 )
 
 

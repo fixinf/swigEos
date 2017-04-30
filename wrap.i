@@ -17,6 +17,7 @@
 #include "InterpolatedScalings.h"
 #include "SCDelta.h"
 #include "MKVOR.h"
+#include "rc_free.h"
 //#include "easylogging.h"
 //INITIALIZE_EASYLOGGINGPP
 %}
@@ -46,6 +47,14 @@ namespace std{
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double * f_init, int dimF_init)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double * inplace, int dim_inplace)};
 %include "eos.h" 
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* in, int n)};
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* in, int n),(double* in2, int n2)};
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* n, int dimN)};
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* init, int dimInit)};
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double* out, int dimOut)};
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double * f_init, int dimF_init)};
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double * inplace, int dim_inplace)};
+%include "rc_free.h"
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* init, int dimInit)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* out, int dimOut)};
 %include "fixedNF.h"

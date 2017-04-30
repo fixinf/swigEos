@@ -2057,7 +2057,7 @@ void stepE_rho2(double n, double * init, int initN, double * f_init, int dimF_in
     D[i] = -1;
   }
   D[m-1] = 0;
-  
+
   b[0] = -n;
 
 	double info[LM_INFO_SZ];
@@ -2137,6 +2137,3 @@ void stepE_rho2(double n, double * init, int initN, double * f_init, int dimF_in
 	delete[] fun;
 	delete[] lb;
 }
-
-
-
