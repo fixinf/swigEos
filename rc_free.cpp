@@ -93,7 +93,7 @@ double E_rho_free(double * n, int dimN, double rc2, set_const * C, double *inpla
     double m_rho_eff = C->m_rho * C->phi_n(0, f);
 
 
-    E_r += m_rho_eff * m_rho_eff * rc2;
+    E_r += 2* m_rho_eff * m_rho_eff * rc2;
 
 
 	//phi
@@ -234,6 +234,57 @@ void fun_n_eq_free(double * p, double * hx, int m, int n, void * adata){
     //}
 }
 
+struct fun_n_eq_params_nfrc{
+	double n;
+	double f;
+	double rc2;
+	set_const * C;
+};
+
+void fun_n_eq_free_nfrc(double * p, double * hx, int m, int n, void * adata){
+    bool debug = 0;
+    fun_n_eq_params_nfrc * par = (fun_n_eq_params_nfrc *) adata;
+    set_const * C = par->C;
+
+    double * n_in = new double [3];
+    double f = par->f;
+	double np = p[0];
+    n_in[0] = f;
+    n_in[1] = par->n - np;
+    n_in[2] = np;
+
+    double rc2 = par->rc2;
+
+    double mu_n = mu(n_in, 3, 1, C);
+    double mu_p = mu(n_in, 3, 2, C);
+	
+    double mu_e = mu_n - mu_p;
+
+	if (rc2 > 0){
+		mu_e = C->m_rho * C->phi_n(0, f);
+	}
+
+	printf("mu_e = %.2f\n", mu_e);
+
+    double n_e = 0;
+    double n_mu = 0;
+    
+
+    if (mu_e * mu_e > m_e * m_e){
+        n_e += pow (mu_e * mu_e - m_e * m_e, 1.5) / (3 * pow(M_PI,2));
+    }
+
+    if (mu_e * mu_e > m_mu * m_mu){
+        n_mu += pow (mu_e * mu_e - m_mu * m_mu, 1.5) / (3 * pow(M_PI,2));
+    }
+
+	printf("n_C = %f\n", 2 * C->m_rho * C->phi_n(0, f) * rc2);
+
+    double Q = np - n_e - n_mu - 2 * C->m_rho * C->phi_n(0, f) * rc2 * (rc2 > 0);
+
+    hx[0] = Q;
+}
+
 void wrap_fun_free(double n_tot,
                    double * init, int initN, 
                    set_const * C, 
@@ -300,4 +351,61 @@ void step_free(double n, double * init, int initN, double * f_init, int dimF_ini
 	delete[] x;
 	delete[] fun;
 	delete[] lb;
+}
+
+double step_free_nfrc(double n, double np, double rc2, double f, int iter, set_const* C) {
+	double opts[5];
+	bool debug = 1;
+	fun_n_eq_params_nfrc p = {n, f, rc2, C};
+	int m = 1;
+	double * x = new double[m];
+	double * lb = new double[m];
+    double * ub = new double[m];
+    double * scale = new double[m];
+	double * fun = new double[m];
+	double info[LM_INFO_SZ];
+	//double x[3] = {v.n[0], v.n[1], v.f};
+
+	for (int i = 0; i < m; i++){
+		x[i] = np;
+		lb[i] = 0.0;
+        ub[i] = n;
+        scale[i] = 1.;
+//		if (i > 2) lb[i] = -100500.0;
+	}
+
+    scale[0] = 1;
+    //Upper limit for the f variable
+    ub[0] = 1.;
+    ub[2] = 10;
+
+
+	opts[0]= LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-55; opts[3]=1E-15;
+		opts[4]= -1e-5;
+	dlevmar_bc_dif(fun_n_eq_free_nfrc, x, NULL, m, m, lb, NULL, NULL, iter, opts, info, NULL, NULL, &p);
+//	dlevmar_dif(calc::fun_n_eq, x, NULL, m, m, 2000, opts, NULL, NULL, NULL, &p);
+
+	if (debug) {
+		printf("info: ");
+		for (int i = 0; i < LM_INFO_SZ; i++){
+			printf(" %i : %f ", i, info[i]);
+		}
+		printf("\n");
+
+		printf("n = %f, f = %f, rc2 = %f, x[0] = %f", n, f, rc2, x[0]);
+		printf("\n");
+
+		fun_n_eq_free_nfrc(x, fun, m, m, &p);
+		for (int i = 0; i < m; i++){
+			printf("f%i = %e  ", i, fun[i]);
+		}
+		printf("\n");
+	}
+	
+	// delete[] x;
+	double res = x[0];
+	delete[] x;
+	delete[] fun;
+	delete[] lb;
+	return res;
 }
