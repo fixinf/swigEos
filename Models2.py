@@ -825,7 +825,7 @@ def _Wal_d():
     C.f0 = 0.2
     return C
 
-def Wal_d(J0=None, f0=0.2):
+def Wal_d(J0=30, f0=0.2):
     return Model(_Wal_d, K0=250., J0=J0, f0=f0, basefolder_suffix='Walecka_Delta')
 
 
