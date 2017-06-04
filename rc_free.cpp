@@ -264,7 +264,7 @@ void fun_n_eq_free_nfrc(double * p, double * hx, int m, int n, void * adata){
 		mu_e = C->m_rho * C->phi_n(0, f);
 	}
 
-	printf("mu_e = %.2f\n", mu_e);
+	// printf("mu_e = %.2f\n", mu_e);
 
     double n_e = 0;
     double n_mu = 0;
@@ -278,7 +278,7 @@ void fun_n_eq_free_nfrc(double * p, double * hx, int m, int n, void * adata){
         n_mu += pow (mu_e * mu_e - m_mu * m_mu, 1.5) / (3 * pow(M_PI,2));
     }
 
-	printf("n_C = %f\n", 2 * C->m_rho * C->phi_n(0, f) * rc2);
+	// printf("n_C = %f\n", 2 * C->m_rho * C->phi_n(0, f) * rc2);
 
     double Q = np - n_e - n_mu - 2 * C->m_rho * C->phi_n(0, f) * rc2 * (rc2 > 0);
 
