@@ -147,7 +147,8 @@ class Wrapper(object):
             P = self._P2
             E = self._E2
             N = self.nrange
-        i_break = np.where(np.diff(P) < 0)[0][-1]
+        # i_break = np.where(np.diff(P) < 0)[0][-1]
+        i_break =  shift + np.where(np.diff(mu[shift:]) < 0)[0][-1]
         i_break_mu = shift + np.where(np.diff(mu[shift:]) < 0)[0][0]
         print(i_break, i_break_mu)
         b1 = np.array([mu[:i_break_mu], P[:i_break_mu], E[:i_break_mu], N[:i_break_mu]]).transpose()
@@ -169,7 +170,7 @@ class Wrapper(object):
         # print(mu_inter)
         i_eq = np.argmin(abs(ip1(mu_inter) - ip2(mu_inter)))
 
-        # print('i_eq = ', i_eq)
+        print('i_eq = ', i_eq)
         if mu_init is None:
             # mu_init = [mu[i_break]]
             mu_init = [mu_inter[i_eq]]
@@ -416,7 +417,7 @@ class Wrapper(object):
                 fname = self.filenames['mass_crust']+'_'+inter
             with open(join(self.foldername, fname), 'w') as f:
                 f.write(table)
-        # return out
+        return out
 
     def dumpMasses(self, nmin=.4, nmax=5., npoints=100, write=True, fname=None, ret_frac=True):
         self.check()
@@ -460,14 +461,6 @@ class Wrapper(object):
             self.check(nrange=self.nrange)
             E, N, P, e, finalE, finalN, finalP, n, p = self.setCrust(inter,
             ncut_crust, ncut_eos)
-            # gradP = np.gradient(finalP)
-            # for _i, _n in enumerate(finalN):
-            #     if gradP[_i] < 0:
-            #         print(_n, gradP[_i])
-            # plt.plot(finalN, finalP)
-            # # plt.plot(finalN, np.gradient(finalE))
-            # plt.show()
-            # print(finalN)
             self.md.setEos(finalN, finalE, finalP)
             # exit()
         else:
@@ -475,29 +468,7 @@ class Wrapper(object):
             finalN = self.md.N
             finalP = self.md.P
 
-        # plt.plot(n, arr(p)/self.m_pi**4, label='crust')
-        # plt.plot(crust[:,2], arr(crust[:, 1]), label='crust_whole')
-        # plt.plot(N, arr(P)/self.m_pi**4, label='eos')
-        # plt.plot(finalN, finalP, label='interp')
-        # plt.legend()
-        # plt.xlabel('n/n_0')
-        # plt.ylabel('P [m_\pi^4]')
-        # plt.xlim([0, 1])
-        # plt.ylim([0., 0.05])
-        # plt.show()
-
         mpi2km = 5.7202e-5
-        # np.savetxt('EPkm2_KVOR06.dat',
-        #            np.array([finalN, mpi2km*finalE, mpi2km*finalP]).transpose(), fmt='%.6e', header='n/n0  E  P')
-
-        # np.savetxt('EPmpi4_KVOR06.dat',
-        #            np.array([finalN, finalE, finalP]).transpose(), fmt='%.6e', header='n/n0  E  P')
-
-        # plt.plot(finalE, finalE)
-        # plt.show()
-        #
-        # plt.plot(np.diff(finalE))
-        # plt.show()
 
         finalN_low, finalE, finalP = self.md.rawN, self.md.rawE, self.md.rawP
         finalN_low, finalE, finalP = self.md.N, self.md.E, self.md.P
@@ -505,12 +476,8 @@ class Wrapper(object):
         for i, e in enumerate(finalE[1:]):
             if finalE[i-1] > e:
                 print(i)
-        # plt.plot(finalE)
-        # plt.plot(finalP)
-        # plt.plot(finalN_low)
-        # plt.show()
         self.dr = eos.KVDriver(finalE, finalP, finalN_low*self.n0)
-        # exit()
+
         if show:
             drE = arr([self.dr.EofN(z) for z in finalN*self.n0])
             drP = arr([self.dr.PofN(z) for z in finalN*self.n0])
@@ -573,8 +540,9 @@ class Wrapper(object):
 
 
         for _n in n_stars:
-            print(_n/self.n0)
-            MR.append(eos.star_crust2(_n, 3, self.dr, 1e-10))
+            mr = eos.star_crust2(_n, 3, self.dr, 1e-10)
+            print(_n/self.n0, mr)
+            MR.append(mr)
             lastN = self.dr.getLastN(self.dr.nSize)[:-1]
             lastR = self.dr.getLastR(self.dr.nSize)[:-1]
             lastM = self.dr.getLastM(self.dr.nSize)[:-1]
@@ -727,7 +695,7 @@ class Wrapper(object):
         # e = []
         # p = []
         # n = []
-        with open("/home/const/workspace/swigEos/crust.dat", 'r') as f:
+        with open("/home/const/Numerics/swigEos/crust.dat", 'r') as f:
             for line in f:
                 # print line
                 _e, _p, _n = line.split()
@@ -735,7 +703,7 @@ class Wrapper(object):
                     e.append(float(_e))
                     p.append(float(_p))
                     n.append(float(_n))
-        crust = np.loadtxt("/home/const/workspace/swigEos/crust.dat")
+        crust = np.loadtxt("/home/const/Numerics/swigEos/crust.dat")
         crust[:, 0] /= self.m_pi ** 4
         crust[:, 1] /= self.m_pi ** 4
         # np.savetxt('crust_export.dat', crust)
@@ -2633,6 +2601,12 @@ class Rho(Wrapper):
         self.set = True
 
 
+    def reset_from_inv(self, nmax_inv = 4., nmax=8., npoints_inv=1000, npoints_add=1000):
+        self.reset_inv(nmax=nmax_inv, npoints=npoints_inv)
+        n_init = self.nrange_inv
+        f_init = self.rho_inv[:, 0]
+        init = np.insert(self.rho_inv[:, 2:], self.rho_inv.shape[1]-2, self.mu_e_inv[:], axis=1)
+        self.reset_from_init(n_init, f_init=f_init, init_vals=init, nmax=nmax, npoints=npoints_add)
 
     def needsMaxwInv(self):
         self.check()

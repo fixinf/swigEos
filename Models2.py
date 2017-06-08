@@ -1339,3 +1339,61 @@ def MKVOR_tanh_join(amp, _join):
     return M
 
  
+def _MKVOR_phi_rho(a, width, f, b):
+    ################# Copied from _MKVOR_tail_poly4 ####################
+    C = eos.MKVORs_phicut()
+    C.Cs = 234.1472066994
+    C.Co = 134.8845385898
+    C.Cr = 81.8421168107
+    C.b = 0.0046749526
+    C.c = -0.0029742081
+    C.f0 = 0.27
+    C.d = -0.5
+    C.alpha = 0.4
+    C.z = 0.65
+
+    C.a_om = 0.11
+    C.b_om = 7.1
+    C.f_om = 0.9
+
+    C.beta = 3.11
+    C.gamma = 28.4
+    C.f_r = 0.522
+    C.a_r0 = 0.448
+    C.a_r1 = -0.614
+    C.a_r2 = 3.
+    C.a_r3 = 0.8
+    C.d_r = -4.
+    C.e_r = 6.
+
+    C.fcut_rho = 0.62
+    C.acut_rho, C.bcut_rho, C.c_cut_rho = (0.5859623173610193, 4.729785161812114, 6.642915417642516)
+
+    C.d_cut_rho = 0
+    C.e_cut_rho = 0
+
+    C.tail_mult_om = 0.2299
+    C.acut_om = 5.515
+    C.bcut_om = 100
+    C.fcut_om = 0.95
+
+    C.SetHyperConstants(2)
+
+#################### Copied from _MKVOR_poly1 ########################
+    C.d_cut_rho = -10.
+    C.e_cut_rho = 0
+
+################### New params #####################
+    C.phi_r_f = f
+    C.phi_r_width = width
+    C.phi_r_a = a
+    C.phi_r_b = b
+
+    return C
+
+def MKVOR_phi_rho(a=0.5, width=0.05, f=0.3, b=0.435):
+    def __MKVOR_phi_rho():
+        return _MKVOR_phi_rho(a, width, f, b)
+    __MKVOR_phi_rho.__name__ = __MKVOR_phi_rho.__name__ + "a=%.2f_w=%.2f_f=%.2f_b=%.2f"%(a, width, f, b)
+    M = Model(__MKVOR_phi_rho)
+    return M
