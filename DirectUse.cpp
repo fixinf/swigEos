@@ -197,8 +197,9 @@ void testStepRhoInv(){
 	double f_init = C->f0;
 	double init[3] = {C->n0, 0.1, 0.5};
 	double res[3];
+    double info[13];
 	for (int j = 0; j < 10; j++){
-		stepE_rho_f(C->f0 + 0.01*j, init, 3, res, 3, 30, C);
+		stepE_rho_f(C->f0 + 0.01*j, init, 3, res, 3, 30, C, info, 13);
 		for (int i = 0; i < 3; i++){
 			printf("res[%i] = %.6f, ", i, res[i]);
 		}
@@ -213,8 +214,9 @@ void testRangeRhoInvHyper(){
 	double f_init = C->f0;
 	double init[3] = {C->n0, 0.1, 0.5};
 	double res[3];
+    double info[13];
 	for (int j = 0; j < 10; j++){
-	stepE_rho_f(C->f0 + 0.01*j, init, 3, res, 3, 30, C);
+	stepE_rho_f(C->f0 + 0.01*j, init, 3, res, 3, 30, C, info, 13);
 	for (int i = 0; i < 3; i++){
 		printf("res[%i] = %.6f, ", i, res[i]);
 	}

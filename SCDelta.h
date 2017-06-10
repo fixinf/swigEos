@@ -292,6 +292,27 @@ public:
 	double tail_mult_om;
 };
 
+
+class MKVORs_phicut: public MKVOR_tail_poly4{
+public:
+	MKVORs_phicut() : MKVOR_tail_poly4(){
+		phi_r_f = 100;
+		phi_r_width = 1000;
+		phi_r_a = 0;
+		phi_r_b = 0;
+	}	
+
+	double phi_rho(double f){
+		double step = 0.5 * (1 + tanh((f - phi_r_f)/phi_r_width));
+		return (1-f) * (1-step) + (phi_r_a + pow(1-f, 2)*phi_r_b) * step;
+	}
+
+	double phi_r_b;
+	double phi_r_f;
+	double phi_r_width;
+	double phi_r_a;
+};
+
 class MKVOR_noRcut : public MKVOR_tail_poly4{
 public:
         MKVOR_noRcut(): MKVOR_tail_poly4(){

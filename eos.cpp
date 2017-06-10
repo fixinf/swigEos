@@ -422,8 +422,8 @@ namespace calc{
 		if (debug)
 			printf("sum %f sum_ch %f sum_o %f sum_rho %f \n", sum, sum_ch, sum_o, sum_rho);
 
-		double mu_n = mu_rho(n_in, m + sc, sc + 0, mu_c, C);
-		double mu_p = mu_rho(n_in, m + sc, sc + 1, mu_c, C);
+		double mu_n = mu_rho(n_in, m, sc + 0, mu_c, C);//!!!!
+		double mu_p = mu_rho(n_in, m, sc + 1, mu_c, C);//!!!
 		double mu_e = mu_n - mu_p;
 		if (debug){
 			for (int i = 0; i < m + sc; i++){
@@ -503,6 +503,22 @@ namespace calc{
 			printf("\n");
 		}
 
+	for (int j = 0; j < m; j++){
+		if (!finite(hx[j])){
+			printf("Function[%i] infinite! f = %.6e \n", j, f);
+			for (int i = 0; i < m; i++) printf("p[%i] = %.6e ",i, p[i]);
+			printf("\n");
+			for (int i = 0; i < m; i++) printf("hx[%i] = %.6e ",i, hx[i]);
+			printf("\n");
+			printf("sum %f sum_ch %f sum_o %f sum_rho %f \n", sum, sum_ch, sum_o, sum_rho);
+			for (int i = 0; i < m; i++){
+				printf("n_in[%i] = %.6f ", i, n_in[i]);
+			}
+			printf("\n");
+			printf("%f %f %f\n" ,mu_n, mu_p, sum_ch);
+			printf("n_rho = %.6f, sum_rho = %.6f \n", n_rho, sum_rho);
+		}
+	}
 
 		delete[] n_in;
 	}
@@ -1357,7 +1373,7 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 			sum_p += n[i]*C->X_p[i-sc];
 		}
 	}
-	//omega
+	
 	double part_om = C->Co * sum*sum/(2.0*C->M[0]*C->M[0]*C->eta_o(f));
 	res += part_om;
 	if (debug){
@@ -1366,8 +1382,7 @@ double E_rho(double * n, int dimN, double mu_c, set_const * C, double *inplace, 
 	if (ret_parts){
 		inplace[4] = part_om;
 	}
-	//rho
-	// double gr = sqrt(C->Cr/C->eta_r((f)))*(C->m_rho* (1-f)) / C->M[0];
+	
 	double n_rho = 2 * C->m_rho * pow(C->M[0]*C->phi_rho(f),2.)* sqrt(C->eta_r(f)) / (C->Cr * C->chi_prime(f)) *
 		(1 - mu_c/(C->m_rho * C->phi_rho(f)));
 
@@ -1874,29 +1889,24 @@ void stepE_rho_withf(double n, double * init, int initN, double * f_init, int di
 	delete[] lb;
 }
 
-void stepE_rho_f(double f, double * init, int initN, double * out, int dim_Out, int iter, set_const* C) {
+void stepE_rho_f(double f, double * init, int initN, double * out, int dim_Out, 
+	int iter, set_const* C, double * info_out, int dimInfo){
 	double opts[5];
-	bool debug = 1;
+	bool debug = 0;
 	calc::fun_n_eq_f_params p = {C, f, 0.0};
 	int m = initN;
 	double * x = new double[m];
 	double * lb = new double[m];
-	double * ub = new double[m];
 	double * fun = new double[m];
-	double * scale = new double [m];
 
 	double info[LM_INFO_SZ];
 
-	for (int i = 0; i < m-1; i++){
+	for (int i = 0; i < m; i++){
 		x[i] = init[i];
 		lb[i] = 0.0;
-		scale[i] = 1.;
 	}
-	lb[m-1] = 0.;
-	x[m-1] = init[m-1];
-	scale[m-1] = 1.;
 
-	opts[0]= 1e-2*LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-25; opts[3]=1E-12;
+	opts[0]= LM_INIT_MU; opts[1]=1E-16; opts[2]=1E-16; opts[3]=1E-16;
 		opts[4]= -1e-5;
   info[6] = 3;
 
@@ -1907,7 +1917,7 @@ void stepE_rho_f(double f, double * init, int initN, double * out, int dim_Out, 
 		}
 		printf("\n");
   	}
-	dlevmar_bc_dif(calc::fun_n_eq_f_rho, x, NULL, m, m, lb, NULL, scale, iter, opts, info, NULL, NULL, &p);
+	dlevmar_bc_dif(calc::fun_n_eq_f_rho, x, NULL, m, m, lb, NULL, NULL, iter, opts, info, NULL, NULL, &p);
 
 	if (debug) {
 		printf("info: ");
@@ -1932,14 +1942,20 @@ void stepE_rho_f(double f, double * init, int initN, double * out, int dim_Out, 
 		out[i] = x[i];
 	}
 	if (dim_Out > m) out[m] = p.misc;
+
+	for (int i = 0; i < LM_INFO_SZ; i++){
+		info_out[i] = info[i];
+	}
+
+	for (int i = 0; i < m; i++){
+		info_out[LM_INFO_SZ + i] = fun[i];
+	}
 //	printf("return\n");
 	delete[] x;
 //	printf("deleted x\n");
 	delete[] fun;
 //	printf("deleted fun\n");
 	delete[] lb;
-	delete[] ub;
-	delete[] scale;
 //	printf("deleted lb\n");
 }
 
@@ -1977,6 +1993,18 @@ void wrap_fun_rho(double * n, int dimN, set_const * C, double * out, int dim_Out
   calc::fun_n_eq_params p = {C, ntot, finit, 1,  0.};
   calc::fun_n_eq_rho_anal(n_in, out, dimN-2, dimN-2, &p);
   delete[] n_in;
+  return;
+}
+
+void wrap_fun_rho_f(double f, double * n, int dimN, double mu, set_const * C, double * out, int dim_Out){
+  calc::fun_n_eq_f_params p = {C, f, 0.0};
+  double * x = new double[dimN + 1];
+  for (int i = 0; i < dimN; i++){
+	  x[i] = n[i]; 
+  }
+  x[dimN] = mu;
+  calc::fun_n_eq_f_rho(x, out, dimN+1, dimN+1, &p);
+  delete[] x;
   return;
 }
 

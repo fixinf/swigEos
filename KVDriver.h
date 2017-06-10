@@ -43,27 +43,20 @@ public:
 	double EofN(double);
 	double dEofN(double);
 	double PofN(double);
-	double PofE(double);
 	int lookFor(double * src, int dim_src, double what);
 	void set(double * E, int dimE, double * P, int dimP, double * n, int dimN);
-	void calculateN();
-	double * proper_N;
-
 private:
 	gsl_spline * iNofE;
 	gsl_spline * iNofP;
 	gsl_spline * iEofP;
 	gsl_spline * iEofN;
 	gsl_spline * iPofN;
-	gsl_spline * iPofE;
 
 	gsl_interp_accel * accNofE;
 	gsl_interp_accel * accNofP;
 	gsl_interp_accel * accEofP;
 	gsl_interp_accel * accEofN;
 	gsl_interp_accel * accPofN;
-	gsl_interp_accel * accPofE;
-
 
 	std::string name;
 	string fname;

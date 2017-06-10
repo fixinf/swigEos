@@ -98,6 +98,9 @@ public:
 	double dU(double);
 	void set_name(std::string name);
 	virtual double phi_n(int, double) = 0;
+	virtual double phi_rho(double f){
+		return pow(1 - f, this->phi_rho_alpha);
+	}
 	virtual double eta_s(double) = 0;
 	virtual double eta_o(double) = 0;
 	virtual double eta_r(double) = 0;
@@ -114,10 +117,6 @@ public:
         return chi_r_prime_val;
         break;
     }
-	}
-	
-	double phi_rho(double f){
-		return pow(1 - f, this->phi_rho_alpha);
 	}
 
 	double phi_rho_alpha;

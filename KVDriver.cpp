@@ -12,7 +12,6 @@
 //#include <fstream>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_integration.h>
 #include <iostream>
 
 
@@ -39,10 +38,6 @@ double KVDriver::NofE(double E){
 
 double KVDriver::EofP(double P){
 	return gsl_spline_eval(iEofP, P, accEofP);
-}
-
-double KVDriver::PofE(double E){
-	return gsl_spline_eval(iPofE, E, accPofE);
 }
 
 void interp_error_handler(const char * reason,
@@ -108,85 +103,34 @@ void KVDriver::set(double * E, int dimE, double * P, int dimP, double * n, int d
 		delete accEofP;
 		delete iPofN;
 		delete accPofN;
-		delete iPofE;
-		delete accPofE;
-		delete proper_N;
 	}
-	const gsl_interp_type * kind = gsl_interp_linear;
-
-	count = dimN;
-	this->E = E;
-	this->P = P;
-	this->n = n;
-	accEofP = gsl_interp_accel_alloc();
-	iEofP = gsl_spline_alloc(kind, dimN);
-	gsl_spline_init(iEofP, P, E, dimN);
-
-	accPofE = gsl_interp_accel_alloc();
-	iPofE = gsl_spline_alloc(kind, dimN);
-	gsl_spline_init(iPofE, E, P, dimN);
-
-	// cout << "Set!" << endl;
-
-	calculateN();
-
-	accPofN = gsl_interp_accel_alloc();
-	iPofN = gsl_spline_alloc(kind, dimN);
-	gsl_spline_init(iPofN, proper_N, P, dimN);
-
 	accEofN = gsl_interp_accel_alloc();
-	iEofN = gsl_spline_alloc(kind, dimN);
-	gsl_spline_init(iEofN, proper_N, E, dimN);
-
+	iEofN = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iEofN, n, E, dimN);
+	cout << "E spline init" << endl;
 	accNofE = gsl_interp_accel_alloc();
-	iNofE = gsl_spline_alloc(kind, dimN);
-	gsl_spline_init(iNofE, E, proper_N, dimN);
+	iNofE = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iNofE, E, n, dimN);
 
 
 	accNofP = gsl_interp_accel_alloc();
-	iNofP = gsl_spline_alloc(kind, dimN);
-	gsl_spline_init(iNofP, P, proper_N, dimN);
+	iNofP = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iNofP, P, n, dimN);
+
+
+	accEofP = gsl_interp_accel_alloc();
+	iEofP = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iEofP, P, E, dimN);
+
+
+	accPofN = gsl_interp_accel_alloc();
+	iPofN = gsl_spline_alloc(gsl_interp_cspline, dimN);
+	gsl_spline_init(iPofN, n, P, dimN);
 	this->isSet = 1;
-}
-
-double properN_func(double x, void * params){
-	DriverBase * dr = (DriverBase*) params;
-	return 1/(x + dr->PofE(x));
-}
-
-void KVDriver::calculateN(){
-	gsl_integration_workspace * w 
-    = gsl_integration_workspace_alloc (1000);
-  
-  double result, error;
-  double expected = -4.0;
-  double alpha = 1.0;
-
-  gsl_function F;
-  F.function = &properN_func;
-  F.params = this;
-
-// The following is stupid. but I don't want to intepolate
-  int i1 = 0;
-  for (int i = 0; i < count; i++){
-	  if (this->n[i] > 0.75){
-		  i1 = i;
-		  break;
-	  }
-  }
-
-  double E1 = E[i1];
-  printf("%i, %.6f \n", i1, E1);
-  this->proper_N = new double[count];
-  proper_N[0] = 0.;
-  for (int i = 1; i < count; i++){
-	printf("%i \n", i);
-	gsl_integration_qags (&F, E1, this->E[i], 1e-7, 1e-5, 1000,
-                        w, &result, &error);
-	proper_N[i] = this->n[i1] * exp(result);
-  }
+	cout << "Set!" << endl;
 }
 
 KVDriver::~KVDriver() {
 
 }
+

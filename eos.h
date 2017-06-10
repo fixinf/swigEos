@@ -33,7 +33,8 @@ extern void stepE_rho_withf(double n, double * init, int dimInit, double * f_ini
 extern void stepE_rho2(double n, double * init, int dimInit, double * f_init, int dimF_init,
 		double * out, int dimOut, int iter, double mu_init, set_const *);
 
-void stepE_rho_f(double f, double * init, int dimInit, double * out, int dimOut, int iter, set_const* C);
+extern void stepE_rho_f(double f, double * init, int dimInit, double * out, int dimOut,
+	int iter, set_const* C, double * info, int dimInfo);
 
 
 void potentials(double * n, int dimN, double * out, int dimOut, set_const * C);
@@ -79,6 +80,7 @@ extern void solveF(double n, double E, double P, double * init, int dimInit, dou
 extern void wrap_fun(double * n, int dimN, set_const * C, double * out, int dimOut);
 extern void wrap_fun_np_f(double nn, double np, double f, set_const * C, double * out, int dimOut);
 extern void wrap_fun_rho(double * n, int dimN, set_const * C, double * out, int dimOut);
+extern void wrap_fun_rho_f(double f, double * n, int dimN, double mu, set_const * C, double * out, int dimOut);
 extern double wrap_fun_dsym_f(double n, double nd, double f_init, set_const * C);
 extern double wrap_fun_dsym(double n, double nd, double f_init, set_const * C);
 
