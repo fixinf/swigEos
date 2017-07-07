@@ -27,6 +27,19 @@ def P_n(obj):
     xlabel = r'$n/n_0$'
     set_labels(obj, xlabel, ylabel)
 
+def Phir_f(obj):
+    ylabel = r'\Phi_\rho(f)'
+    xlabel = r'f'
+    xlim = [0, 1]
+    set_labels(obj, xlabel, ylabel, xlim)
+
+def E_f(obj):
+    ylabel = r'$E(n, f) / E(n, 0)$'
+    xlabel = r'$f$'
+    # ylim = [-10, 10]
+    # xlim = [0, 1]
+    set_labels(obj, xlabel, ylabel)
+
 def D_f(obj):
     ylabel = r'$D(f), \, m_\pi^4$'
     xlabel = r'$f$'
@@ -34,7 +47,7 @@ def D_f(obj):
     xlim = [0, 1]
     set_labels(obj, xlabel, ylabel)
     set_lim(obj, xlim, ylim)
-    
+
 def Conc_n(obj):
     ylabel = r'$n_i/n$'
     xlabel = r'$n/n_0$'
@@ -48,5 +61,15 @@ def M_n(obj):
     xlabel = r'$n_{\rm cen}/n_0$'
     ylim = None
     xlim = None
+    set_labels(obj, xlabel, ylabel)
+    set_lim(obj, xlim, ylim)
+
+def Etar_f(obj):
+    ylabel = r'$\eta_\rho(f)$'
+    xlabel = r'$f$'
+    ylim = None
+    xlim = [0, 1]
+    ylim = None
+    xlim = [0, 1]
     set_labels(obj, xlabel, ylabel)
     set_lim(obj, xlim, ylim)

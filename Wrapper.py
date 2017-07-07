@@ -247,7 +247,7 @@ class Wrapper():
         e = []
         p = []
         n = []
-        with open("/home/const/workspace/swigEosWrapper/crust.dat", 'r') as f:
+        with open("./crust.dat", 'r') as f:
             for line in f:
                 # print line
                 _e, _p, _n = line.split()

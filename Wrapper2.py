@@ -80,9 +80,11 @@ class Wrapper(object):
     def getDuCrit(self):
         self.check()
         nc = 8 * self.n0
+        solve = 0
         for i, _n in enumerate(self.nrange):
             if eos.p_f(self.rho[i, 1], 0.5) < eos.p_f(self.rho[i, 2], 0.5) + eos.p_f(self.n_e[i], 0.5):
                 nc = _n
+                solve = 1
                 break
         # out = self.dumpMassesCrust(write=0)
         try:
@@ -90,7 +92,20 @@ class Wrapper(object):
         except FileNotFoundError:
             out = np.loadtxt(join(self.foldername, self.filenames['mass_crust'])+'_linear', skiprows=1)
         iM = interp1d(out[:, 0], out[:, 1])
-        print(nc/self.n0)
+
+        iPfn = interp1d(self.nrange, 
+               [eos.p_f(r, 0.5) for r in self.rho[:, 1]])
+
+        iPfp = interp1d(self.nrange, 
+               [eos.p_f(r, 0.5) for r in self.rho[:, 2]])
+
+        iPfe = interp1d(self.nrange, 
+               [eos.p_f(r, 0.5) for r in self.n_e])
+        
+        from scipy.optimize import root
+        if solve:
+            root = root(lambda z: iPfn(z) - iPfp(z) - iPfe(z), nc, )
+            nc = root.x
         Mc = iM(nc/self.n0)
         return [nc, Mc]
 
@@ -137,8 +152,9 @@ class Wrapper(object):
         return n_crit, n_cr, n_DU/self.n0, m_DU, [nmax, mmax, rmax], [n15, m15, r15]
         
 
-    def processMaxw(self, mu_init=None, show=0, branch_3=0, shift=0):
-        mu = np.nan_to_num(self.mu(branch_3=branch_3)[:, 0])
+    def processMaxw(self, mu_init=None, show=0, branch_3=0, shift=0, verbose=0, mu=None):
+        if mu is None:
+            mu = np.nan_to_num(self.mu(branch_3=branch_3)[:, 0])
         if not branch_3:
             P = self._P
             E = self._E
@@ -150,12 +166,19 @@ class Wrapper(object):
         # i_break = np.where(np.diff(P) < 0)[0][-1]
         i_break =  shift + np.where(np.diff(mu[shift:]) < 0)[0][-1]
         i_break_mu = shift + np.where(np.diff(mu[shift:]) < 0)[0][0]
-        print(i_break, i_break_mu)
+        if verbose: print(i_break, i_break_mu)
         b1 = np.array([mu[:i_break_mu], P[:i_break_mu], E[:i_break_mu], N[:i_break_mu]]).transpose()
         b2 = np.array([mu[i_break+1:], P[i_break+1:], E[i_break+1:], N[i_break+1:]]).transpose()
+        # for a in [mu[i_break+1:], P[i_break+1:], E[i_break+1:], N[i_break+1:]]:
+            # print(a.shape, a.dtype)
+        # print([mu[:i_break_mu], P[:i_break_mu], E[:i_break_mu], N[:i_break_mu]])
+        # print([mu[i_break+1:], P[i_break+1:], E[i_break+1:], N[i_break+1:]])
+        # return b1, b2
         # kind = 'cubic'
         kind = 'linear'
         # print(b1)
+        # print(b2)
+        # print(b1.shape, b2.shape)
         ip1 = interp1d(b1[:, 0], b1[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ip2 = interp1d(b2[:, 0], b2[:, 1], bounds_error=0, fill_value=0., kind=kind)
         ie1 = interp1d(b1[:, 0], b1[:, 2], bounds_error=0, fill_value=0., kind=kind)
@@ -170,11 +193,11 @@ class Wrapper(object):
         # print(mu_inter)
         i_eq = np.argmin(abs(ip1(mu_inter) - ip2(mu_inter)))
 
-        print('i_eq = ', i_eq)
+        if verbose: print('i_eq = ', i_eq)
         if mu_init is None:
             # mu_init = [mu[i_break]]
             mu_init = [mu_inter[i_eq]]
-            print('mu_init = ', mu_init)
+            if verbose: print('mu_init = ', mu_init)
         if show:
             plt.plot(mu_inter, ip1(mu_inter))
             plt.plot(mu_inter, ip2(mu_inter))
@@ -186,20 +209,26 @@ class Wrapper(object):
             plt.plot(b2[:, 0], b2[:, 1])
             plt.show()
         mu_eq = root(lambda z: ip1(z) - ip2(z), mu_init, tol=1e-6).x
-        print('mu_eq = ', mu_eq)
+        if verbose: print('mu_eq = ', mu_eq)
         P_eq = ip1(mu_eq)
         P_eq2 = ip2(mu_eq)
-        print('P_eq = ', P_eq, 'P_eq2 = ', P_eq2)
-        print('E1 = ', ie1(mu_eq))
-        print('E2 = ', ie2(mu_eq))
+        if verbose: 
+            print('P_eq = ', P_eq, 'P_eq2 = ', P_eq2)
+            print('E1 = ', ie1(mu_eq))
+            print('E2 = ', ie2(mu_eq))
         n1 = in1(mu_eq)
         n2 = in2(mu_eq)
-        print('n1 = %.6f, n2 = %.6f' %(n1/self.n0, n2/self.n0))
-        print('E1 = ', (ie1(mu_eq)/n1 - self.C.M[0]) * self.m_pi)
-        print('E2 = ', (ie2(mu_eq)/n2 - self.C.M[0]) * self.m_pi)
+        if verbose: 
+            print('n1 = %.6f, n2 = %.6f' %(n1/self.n0, n2/self.n0))
+            print('E1 = ', (ie1(mu_eq)/n1 - self.C.M[0]) * self.m_pi)
+            print('E2 = ', (ie2(mu_eq)/n2 - self.C.M[0]) * self.m_pi)
 
         p1 = np.array([p for p in b1[:, 1] if p < P_eq])
         p2 = np.array([p for p in b2[:, 1] if p > P_eq])
+
+        mu1 = np.array([mu for mu in b1[:, 0] if mu < mu_eq])
+        mu2 = np.array([mu for mu in b2[:, 0] if mu > mu_eq])
+
         n1 = b1[:len(p1), 3]
         n2 = b2[(len(b2[:, 1]) - len(p2)):, 3]
 
@@ -209,10 +238,12 @@ class Wrapper(object):
         p_total = np.concatenate((p1, p2))
         n_total = np.concatenate((n1, n2))
         e_total = np.concatenate((e1, e2))
+        mu_total = np.concatenate((mu1, mu2))
 
         self.nrange_maxw = n_total
         self._P_maxw = p_total
         self._E_maxw = e_total
+        self.mu_maxw = mu_total
 
 
 
@@ -398,12 +429,17 @@ class Wrapper(object):
 
 
     def dumpMassesCrust(self, nmin=0.4, nmax=None, npoints=100, write=True, fname=None, ret_frac=False):
-        # self.check()
         inter = 'linear'
         if nmax == None:
             nmax = 10.5*self.n0
-        if any(np.diff(self._P) < 0):
-            self.processMaxw()
+        if self.needsMaxw() and not (hasattr(self, 'nrange_maxw')):
+            raise ValueError('Maxwell construction inside dumpMassesCrust is deprecated, prepare the EoS explicitly instead!')
+            # self.processMaxw()
+            # if any(np.diff(self._P_maxw) < 0) or any(np.diff(self.nrange_maxw) < 0):
+            #     raise ValueError('EoS still non-monotonous after Maxwell construction, check the solution!')
+            # else:
+            #     self.switch_maxw()
+        
         out = self.stars_crust(nmin=nmin, nmax=nmax, npoints=npoints, ret_frac=ret_frac, inter=inter,
             show=0)
         out[0] /= self.n0
@@ -450,19 +486,21 @@ class Wrapper(object):
 
     def stars_crust(self, ncut_crust=0.45, ncut_eos=0.7, inter='linear',
             n_stars=None, nmin=.6, nmax=5.0, npoints=50,
-                    crust="crust.вутыdat", show=False, crustName=None,
+                    crust="crust.dat", show=False, crustName=None,
                     ret_frac=False, fasthyp=False, neutron=0, ret_i=0, force_reset=0):
         neos = self.npoints
         if nmax > max(self.nrange):
             nmax = max(self.nrange)
         if n_stars is not None:
             nmax = n_stars[-1]  # TODO too dirty workaround
+
+        # print('in stars_crust')
         if not np.all([self.md.E, self.md.N, self.md.P]) or force_reset:
             self.check(nrange=self.nrange)
             E, N, P, e, finalE, finalN, finalP, n, p = self.setCrust(inter,
             ncut_crust, ncut_eos)
             self.md.setEos(finalN, finalE, finalP)
-            # exit()
+            
         else:
             finalE = self.md.E
             finalN = self.md.N
@@ -472,10 +510,11 @@ class Wrapper(object):
 
         finalN_low, finalE, finalP = self.md.rawN, self.md.rawE, self.md.rawP
         finalN_low, finalE, finalP = self.md.N, self.md.E, self.md.P
-        print(finalE)
+        # print(finalE)
         for i, e in enumerate(finalE[1:]):
             if finalE[i-1] > e:
-                print(i)
+                # print(i)
+                pass
         self.dr = eos.KVDriver(finalE, finalP, finalN_low*self.n0)
 
         if show:
@@ -541,12 +580,15 @@ class Wrapper(object):
 
         for _n in n_stars:
             mr = eos.star_crust2(_n, 3, self.dr, 1e-10)
-            print(_n/self.n0, mr)
+            # print(_n/self.n0, mr)
             MR.append(mr)
             lastN = self.dr.getLastN(self.dr.nSize)[:-1]
             lastR = self.dr.getLastR(self.dr.nSize)[:-1]
             lastM = self.dr.getLastM(self.dr.nSize)[:-1]
+            # try:
             dx = lastR[1] - lastR[0]
+            # except IndexError:
+            #     dx=1.
 
             grav_mult = []
             for i, r in enumerate(lastR):
@@ -582,7 +624,7 @@ class Wrapper(object):
         E, P, N = self.EPN(self.nrange)
         P = P / self.mpi4_2_mevfm3
         N = N / self.n0
-        print(self.Ctype.__name__)
+        # print(self.Ctype.__name__)
         np.savetxt('eos' + self.Ctype.__name__ + '.dat', arr([E, P, N]).transpose())
         E *= self.m_pi ** 4
         P *= self.m_pi ** 4
@@ -615,7 +657,7 @@ class Wrapper(object):
         eraw = np.append(e[:], E[i_n_eos:])
         conc = self.concentrations()[i_n_eos:]
         cr_conc = arr([[1.] + [0. for i in range(conc.shape[1]-1)] for n in e])
-        print(conc.shape, cr_conc.shape)
+        # print(conc.shape, cr_conc.shape)
         res_conc = np.append(cr_conc, conc, axis=0).transpose()
         self.md.setRawEos(nraw, eraw/self.m_pi**4, praw/self.m_pi**4, res_conc)
         # print(i_n_eos)
@@ -682,10 +724,21 @@ class Wrapper(object):
 
 
     def setCrust(self, inter, ncut_crust, ncut_eos):
-        E, P, N = self.EPN(self.nrange)
+        # E, P, N = self.EPN(self.nrange)
+        if not self.needsMaxw():
+            print('not switching to maxw')
+            E, P, N = self.EPN(self.nrange)
+        else:
+            if not hasattr(self, 'nrange_maxw'):
+                raise ValueError('Need to set up maxw first!')
+            print('switching to maxw')
+            E = np.copy(self._E_maxw)
+            P = np.copy(self._P_maxw)
+            N = np.copy(self.nrange_maxw)
+
         P = P / self.mpi4_2_mevfm3
         N = N / self.n0
-        print(self.Ctype.__name__)
+        # print(self.Ctype.__name__)
         # np.savetxt('eos' + self.Ctype.__name__ + '.dat', arr([E, P, N]).transpose())
         E *= self.m_pi ** 4
         P *= self.m_pi ** 4
@@ -724,7 +777,7 @@ class Wrapper(object):
 
         conc = self.concentrations()[i_n_eos:]
         cr_conc = arr([[1.] + [0. for i in range(conc.shape[1]-1)] for n in e])
-        print(conc.shape, cr_conc.shape)
+        # print(conc.shape, cr_conc.shape)
         res_conc = np.append(cr_conc, conc, axis=0).transpose()
         self.md.setRawEos(nraw, eraw/self.m_pi**4, praw/self.m_pi**4, res_conc)
         # print(i_n_eos)
@@ -1683,6 +1736,16 @@ class Hyperon(Nucleon):
         n_e, n_mu = self.lepton_concentrations().transpose()
         self.dumpGrig(E, P, conc, n_e, n_mu)
 
+        # if hasattr(self, 'status'):
+        #     np.savetxt(join(self.foldername, self.filenames['eos'])+'_status', self.status)
+
+        # if hasattr(self, 'warnings'):
+        #     np.save(join(self.foldername, self.filenames['eos'])+'_warnings', self.status)
+
+        # if hasattr(self, 'warnings_inv'):
+        #     np.save(join(self.foldername, self.filenames['eos'])+'_warnings_inv', self.status)
+
+
         return tab
 
     def dumpEtap(self):
@@ -2230,6 +2293,15 @@ class Rho(Wrapper):
         if self.rho is None:
             self.rho = self.rho_inv
 
+    def E_NF(self, n, f, init, iterations=30):
+        res = eos.stepE_rho_nf(n, f, init, len(init) + 1,
+                            iterations, init[-1], self.C)
+        n_n = n - sum(res[:-2])
+        nc = res[-1]
+        mu_e = res[-2]
+        n_in = np.concatenate(([f, n_n], res[:-2]))
+        return res, self.Efull(rlist = [n_in], nclist=[nc], mu_list=[mu_e])
+
     def regen_mue(self):
         mu = self.mu()
         mu_e = mu[:, 0] - mu[:, 1]
@@ -2434,46 +2506,39 @@ class Rho(Wrapper):
             init = arr([0. for i in range(self.n_baryon - 1)] + [0.])
 
         f = arr([0.])  # sp omitted
+        self.status = []
+        self.warnings = []
         for i, _n in enumerate(self.nrange):
             if timeout is None:
-                print('init= ', init)
-                init = eos.stepE_rho_withf(_n, init, f, len(init)+2, iterations, 0., self.C)
-                print('init -> ', init)
+                # print('init= ', init)
+                out, info = eos.stepE_rho_withf(_n, init, f, len(init)+2, iterations, 0., self.C, 10+len(init))
+                # print('init -> ', init)
             else:
-                queue = Queue()
-                p = Process(target=eos.stepE_rho, args=(_n, init, f, len(init)+1,
-                                                  iterations, 0., self.C, queue))
-                p.start()
-                p.join(timeout)
-                if p.is_alive():
-                    p.terminate()
-                    print("timeout reached")
-                    self.rho = np.ascontiguousarray(rho[:])
-                    self.mu_e = np.ascontiguousarray(arr(mu_e))
-                    self.nrange = self.nrange[: self.rho.shape[0]]
-                    _E = [eos.E(z, self.C) for z in self.rho]
-                    self._E = np.ascontiguousarray(np.array(_E[:]))
-                    self._P = np.ascontiguousarray(self.P_chem(self.rho))
-                    self.set=1
-                    return
-                init = queue.get(timeout=None)
+                raise NotImplementedError
 
-                # print init
-            # print(init)
+            fun = info[-len(init):]
+            info = info[:-len(init)]
+            info_dict = {'init':init, 'i': i, 'f': f, 'info': info, 'out': out, 'fun':fun}
+            self.status.append(info_dict)
+            
+            if int(info[6]) != 6:
+                self.warnings.append(info_dict)
+     
+                
             if i % (len(self.nrange) / 20) == 0:
                 print('.', end=' ')
 
-            rho.append(init.copy()[:-3]) ## 3 reserved for f, mu_c and n_c
+            rho.append(out.copy()[:-3]) ## 3 reserved for f, mu_c and n_c
             rho[i] = np.insert(rho[i], 0, _n - np.sum(rho[i]))
-            f = np.array([init[-3]])
+            f = np.array([out[-3]])
             if self.verbose:
                 pass  # TODO: some verbose output
             # rho contains all scalar fields as well
             rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
-            mu_e.append(init[-2])
-            mu_c.append(init[-2])
-            nc.append(init.copy()[-1])
-            init = np.delete(init[:-1], -2)
+            mu_e.append(out[-2])
+            mu_c.append(out[-2])
+            nc.append(out.copy()[-1])
+            init = np.delete(out[:-1], -2)
 
         self.mu_c = np.array(mu_c)
         self.nc = np.nan_to_num(np.ascontiguousarray(arr(nc)))
@@ -2506,7 +2571,8 @@ class Rho(Wrapper):
         mu_e = []
         mu_c = []
         nc = []
-
+        self.status = []
+        self.warnings = []
         nmax *= self.n0
 
         stepper = eos.stepE_rho
@@ -2531,26 +2597,35 @@ class Rho(Wrapper):
             f = np.array([f])
             if timeout is None:
                 # print('before ', init)
-                init = eos.stepE_rho_withf(_n, init, f, len(init)+2, iterations, 0., self.C)
+                out, info = eos.stepE_rho_withf(_n, init, f, len(init)+2, iterations, 0., self.C, 10 + len(init))
                 # print('after ', init)
             else:
                 raise NotImplementedError()
                 # print init
+            fun = info[-len(init):]
+            info = info[:-len(init)]
+            info_dict = {'init':init, 'i': i, 'f': f, 'info': info, 'out': out, 'fun':fun}
+            self.status.append(info_dict)
+            
+            if int(info[6]) != 6:
+                self.warnings.append(info_dict)
+            
             # print(init)
             # if i % (len(self.nrange) / 20) == 0:
             #     print('.', end=' ')
 
-            rho.append(init.copy()[:-3]) ## 3 reserved for f, mu_c and n_c
+
+            rho.append(out.copy()[:-3]) ## 3 reserved for f, mu_c and n_c
             rho[i] = np.insert(rho[i], 0, _n - np.sum(rho[i]))
-            f = np.array([init[-3]])
+            f = np.array([out[-3]])
             if self.verbose:
                 pass  # TODO: some verbose output
             # rho contains all scalar fields as well
             rho[i] = np.insert(rho[i], 0, f)  #and again sp omitted
-            mu_e.append(init[-2])
-            mu_c.append(init[-2])
-            nc.append(init.copy()[-1])
-            init = np.delete(init[:-1], -2)
+            mu_e.append(out[-2])
+            mu_c.append(out[-2])
+            nc.append(out.copy()[-1])
+            init = np.delete(out[:-1], -2)
             if i >= len(n_init) and i < len(n_tosolve)-1:
                 init_vals[i+1] = init
                 f_init[i+1] = f[0]
@@ -2600,13 +2675,69 @@ class Rho(Wrapper):
         self._P = np.ascontiguousarray(self.P_chem())
         self.set = True
 
+    def get_init_inv(self):
+        if not hasattr(self, 'nrange_inv'):
+            try:
+                self.loadEosInv()
+            except:
+                raise NotImplementedError
 
-    def reset_from_inv(self, nmax_inv = 4., nmax=8., npoints_inv=1000, npoints_add=1000):
-        self.reset_inv(nmax=nmax_inv, npoints=npoints_inv)
         n_init = self.nrange_inv
         f_init = self.rho_inv[:, 0]
         init = np.insert(self.rho_inv[:, 2:], self.rho_inv.shape[1]-2, self.mu_e_inv[:], axis=1)
-        self.reset_from_init(n_init, f_init=f_init, init_vals=init, nmax=nmax, npoints=npoints_add)
+
+        return init, f_init, n_init
+
+    def reset_from_inv(self, nmax_inv = 4., nmax=8., npoints_inv=1000, npoints_add=1000, iterations=100):
+        self.reset_inv(nmax=nmax_inv, npoints=npoints_inv, iterations=iterations)
+        n_init = self.nrange_inv
+        f_init = self.rho_inv[:, 0]
+        init = np.insert(self.rho_inv[:, 2:], self.rho_inv.shape[1]-2, self.mu_e_inv[:], axis=1)
+        self.reset_from_init(n_init, f_init=f_init, init_vals=init, nmax=nmax, npoints=npoints_add, iterations=iterations)
+
+    def reset_from_branches(self, branches, npoints=1000, nmax=4., iterations=30, kind='linear'):
+        nmin = min([min(b['n']) for b in branches])
+
+        # remove branches with only 1 point
+        print([len(b['n']) for b in branches])
+        for i, b in enumerate(branches):
+            if len(b['n']) < 2:
+                branches.pop(i)
+        print([len(b['n']) for b in branches])
+        _nmax = max([max(b['n']) for b in branches])
+        if _nmax < nmax:
+            nmax = _nmax
+
+        #density range for which the `exact` solution will be found
+        nrange = np.linspace(nmin, nmax, npoints)
+
+        # set up the interpolators
+        i_b_f = [interp1d(b['n'], b['f']) for b in branches]
+        i_b_E = [interp1d(b['n'], b['E']) for b in branches]
+        i_b_mu = [interp1d(b['n'], b['mu_e']) for b in branches]
+        i_b_conc = [
+            [interp1d(b['n'], conc) for conc in b['conc'].transpose()]
+            for b in branches
+        ]
+
+        init = []
+        f_init = []
+        for n in nrange:
+            Es = []
+            for i, b in enumerate(branches):
+                try:
+                    E = i_b_E[i](n)
+                except ValueError:
+                    E = np.inf
+                Es.append(E)
+            i_min = np.argmin(Es)
+            # print(n, Es, i_min)
+            f_init.append(i_b_f[i_min](n))
+            init.append(np.array([i_conc(n) for i_conc in i_b_conc[i_min][1:]] +
+            [i_b_mu[i_min](n)]
+            ))
+        self.reset_from_init(nrange, f_init, init)
+        return nrange, np.array(init), f_init
 
     def needsMaxwInv(self):
         self.check()
@@ -2622,21 +2753,29 @@ class Rho(Wrapper):
 
         mu_e = []
         mu_c = []
-        # mu_n = []
+        
         nc = []
         nlist = []
-
+        self.warnings_inv = []
+        self.status_inv = []
         if not adaptive:
-            self.frange_inv = np.linspace(0., fmax, npoints)
-            init = arr([0.001] + [0.00] * (self.n_baryon - 1) + [0.]) #All particles + mu_ch
+            self.frange_inv = np.linspace(1e-4, fmax, npoints)
+            init = arr([0.001] + [0.] * (self.n_baryon - 1) + [0.]) #All particles + mu_ch
             for i, f in enumerate(self.frange_inv):
                 if sum(init) < 1e-7:
                     init = arr([1e-7] + [0.]* (self.n_baryon-1) + [0.]) #All particles + mu_ch
+                # good = False
+                # while not good:
+                out, info = eos.stepE_rho_f(f, init, len(init) + 1, iterations, self.C, 10 + len(init)) # 10 = the info size
+                fun = info[-len(init):]
+                info = info[:-len(init)]
+                info_dict = {'init':init, 'i': i, 'f': f, 'info': info, 'out': out, 'fun':fun}
+                self.status_inv.append(info_dict)
 
-                out = eos.stepE_rho_f(f, init, len(init) + 1, iterations, self.C)
-                #len(out) = len(init) + 1 [for n_rho]
+                if int(info[6]) != 6:
+                    self.warnings_inv.append(info_dict)
 
-                if i % (npoints / 20) == 0: print('.', end=' ')
+                if i % (npoints / 20) == 0: print('.', end='')
                 rho.append(out.copy()[:-2]) ## 2 reserved for mu_c and n_c
 
                 # rho contains all scalar fields as well
@@ -3533,6 +3672,7 @@ class RhoDeltaPhi(DeltaPhi, Rho):
         rcond = arr([self.nrange/self.n0, self.nc/self.nrange]).transpose()
         np.savetxt(join(self.foldername, self.filenames['rcond'])
                    ,rcond, fmt='%.8f')
+        
 
     def checkEq(self):
         params = eos.fun_n_eq_params()
