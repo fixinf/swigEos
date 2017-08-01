@@ -11,6 +11,7 @@ from math import pi
 import Models
 from scipy.optimize import leastsq
 from os.path import join
+import inspect 
 
 def ret_fun(f):
     return
@@ -1411,63 +1412,8 @@ def MKVOR_phi_rho(a=0.5, width=0.05, f=0.3, b=0.435):
 
 def __MKVOR_tanh2(amp):
     C = eos.MKVOR_tanh2()
-    C.Cs = 234.1472066994
-    C.Co = 134.8845385898
-    C.Cr = 81.8421168107
-    C.b = 0.0046749526
-    C.c = -0.0029742081
-    C.f0 = 0.27
-    C.d = -0.5
-    C.alpha = 0.4
-    C.z = 0.65
-
-    C.a_om = 0.11
-    C.b_om = 7.1
-    C.f_om = 0.9
-
-    C.beta = 3.11
-    C.gamma = 28.4
-    C.f_r = 0.522
-    C.a_r0 = 0.448
-    C.a_r1 = -0.614
-    C.a_r2 = 3.
-    C.a_r3 = 0.8
-    C.d_r = -4.
-    C.e_r = 6.
-
-    C.fcut_rho = 0.62
-    C.acut_rho, C.bcut_rho, C.c_cut_rho = (0.5859623173610193, 4.729785161812114, 6.642915417642516)
-
-    C.d_cut_rho = 0
-    C.e_cut_rho = 0
-
-    C.tail_mult_om = 0.2299
-    C.acut_om = 5.515
-    C.bcut_om = 100
-    C.fcut_om = 0.95
-
-    C.SetHyperConstants(2)
-    C.d_cut_rho = -10.
-    C.e_cut_rho = 0
-
-    C.amp = amp 
-    
-    C.f_tanh = 0.45
-
-    Cref = _MKVOR_poly1()
-
-    C.shift = Cref.eta_r(C.f_tanh)
-    def func_fit(x, amp):
-        C.amp = amp
-        C.a_tanh, C.b_tanh = x
-        fun = []
-        rel = []
-        for order in range(1, 3):
-            fun.append(derivative(lambda z: C.eta_r(z), C.f_tanh, dx=1e-4, n=order, order=5))
-            rel.append(derivative(lambda z: Cref.eta_r(z), C.f_tanh, dx=1e-4, n=order, order=5))
-        return np.array(fun) - np.array(rel)
-
-    leastsq(lambda z: func_fit(z, amp), [-2., 2.])  
+    setMkvParams(C)
+    setCutParams(C, amp)
     # C.SetHyperConstants(2)
     return C
 
@@ -1478,6 +1424,18 @@ def MKVOR_tanh2(amp):
     M = Model(_MKVOR_tanh2)
     np.savetxt(join(M.foldername, 'fit_params.dat'), np.array([M.C.fcut_rho, M.C.shift, M.C.acut_rho, M.C.bcut_rho, M.C.c_cut_rho]))
     return M
+
+def __MKVOR_tanh2_free(amp, b):
+    C = eos.MKVOR_tanh2()
+    setMkvParams(C)
+    setCutParamsFree(C, amp, b)
+    return C
+
+def MKVOR_tanh_free(amp, b):
+    M = Model(get_new_fun(__MKVOR_tanh2_free, 
+                    amp=amp, b=b))
+    return M    
+
 
 def setMkvParams(C):
     C.Cs = 234.1472066994
@@ -1521,51 +1479,18 @@ def setMkvParams(C):
 
 def __MKVOR_tanh_join2(amp, join):
     C = eos.MKVOR_tanh_join2()
-    C.Cs = 234.1472066994
-    C.Co = 134.8845385898
-    C.Cr = 81.8421168107
-    C.b = 0.0046749526
-    C.c = -0.0029742081
-    C.f0 = 0.27
-    C.d = -0.5
-    C.alpha = 0.4
-    C.z = 0.65
+    setMkvParams(C)
+    setCutParams(C, amp)  
+    C.join = join
+    return C
 
-    C.a_om = 0.11
-    C.b_om = 7.1
-    C.f_om = 0.9
-
-    C.beta = 3.11
-    C.gamma = 28.4
-    C.f_r = 0.522
-    C.a_r0 = 0.448
-    C.a_r1 = -0.614
-    C.a_r2 = 3.
-    C.a_r3 = 0.8
-    C.d_r = -4.
-    C.e_r = 6.
-
-    C.fcut_rho = 0.62
-    C.acut_rho, C.bcut_rho, C.c_cut_rho = (0.5859623173610193, 4.729785161812114, 6.642915417642516)
-
-    C.d_cut_rho = 0
-    C.e_cut_rho = 0
-
-    C.tail_mult_om = 0.2299
-    C.acut_om = 5.515
-    C.bcut_om = 100
-    C.fcut_om = 0.95
-
-    C.SetHyperConstants(2)
-    C.d_cut_rho = -10.
-    C.e_cut_rho = 0
-
+def setCutParams(C, amp):
     C.f_tanh = 0.45
 
     Cref = _MKVOR_poly1()
 
     C.shift = Cref.eta_r(C.f_tanh)
-    
+
     C.join = 1.
     def func_fit(x, amp):
         C.amp = amp
@@ -1577,10 +1502,27 @@ def __MKVOR_tanh_join2(amp, join):
             rel.append(derivative(lambda z: Cref.eta_r(z), C.f_tanh, dx=1e-4, n=order, order=5))
         return np.array(fun) - np.array(rel)
 
-    leastsq(lambda z: func_fit(z, amp), [0., 0.])  
-     
-    C.join = join
-    return C
+    leastsq(lambda z: func_fit(z, amp), [2., -2.])  
+
+def setCutParamsFree(C, amp, b):
+    C.f_tanh = 0.45
+    C.b_tanh = b
+    Cref = _MKVOR_poly1()
+
+    C.shift = Cref.eta_r(C.f_tanh)
+
+    C.join = 1.
+    def func_fit(x, amp):
+        C.amp = amp
+        C.a_tanh, = x
+        fun = []
+        rel = []
+        for order in range(1, 2):
+            fun.append(derivative(lambda z: C.eta_r(z), C.f_tanh, dx=1e-4, n=order, order=5))
+            rel.append(derivative(lambda z: Cref.eta_r(z), C.f_tanh, dx=1e-4, n=order, order=5))
+        return np.array(fun) - np.array(rel)
+
+    leastsq(lambda z: func_fit(z, amp), [2.])  
 
 def MKVOR_tanh_join2(amp, _join):
     def _MKVOR_tanh_join2():
@@ -1644,4 +1586,62 @@ def MKVOR_tanh2_cut(f_cut, b_cut, amp):
     
     _MKVOR_tanh2_cut.__name__ = _MKVOR_tanh2_cut.__name__ + 'fc=%2f_bc=%.2f_a=%.2f' % (f_cut, b_cut, amp)
     return Model(_MKVOR_tanh2_cut)
+
+
+def __MKVOR_t_phir(amp, a, b, f, width):
+    C = eos.MKVOR_tc_pc()
+    setMkvParams(C)
+    setCutParams(C, amp)
+    C.phi_r_f = f
+    C.phi_r_width = width
+    C.phi_r_a = a
+    C.phi_r_b = b
+    return C
+
+def get_new_fun(func, **kwargs):
+    def _func():
+        return func(**kwargs)
+    _func.__name__ = func.__name__ + '_'.join(['%s=%.2e'%(key, val) for key, val in kwargs.items()])
+    return _func
+
+def MKVOR_t_phir(amp, a, b, f, width=0.05):
+    M = Model(get_new_fun(__MKVOR_t_phir, amp=amp, a=a, b=b, f=f, width=width))
+    return M
+
+def __MKVOR_tj_phir(amp, join, a, b, f, width):
+    C = eos.MKVOR_tj_pc()
+    setMkvParams(C)
+    setCutParams(C, amp)
+    C.phi_r_f = f
+    C.phi_r_width = width
+    C.phi_r_a = a
+    C.phi_r_b = b
+    C.join = join
+    return C
+
+def MKVOR_tj_phir(amp, join, a, b, f, width=0.05):
+    M = Model(get_new_fun(__MKVOR_tj_phir, 
+                    amp=amp, a=a, b=b, f=f, width=width, join=join))
+    return M
+
+def __MKVOR_p_phir(d_power, f_power, a, b, f, width=0.05):
+    C = eos.MKVOR_p_pc()
+    setMkvParams(C)
+    C.f_power = f_power
+    Cmkv = MKVOR_poly1().C
+    C.a_power = Cmkv.eta_r(f_power)
+    C.b_power = f_power * derivative(Cmkv.eta_r, f_power, dx=1e-4)
+    # C.c_power = c_power
+    C.c_power = f_power**2 * derivative(Cmkv.eta_r, f_power, dx=1e-4, n=2) / 2
+    C.d_power = d_power
+    C.phi_r_f = f
+    C.phi_r_width = width
+    C.phi_r_a = a
+    C.phi_r_b = b
+    return C
+
+def MKVOR_p_phir(d_power, a, b, f, f_power=0.45, width=0.05):
+    M = Model(get_new_fun(__MKVOR_p_phir,
+                d_power=d_power, a=a, b=b, f=f, f_power=f_power, width=width))
+    return M
 

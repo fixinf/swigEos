@@ -21,7 +21,7 @@ from scipy.optimize import minimize
 import inspect
 from copy import copy
 workfolder = '/home/const/MEGA/'
-
+import pdb
 BASEFOLDER = join(workfolder, 'data2/')
 
 def initBasefolder(fname):
@@ -163,7 +163,21 @@ class Wrapper(object):
             P = self._P2
             E = self._E2
             N = self.nrange
-        # i_break = np.where(np.diff(P) < 0)[0][-1]
+
+        regions = []
+        i_dP = np.where(np.diff(mu) < 0)[0]
+        i0 = i_dP[0]
+        region_lasti = 0
+        for i, _n in enumerate(i_dP):
+            if (_n - i0) > 1:
+                regions.append(i_dP[region_lasti:i])
+                region_lasti = i
+                i0 = _n
+            else:
+                i0 = _n
+        
+        regions.append(i_dP[region_lasti:])
+        
         i_break =  shift + np.where(np.diff(mu[shift:]) < 0)[0][-1]
         i_break_mu = shift + np.where(np.diff(mu[shift:]) < 0)[0][0]
         if verbose: print(i_break, i_break_mu)
@@ -487,7 +501,8 @@ class Wrapper(object):
     def stars_crust(self, ncut_crust=0.45, ncut_eos=0.7, inter='linear',
             n_stars=None, nmin=.6, nmax=5.0, npoints=50,
                     crust="crust.dat", show=False, crustName=None,
-                    ret_frac=False, fasthyp=False, neutron=0, ret_i=0, force_reset=0):
+                    ret_frac=False, fasthyp=False, neutron=0, ret_i=0, 
+                    force_reset=0, internal_kind=0):
         neos = self.npoints
         if nmax > max(self.nrange):
             nmax = max(self.nrange)
@@ -506,16 +521,16 @@ class Wrapper(object):
             finalN = self.md.N
             finalP = self.md.P
 
+        # return finalN, finalE, finalP 
+
         mpi2km = 5.7202e-5
 
-        finalN_low, finalE, finalP = self.md.rawN, self.md.rawE, self.md.rawP
+        # finalN_low, finalE, finalP = self.md.rawN, self.md.rawE, self.md.rawP
         finalN_low, finalE, finalP = self.md.N, self.md.E, self.md.P
         # print(finalE)
-        for i, e in enumerate(finalE[1:]):
-            if finalE[i-1] > e:
-                # print(i)
-                pass
-        self.dr = eos.KVDriver(finalE, finalP, finalN_low*self.n0)
+        # pdb.set_trace()
+        # return finalE, finalP, finalN_low*self.n0
+        self.dr = eos.KVDriver(finalE, finalP, finalN_low*self.n0, internal_kind)
 
         if show:
             drE = arr([self.dr.EofN(z) for z in finalN*self.n0])
@@ -2275,6 +2290,15 @@ class Rho(Wrapper):
             except TypeError:
                 pass
 
+    def getEparts():
+        Eparts = []
+        for r, mu_e in zip(self.rho, self.mu_e):
+            E, out = eos.E_rho_parts(r, mu_e, self.C, len(self.part_names) +  6)
+
+            Eparts.append(out)
+
+        return np.array(Eparts)
+
 
     def switch_inv(self):
         self.mu_e = self.mu_e_inv
@@ -3950,7 +3974,7 @@ class RcpDeltaPhiSigma(Rcp, DeltaPhiSigma):
 
 
 class Model(Wrapper):
-    def __init__(self, C, K0=None, f0=None, J0=None, suffix=None, basefolder_suffix=''):
+    def __init__(self, C=eos.KVOR, K0=None, f0=None, J0=None, suffix=None, basefolder_suffix=''):
         if any([K0, f0, J0]):
             params = []
             names = []
