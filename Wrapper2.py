@@ -77,12 +77,14 @@ class Wrapper(object):
         rho = eos.stepE(n, last, f, len(last), iter, C)
         que.put(rho)
 
-    def getDuCrit(self):
+    def getDuCrit(self, br=1):
         self.check()
         nc = 8 * self.n0
         solve = 0
-        for i, _n in enumerate(self.nrange):
-            if eos.p_f(self.rho[i, 1], 0.5) < eos.p_f(self.rho[i, 2], 0.5) + eos.p_f(self.n_e[i], 0.5):
+        flag = 0
+        for i, _n in enumerate(self.nrange[::-1**br]):
+            k = br * len(self.nrange) + (-1)**br * i
+            if eos.p_f(self.rho[k, 1], 0.5) < eos.p_f(self.rho[k, 2], 0.5) + eos.p_f(self.n_e[k], 0.5):
                 nc = _n
                 solve = 1
                 break
@@ -152,7 +154,7 @@ class Wrapper(object):
         return n_crit, n_cr, n_DU/self.n0, m_DU, [nmax, mmax, rmax], [n15, m15, r15]
         
 
-    def processMaxw(self, mu_init=None, show=0, branch_3=0, shift=0, verbose=0, mu=None):
+    def processMaxw(self, mu_init=None, show=0, branch_3=0, shift=0, verbose=0, epsilon=1e-4, mu=None):
         if mu is None:
             mu = np.nan_to_num(self.mu(branch_3=branch_3)[:, 0])
         if not branch_3:
@@ -237,20 +239,40 @@ class Wrapper(object):
             print('E1 = ', (ie1(mu_eq)/n1 - self.C.M[0]) * self.m_pi)
             print('E2 = ', (ie2(mu_eq)/n2 - self.C.M[0]) * self.m_pi)
 
-        p1 = np.array([p for p in b1[:, 1] if p < P_eq])
-        p2 = np.array([p for p in b2[:, 1] if p > P_eq])
+        # p1 = np.array([p for p in b1[:, 1] if p < P_eq])
+        # p2 = np.array([p for p in b2[:, 1] if p > P_eq])
 
-        mu1 = np.array([mu for mu in b1[:, 0] if mu < mu_eq])
-        mu2 = np.array([mu for mu in b2[:, 0] if mu > mu_eq])
+        nrange1 = np.linspace(min(b1[:, 3]), n1 - epsilon, len(b1[:, 3]))
+        nrange2 = np.linspace(n2 + epsilon, max(b2[:, 3]), len(b2[:, 3]))
 
-        n1 = b1[:len(p1), 3]
-        n2 = b2[(len(b2[:, 1]) - len(p2)):, 3]
+        iPn1 = interp1d(b1[:, 3], b1[:, 1])
+        iPn2 = interp1d(b2[:, 3], b2[:, 1])
 
-        e1 = b1[:len(p1), 2]
-        e2 = b2[(len(b2[:, 1]) - len(p2)):, 2]
+        p1 = iPn1(nrange1)
+        p2 = iPn2(nrange2)
+
+        iMun1 = interp1d(b1[:, 3], b1[:, 0])
+        iMun2 = interp1d(b2[:, 3], b2[:, 0])
+
+        # mu1 = np.array([mu for mu in b1[:, 0] if mu < mu_eq])
+        # mu2 = np.array([mu for mu in b2[:, 0] if mu > mu_eq])
+        mu1 = iMun1(nrange1)
+        mu2 = iMun2(nrange2)
+
+        # n1 = b1[:len(p1), 3]
+        # n2 = b2[(len(b2[:, 1]) - len(p2)):, 3]
+
+        # e1 = b1[:len(p1), 2]
+        # e2 = b2[(len(b2[:, 1]) - len(p2)):, 2]
+
+        iEn1 = interp1d(b1[:, 3], b1[:, 2])
+        iEn2 = interp1d(b2[:, 3], b2[:, 2])
+
+        e1 = iEn1(nrange1)
+        e2 = iEn2(nrange2)
 
         p_total = np.concatenate((p1, p2))
-        n_total = np.concatenate((n1, n2))
+        n_total = np.concatenate((nrange1, nrange2))
         e_total = np.concatenate((e1, e2))
         mu_total = np.concatenate((mu1, mu2))
 
@@ -741,12 +763,12 @@ class Wrapper(object):
     def setCrust(self, inter, ncut_crust, ncut_eos):
         # E, P, N = self.EPN(self.nrange)
         if not self.needsMaxw():
-            print('not switching to maxw')
+            # print('not switching to maxw')
             E, P, N = self.EPN(self.nrange)
         else:
             if not hasattr(self, 'nrange_maxw'):
                 raise ValueError('Need to set up maxw first!')
-            print('switching to maxw')
+            # print('switching to maxw')
             E = np.copy(self._E_maxw)
             P = np.copy(self._P_maxw)
             N = np.copy(self.nrange_maxw)
@@ -2290,7 +2312,7 @@ class Rho(Wrapper):
             except TypeError:
                 pass
 
-    def getEparts():
+    def getEparts(self):
         Eparts = []
         for r, mu_e in zip(self.rho, self.mu_e):
             E, out = eos.E_rho_parts(r, mu_e, self.C, len(self.part_names) +  6)
