@@ -1410,6 +1410,18 @@ def MKVOR_phi_rho(a=0.5, width=0.05, f=0.3, b=0.435):
     M = Model(__MKVOR_phi_rho)
     return M
 
+def _MKVOR_phi_rho2(Fmin):
+    C = eos.MKVORs_phicut2()
+    setMkvParams(C)
+    dF = 0.1
+    C.phi_r_f = 1 - Fmin - dF
+    C.phi_r_b = Fmin/dF - 1
+    return C
+
+def MKVOR_phi_rho2(Fmin=0.5):
+    M = Model(get_new_fun(_MKVOR_phi_rho2, Fmin=Fmin))
+    return M
+
 def __MKVOR_tanh2(amp):
     C = eos.MKVOR_tanh2()
     setMkvParams(C)

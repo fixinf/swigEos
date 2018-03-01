@@ -20,7 +20,8 @@ from scipy.optimize import minimize
 # import ipdb
 import inspect
 from copy import copy
-workfolder = '/home/const/MEGA/'
+# workfolder = '/home/const/MEGA/'
+workfolder = 'C:/Users/const.maslov/Documents/MEGA'
 import pdb
 BASEFOLDER = join(workfolder, 'data2/')
 
@@ -602,8 +603,10 @@ class Wrapper(object):
             n_stars = np.linspace(nmin, nmax, npoints)
 
         #interpolating particle fractions (except n)
-
-        conc = self.concentrations()
+        if hasattr(self, 'rho'):
+            conc = self.concentrations()
+        else:
+            conc = np.array([[0. for n in self.nrange]])
         if ret_frac:
             inter_hyp = [interpolate.interp1d(self.nrange, conc[:, i])
                          for i in range(1, self.n_baryon)]
@@ -671,7 +674,9 @@ class Wrapper(object):
         # e = []
         # p = []
         # n = []
-        with open("/home/const/workspace/swigEos/crust.dat", 'r') as f:
+        # with open("/home/const/workspace/swigEos/crust.dat", 'r') as f:
+        fname = "C:/Users/const.maslov/Numerics/swigPy/crust.dat"
+        with open(fname, 'r') as f:
             for line in f:
                 # print line
                 _e, _p, _n = line.split()
@@ -679,7 +684,7 @@ class Wrapper(object):
                     e.append(float(_e))
                     p.append(float(_p))
                     n.append(float(_n))
-        crust = np.loadtxt("/home/const/workspace/swigEos/crust.dat")
+        crust = np.loadtxt(fname)
         crust[:, 0] /= self.m_pi ** 4
         crust[:, 1] /= self.m_pi ** 4
         np.savetxt('crust_export.dat', crust)
@@ -785,7 +790,8 @@ class Wrapper(object):
         # e = []
         # p = []
         # n = []
-        with open("/home/const/Numerics/swigEos/crust.dat", 'r') as f:
+        fname = "C:/Users/const.maslov/Numerics/swigPy/crust.dat"
+        with open(fname, 'r') as f:
             for line in f:
                 # print line
                 _e, _p, _n = line.split()
@@ -793,7 +799,7 @@ class Wrapper(object):
                     e.append(float(_e))
                     p.append(float(_p))
                     n.append(float(_n))
-        crust = np.loadtxt("/home/const/Numerics/swigEos/crust.dat")
+        crust = np.loadtxt(fname)
         crust[:, 0] /= self.m_pi ** 4
         crust[:, 1] /= self.m_pi ** 4
         # np.savetxt('crust_export.dat', crust)
@@ -811,8 +817,10 @@ class Wrapper(object):
         # erange = np.linspace(0., max(eraw/self.m_pi**4), 1000)
         # np.savetxt('pe_' + self.__repr__() + '.dat', arr([erange, iEP(erange)]).transpose())
         # np.savetxt('np_' + self.__repr__() + '.dat', arr([]))
-
-        conc = self.concentrations()[i_n_eos:]
+        if hasattr(self, 'rho'):
+            conc = self.concentrations()[i_n_eos:]
+        else:
+            conc = arr([[0. for n in self.nrange]])
         cr_conc = arr([[1.] + [0. for i in range(conc.shape[1]-1)] for n in e])
         # print(conc.shape, cr_conc.shape)
         res_conc = np.append(cr_conc, conc, axis=0).transpose()
@@ -894,7 +902,7 @@ class Wrapper(object):
         return np.array(res) * self.mpi4_2_mevfm3
 
 
-    def E_gen(self, nlist, solve_f=1, ret_f=False, f=0., dn=None):
+    def E_gen(self, nlist, solve_f=1, ret_f=False, f=0.1, dn=None):
         """Provides the energy density for given particle concentrations [n]
         without leptons. DO NOT OVERRIDE.
 
@@ -910,8 +918,8 @@ class Wrapper(object):
         flist = []
         elist = []
         eparts = []
-        dEparts = []
         print(ret_f)
+        dEparts = []
         for n in nlist:
             epart = np.zeros(9, dtype='float')
             if not solve_f:
@@ -1633,7 +1641,7 @@ class Sym(Nucleon):
         print(self.rho.shape)
         self.set = 1
 
-    def E(self, nrange, ret_f=False, f=0.):
+    def E(self, nrange, ret_f=False, f=0.01):
         nlist = [[n / 2, n / 2] for n in nrange]
         dn = 1e-4
         dn = arr([dn, dn])
@@ -1662,7 +1670,7 @@ class Sym(Nucleon):
         with open(join(self.foldername, self.filenames['J']), 'w') as f:
             f.write(tabulate(tab, ['n/n0', 'J\tilde[MeV]'], tablefmt='plain'))
 
-        # return res
+        return np.array(res)[:, 1]
 
     def K(self):
         return eos.K(self.n0, self.C)
@@ -4630,11 +4638,11 @@ class Model(Wrapper):
         #We have to approach the density n from below gradually:
         steps = 10
         nrange = np.linspace(0, n, steps)
-        f = [0.]
+        f = [0.2]
         for _n in nrange:
             n_in = np.array([_n/2, _n/2])
             f = eos.f_eq(n_in, np.array(f), 1, self.C)
-        
+        print(f)
         pots = eos.potentials(np.insert(n_in, 0, f), 5, self.C)
         V = self.m_pi*self.C.X_o[0] * pots[2]
         S = self.m_pi*(-self.C.M[0]) * (1 - self.C.phi_n(0, self.C.X_s[0]*self.C.M[0]/self.C.M[0]*f[0]))
